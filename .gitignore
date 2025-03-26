@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+*$py.class
+/.idea/
+**/build/
+**/dist/
+.DS_STORE
+.vscode
+**/*.iml
+.venv/
+secrets/
+test*.py
