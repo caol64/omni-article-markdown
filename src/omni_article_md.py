@@ -1,8 +1,8 @@
 from pathlib import Path
-from bs4 import BeautifulSoup
 import requests
 
 from html_md_parser import HtmlMarkdownParser
+from utils import to_snake_case
 
 
 class HtmlReader:
@@ -25,7 +25,7 @@ class HtmlReader:
     def __init__(self, url_or_path: str):
         self.url_or_path = url_or_path
 
-    def read(self) -> BeautifulSoup:
+    def read(self) -> str:
         if self.url_or_path.startswith("http"):
             response = requests.get(self.url_or_path, headers=HtmlReader.REQUEST_HEADERS)
             response.encoding = "utf-8"
@@ -55,12 +55,7 @@ class OmniArticleMarkdown:
         save_path = save_path or self.DEFAULT_SAVE_PATH
         file_path = Path(save_path)
         if file_path.is_dir():
-            filename = f"{self.to_snake_case(self.title)}.md"
+            filename = f"{to_snake_case(self.title)}.md"
             file_path = file_path / filename 
         with file_path.open("w", encoding="utf-8") as f:
             f.write(self.markdown)
-
-    def to_snake_case(self, input_string):
-        input_string = "".join(char if char.isalnum() else " " for char in input_string)
-        snake_case_string = "_".join(word.lower() for word in input_string.split())
-        return snake_case_string

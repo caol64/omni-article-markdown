@@ -1,46 +1,9 @@
-import re
 from bs4 import BeautifulSoup, element, NavigableString
+
+from utils import Constants, is_sequentially_increasing, is_block_element, move_spaces, detect_language, collapse_spaces
 
 
 class HtmlMarkdownParser:
-
-    ARTICLE_CONTAINER = [
-        ("div", {"class": "main-content"}), # Freedium
-        ("div", {"id": "page-content"}), # 公众号
-        ("div", {"class": "post-content"}), # Hugo
-        ("div", {"class": "article-content"}), # 头条
-        ("div", {"class": "Post-RichText"}), # 知乎专栏
-        ("article", None),
-        ("main", None),
-        ("body", None)
-    ]
-
-    TAGS_TO_CLEAN = [
-        lambda el: el.name in ("script", "style", "link", "button", "footer", "header", "aside"),
-    ]
-
-    ATTRS_TO_CLEAN = [
-        lambda el: 'style' in el.attrs and re.search(r'display\s*:\s*none', el.attrs['style'], re.IGNORECASE),
-        lambda el: 'id' in el.attrs and el.attrs['id'] == 'meta_content', # 公众号
-        lambda el: 'data-testid' in el.attrs, # Medium
-        lambda el: 'class' in el.attrs and 'speechify-ignore' in el.attrs['class'] # Medium
-    ]
-
-    POST_HANDLER = [
-        lambda el: el.replace("[|lb_bl|][|lb_bl|]", "[|lb_bl|]").replace("[|lb_bl|]", "\n\n").strip(), # 添加换行使文章更美观
-        lambda el: re.sub(r"`\*\*(.*?)\*\*`", r"**`\1`**", el), # 纠正不规范格式 `**code**` 替换为 **`code`**
-        lambda el: re.sub(r"`\*(.*?)\*`", r"*`\1`*", el), # 纠正不规范格式 `*code*` 替换为 *`code`*
-    ]
-
-    INLINE_ELEMENTS = [
-        "span", "code", "li", "a", "strong", "em", "img"
-    ]
-
-    BLOCK_ELEMENTS = [
-        "p", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "blockquote", "pre", "picture", "hr", "figcaption"
-    ]
-
-    TRUSTED_ELEMENTS = INLINE_ELEMENTS + BLOCK_ELEMENTS
 
     def __init__(self, raw_html: str):
         self.raw_html = raw_html
@@ -49,58 +12,63 @@ class HtmlMarkdownParser:
         self.description = None
 
     def parse(self) -> tuple:
-        self.extract_title()
         article = self.extract_article()
         if article:
+            self.extract_title_and_description(article)
             for element in article.find_all():
                 # print(isinstance(element, NavigableString))
-                if any(cond(element) for cond in HtmlMarkdownParser.TAGS_TO_CLEAN):
+                if any(cond(element) for cond in Constants.TAGS_TO_CLEAN):
                     element.decompose()
                     continue
                 if element.attrs:
-                    if any(cond(element) for cond in HtmlMarkdownParser.ATTRS_TO_CLEAN):
+                    if any(cond(element) for cond in Constants.ATTRS_TO_CLEAN):
                         element.decompose()
             # print(article)
             result = f"# {self.title}\n\n"
             if self.description:
                 result += f"> {self.description}\n\n"
             markdown = self.process_children(article)
-            for handler in HtmlMarkdownParser.POST_HANDLER:
+            for handler in Constants.POST_HANDLERS:
                 markdown = handler(markdown)
             result += markdown
             # print(result)
-        return (self.title, result)
+            return (self.title, result)
+        return (None, None)
 
-    def process_element(self, element: element, level: int = 0, is_strip: bool = True) -> str:
+    def process_element(self, element: element, level: int = 0, is_pre: bool = False) -> str:
         parts = []
         if element.name == "br":
-            parts.append("\n")
+            parts.append(Constants.LB_SYMBOL)
         elif element.name == "hr":
             parts.append("---")
         elif element.name in {"h1", "h2", "h3", "h4", "h5", "h6"}:
-            heading = self.process_children(element, is_strip=is_strip)
+            heading = self.process_children(element, level, is_pre=is_pre)
             parts.append(f"{'#' * int(element.name[1])} {heading}")
         elif element.name == "a":
-            link = self.process_children(element, is_strip=is_strip).replace("[|lb_bl|]", "")
+            link = self.process_children(element, level, is_pre=is_pre).replace(Constants.LB_SYMBOL, "")
             if link:
                 parts.append(f"[{link}]({element.get("href")})")
-        elif element.name == "strong":
-            parts.append(self.move_spaces(f"**{self.process_children(element, is_strip=is_strip)}**", "**"))
-        elif element.name == "em":
-            parts.append(self.move_spaces(f"*{self.process_children(element, is_strip=is_strip)}*", "*"))
+        elif element.name == "strong" or element.name == "b":
+            parts.append(move_spaces(f"**{self.process_children(element, level, is_pre=is_pre)}**", "**"))
+        elif element.name == "em" or element.name == "i":
+            parts.append(move_spaces(f"*{self.process_children(element, level, is_pre=is_pre)}*", "*"))
         elif element.name == "ul" or element.name == "ol":
             parts.append(self.process_list(element, level))
         elif element.name == "img":
             src = element.get("src") or element.get("data-src")
             parts.append(f"![{element.get('alt', '')}]({src})" if src else "")
         elif element.name == "blockquote":
-            blockquote = self.process_children(element, is_strip=is_strip)
-            parts.append("\n".join(f"> {line}" for line in blockquote.split("[|lb_bl|]")))
+            blockquote = self.process_children(element, level, is_pre=is_pre)
+            if blockquote.startswith(Constants.LB_SYMBOL):
+                blockquote = blockquote.removeprefix(Constants.LB_SYMBOL)
+            if blockquote.endswith(Constants.LB_SYMBOL):
+                blockquote = blockquote.removesuffix(Constants.LB_SYMBOL)
+            parts.append("\n".join(f"> {line}" for line in blockquote.split(Constants.LB_SYMBOL)))
         elif element.name == "pre":
-            parts.append(self.process_codeblock(element))
+            parts.append(self.process_codeblock(element, level))
         elif element.name == "code": # inner code
-            code = self.process_children(element, is_strip=is_strip)
-            if "\n" not in code:
+            code = self.process_children(element, level, is_pre=is_pre)
+            if Constants.LB_SYMBOL not in code:
                 parts.append(f"`{code}`")
             else:
                 parts.append(code)
@@ -113,50 +81,55 @@ class HtmlMarkdownParser:
                 if src:
                     parts.append(f"![{img_element.get('alt', '')}]({src})")
         elif element.name == "figcaption":
-            figcaption = self.process_children(element, is_strip=is_strip)
+            figcaption = self.process_children(element, level, is_pre=is_pre)
             parts.append(f"*{figcaption}*")
         elif element.name == "table":
-            parts.append(self.process_table(element))
+            parts.append(self.process_table(element, level))
         else:
-            parts.append(self.process_children(element, is_strip=is_strip))
+            parts.append(self.process_children(element, level, is_pre=is_pre))
         result = ''.join(parts)
-        if result and self.is_block_element(element):
-            result = f"[|lb_bl|]{result}[|lb_bl|]"
+        if result and is_block_element(element.name):
+            result = f"{Constants.LB_SYMBOL}{result}{Constants.LB_SYMBOL}"
         return result
 
-    def process_children(self, element: element, level: int = 0, is_strip: bool = True) -> str:
+    def process_children(self, element: element, level: int = 0, is_pre: bool = False) -> str:
         parts = []
         if element.children:
+            new_level = level + 1 if element.name in Constants.TRUSTED_ELEMENTS else level
             for child in element.children:
-                # print(bytes(str(child), 'utf-8'))
                 if isinstance(child, NavigableString):
-                    if element.name in HtmlMarkdownParser.TRUSTED_ELEMENTS:
-                        parts.append(child.replace("<", "&lt;").replace(">", "&gt;") if is_strip else child)
+                    if is_pre:
+                        parts.append(child)
+                    else:
+                        result = collapse_spaces(child).replace("<", "&lt;").replace(">", "&gt;")
+                        if result.strip():
+                            parts.append(result)
+                        # print(element.name, level, result)
                 else:
-                    parts.append(self.process_element(child, level, is_strip=is_strip))
-        return ''.join(parts).strip() if is_strip else ''.join(parts)
+                    parts.append(self.process_element(child, new_level, is_pre=is_pre))
+        return ''.join(parts) if is_pre or level > 0 else ''.join(parts).strip()
 
     def process_list(self, element: element, level: int) -> str:
         indent = "    " * level
         li_list = element.find_all("li", recursive=False)
         is_ol = element.name == "ol"
-        parts = [f"{indent}{f'{i + 1}.' if is_ol else '-'} {self.process_children(li, level+1).replace("[|lb_bl|]", "")}" for i, li in enumerate(li_list)]
+        parts = [f"{indent}{f'{i + 1}.' if is_ol else '-'} {self.process_children(li, level).replace(Constants.LB_SYMBOL, "")}" for i, li in enumerate(li_list)]
         # print(level, parts)
         return f'\n{"\n".join(parts)}' if level > 0 else "\n".join(parts)
 
-    def process_codeblock(self, element: element) -> str:
+    def process_codeblock(self, element: element, level: int) -> str:
         code_element = element.find("code") or element
-        code = self.process_children(code_element, is_strip=False).strip()
-        if self.is_sequentially_increasing(code):
+        code = self.process_children(code_element, level, is_pre=True).replace(Constants.LB_SYMBOL, "\n")
+        if is_sequentially_increasing(code):
             return ''  # 如果代码块中的内容是连续递增的数字（极有可能是行号），则不输出代码块
         language = next((cls.split('-')[1] for cls in (code_element.get("class") or []) if cls.startswith("language-")), "")
         if not language:
-            language = self.detect_language(code)
+            language = detect_language(code)
         return f"```{language}\n{code}\n```" if language else f"```\n{code}\n```"
 
-    def process_table(self, element: element) -> str:
+    def process_table(self, element: element, level: int) -> str:
         if element.find("pre"):
-            return self.process_children(element)
+            return self.process_children(element, level)
         # 获取所有行，包括 thead 和 tbody
         rows = element.find_all("tr")
         # 解析表头（如果有）
@@ -181,49 +154,31 @@ class HtmlMarkdownParser:
             markdown_table.append("| " + " | ".join(row) + " |")
         return "\n".join(markdown_table)
 
-    def is_block_element(self, element: element) -> bool:
-        return element.name in HtmlMarkdownParser.BLOCK_ELEMENTS
-
-    def move_spaces(self, input_string: str, suffix: str) -> str:
-        # 使用正则表达式匹配以指定的suffix结尾，且suffix之前有空格的情况
-        escaped_suffix = re.escape(suffix)  # 处理正则中的特殊字符
-        pattern = rf'(.*?)\s+({escaped_suffix})$'
-        match = re.search(pattern, input_string)
-        if match:
-            # 获取字符串的主体部分（不含空格）和尾部的 '**'
-            main_part = match.group(1)
-            stars = match.group(2)
-            # 计算空格的数量并将空格移动到 '**' 后
-            space_count = len(input_string) - len(main_part) - len(stars)
-            return f"{main_part}{stars}{' ' * space_count}"
-        return input_string
-
-    def extract_title(self):
+    def extract_title_and_description(self, article: element):
         title_tag = self.soup.title
         title = title_tag.text.strip() if title_tag else None
-
         if title and title.endswith(" - Freedium"):
             h1 = self.soup.find("h1")
             self.title = h1.text.strip() if h1 else None
-
             h2 = self.soup.find("h2")
             self.description = h2.text.strip() if h2 else None
-
+        h1 = article.find("h1", {"class": "wp-block-post-title"})
+        if h1:
+            self.title = h1.text.strip() if h1 else None
+            h1.decompose()
         # 如果 title 仍为空，尝试获取 og:title
         if not self.title:
             og_title = self.soup.find("meta", {"property": "og:title"})
             self.title = og_title["content"].strip() if og_title and "content" in og_title.attrs else title
-
         # 确保 title 不为 None
         self.title = self.title or "Untitled"
-
         # 确保 description 不为 None，尝试获取 og:description
         if not self.description:
             og_desc = self.soup.find("meta", {"property": "og:description"})
             self.description = og_desc["content"].strip() if og_desc and "content" in og_desc.attrs else None
 
     def extract_article(self) -> element:
-        for e in HtmlMarkdownParser.ARTICLE_CONTAINER:
+        for e in Constants.ARTICLE_CONTAINERS:
             article = self._extract_article(e)
             if article:
                 return article
@@ -234,16 +189,3 @@ class HtmlMarkdownParser:
             return self.soup.find(template[0], attrs=template[1])
         else:
             return self.soup.find(template[0])
-
-    def is_sequentially_increasing(self, code: str) -> bool:
-        try:
-            # 解码并按换行符拆分
-            numbers = [int(line.strip()) for line in code.split('\n') if line.strip()]
-            # 检查是否递增
-            return all(numbers[i] + 1 == numbers[i + 1] for i in range(len(numbers) - 1))
-        except ValueError:
-            return False  # 处理非数字情况
-
-    def detect_language(self, code: str) -> str:
-        # TODO: 添加语言检测逻辑
-        return ''
