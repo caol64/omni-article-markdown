@@ -1,7 +1,14 @@
 from bs4 import BeautifulSoup, element, NavigableString
 
-from utils import Constants, is_sequentially_increasing, is_block_element, move_spaces, detect_language, collapse_spaces
-
+from utils import (
+    Constants,
+    is_sequentially_increasing,
+    is_block_element,
+    move_spaces,
+    detect_language,
+    collapse_spaces,
+    extract_domain,
+)
 
 class HtmlMarkdownParser:
 
@@ -10,6 +17,7 @@ class HtmlMarkdownParser:
         self.soup = BeautifulSoup(self.raw_html, "html5lib")
         self.title = None
         self.description = None
+        self.url = None
 
     def parse(self) -> tuple:
         article = self.extract_article()
@@ -56,7 +64,7 @@ class HtmlMarkdownParser:
             parts.append(self.process_list(element, level))
         elif element.name == "img":
             src = element.get("src") or element.get("data-src")
-            parts.append(f"![{element.get('alt', '')}]({src})" if src else "")
+            parts.append(self.process_image(src, element.get("alt", "")))
         elif element.name == "blockquote":
             blockquote = self.process_children(element, level, is_pre=is_pre)
             if blockquote.startswith(Constants.LB_SYMBOL):
@@ -78,11 +86,11 @@ class HtmlMarkdownParser:
             if img_element and source_elements:
                 src_set = source_elements[0]["srcset"]
                 src = src_set.split()[0]
-                if src:
-                    parts.append(f"![{img_element.get('alt', '')}]({src})")
+                parts.append(self.process_image(src, img_element.get("alt", "")))
         elif element.name == "figcaption":
-            figcaption = self.process_children(element, level, is_pre=is_pre)
-            parts.append(f"*{figcaption}*")
+            figcaption = self.process_children(element, level, is_pre=is_pre).replace(Constants.LB_SYMBOL, "\n").strip()
+            figcaptions = figcaption.replace("\n\n", "\n").split("\n")
+            parts.append("\n".join([f"*{caption}*" for caption in figcaptions]))
         elif element.name == "table":
             parts.append(self.process_table(element, level))
         else:
@@ -154,6 +162,14 @@ class HtmlMarkdownParser:
             markdown_table.append("| " + " | ".join(row) + " |")
         return "\n".join(markdown_table)
 
+    def process_image(self, src: str, alt: str) -> str:
+        if src:
+            if src.startswith("/") and self.url:
+                domain = extract_domain(self.url)
+                src = f"{domain}{src}"
+            return f"![{alt}]({src})"
+        return ""
+
     def extract_title_and_description(self, article: element):
         title_tag = self.soup.title
         title = title_tag.text.strip() if title_tag else None
@@ -176,6 +192,8 @@ class HtmlMarkdownParser:
         if not self.description:
             og_desc = self.soup.find("meta", {"property": "og:description"})
             self.description = og_desc["content"].strip() if og_desc and "content" in og_desc.attrs else None
+        og_url = self.soup.find("meta", {"property": "og:url"})
+        self.url = og_url["content"].strip() if og_url and "content" in og_url.attrs else None
 
     def extract_article(self) -> element:
         for e in Constants.ARTICLE_CONTAINERS:

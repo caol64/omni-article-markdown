@@ -1,4 +1,6 @@
 import re
+from urllib.parse import urlparse
+from typing import Optional
 
 
 class Constants:
@@ -82,6 +84,25 @@ def collapse_spaces(text) -> str:
     将多个连续空格（包括换行和 Tab）折叠成一个空格。
     """
     return re.sub(r'\s+', ' ', text)
+
+def extract_domain(url: str) -> Optional[str]:
+    """
+    从URL中提取域名（包含协议）。
+
+    Args:
+        url (str): 要提取域名的URL。
+
+    Returns:
+        Optional[str]: 提取出的域名（包含协议），如果解析失败或协议不支持则返回 None。
+    """
+    try:
+        parsed_url = urlparse(url)
+        if parsed_url.scheme in {"http", "https"} and parsed_url.netloc:
+            return f"{parsed_url.scheme}://{parsed_url.netloc}".rstrip('/')
+        return None  # 返回 None 表示 URL 格式不符合要求或协议不支持
+
+    except ValueError:
+        return None  # 如果 URL 格式无效，则返回 None
 
 def detect_language(code: str) -> str:
     # TODO: 添加语言检测逻辑
