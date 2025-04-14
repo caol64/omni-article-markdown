@@ -1,6 +1,6 @@
 import argparse
 
-from .omni_article_md import OmniArticleMarkdown
+from omni_article_markdown.omni_article_md import OmniArticleMarkdown
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
