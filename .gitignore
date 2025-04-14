@@ -10,3 +10,5 @@ __pycache__/
 .venv/
 secrets/
 test*.py
+.env
+*.egg-info/

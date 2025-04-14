@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "omni-article-markdown"
+version = "0.1.0"
+description = "Easily convert web articles (blogs, news, documents, etc.) into Markdown format."
+authors = [
+    { name = "caol64", email = "caol64@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.13"
+license = "MIT"
+
+[project.urls]
+Homepage = "https://github.com/caol64/omni-article-markdown"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

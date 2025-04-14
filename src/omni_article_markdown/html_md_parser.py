@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup, element, NavigableString
 
-from utils import (
+from .utils import (
     Constants,
     is_sequentially_increasing,
     is_block_element,

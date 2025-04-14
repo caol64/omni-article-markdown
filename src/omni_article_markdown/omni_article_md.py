@@ -1,8 +1,8 @@
 from pathlib import Path
 import requests
 
-from html_md_parser import HtmlMarkdownParser
-from utils import to_snake_case
+from .html_md_parser import HtmlMarkdownParser
+from .utils import to_snake_case
 
 
 class HtmlReader:
