@@ -12,6 +12,12 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.13"
 license = "MIT"
+dependencies = [
+    "build>=1.2.2.post1",
+    "requests",
+    "beautifulsoup4",
+    "html5lib",
+]
 
 [project.urls]
 Homepage = "https://github.com/caol64/omni-article-markdown"

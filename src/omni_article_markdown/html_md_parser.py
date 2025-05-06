@@ -93,6 +93,12 @@ class HtmlMarkdownParser:
             parts.append("\n".join([f"*{caption}*" for caption in figcaptions]))
         elif element.name == "table":
             parts.append(self.process_table(element, level))
+        elif element.name == "math": # 处理latex公式
+            semantics = element.find("semantics")
+            if semantics:
+                tex = semantics.find(attrs={'encoding': 'application/x-tex'})
+                if tex:
+                    parts.append(f"$$ {tex.text} $$")
         else:
             parts.append(self.process_children(element, level, is_pre=is_pre))
         result = ''.join(parts)

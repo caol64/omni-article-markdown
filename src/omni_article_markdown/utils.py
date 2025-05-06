@@ -28,6 +28,7 @@ class Constants:
         lambda el: 'data-testid' in el.attrs, # Medium
         lambda el: 'class' in el.attrs and 'speechify-ignore' in el.attrs['class'], # Medium
         lambda el: 'hidden' in el.attrs,
+        lambda el: 'class' in el.attrs and 'katex-html' in el.attrs['class'], # katex
     ]
 
     POST_HANDLERS = [
