@@ -4,6 +4,15 @@
 
 ---
 
+## Recent changes:
+
+- 添加对github gist的支持
+  - 示例：https://towardsdatascience.com/hands-on-multi-agent-llm-restaurant-simulation-with-python-and-openai
+- 添加对katex公式的支持
+  - 示例：https://quantum.country/qcvc
+
+---
+
 ## **1. 功能介绍**
 此脚本的开发初衷，是为了解决一个问题：如何将来自互联网上各种不同网站的文章内容，精准且高效地转换成统一的Markdown格式。
 

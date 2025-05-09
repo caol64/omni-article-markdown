@@ -1,4 +1,6 @@
+import re
 from bs4 import BeautifulSoup, element, NavigableString
+import requests
 
 from .utils import (
     Constants,
@@ -99,6 +101,8 @@ class HtmlMarkdownParser:
                 tex = semantics.find(attrs={'encoding': 'application/x-tex'})
                 if tex:
                     parts.append(f"$$ {tex.text} $$")
+        elif element.name == "script": # 处理github gist
+            parts.append(self.process_gist(element))
         else:
             parts.append(self.process_children(element, level, is_pre=is_pre))
         result = ''.join(parts)
@@ -138,7 +142,7 @@ class HtmlMarkdownParser:
             return ''  # 如果代码块中的内容是连续递增的数字（极有可能是行号），则不输出代码块
         language = next((cls.split('-')[1] for cls in (code_element.get("class") or []) if cls.startswith("language-")), "")
         if not language:
-            language = detect_language(code)
+            language = detect_language(None, code)
         return f"```{language}\n{code}\n```" if language else f"```\n{code}\n```"
 
     def process_table(self, element: element, level: int) -> str:
@@ -175,6 +179,29 @@ class HtmlMarkdownParser:
                 src = f"{domain}{src}"
             return f"![{alt}]({src})"
         return ""
+
+    def process_gist(self, element: element) -> str:
+        src = element.attrs["src"]
+        pattern = r"/([0-9a-f]+)(?:\.js)?$"
+        match = re.search(pattern, src)
+        if match:
+            gist_id = match.group(1)
+        else:
+            return ""
+        url = f"https://api.github.com/gists/{gist_id}"
+        response = requests.get(url)
+        response.encoding = "utf-8"
+        if response.status_code == 200:
+            data = response.json()
+            gists = []
+            for filename, info in data["files"].items():
+                code = info["content"]
+                language = detect_language(filename, code)
+                gists.append(f"```{language}\n{code}\n```")
+            return "\n\n".join(gists)
+        else:
+            print(f"Fetch gist error: {response.status_code}")
+            return ""
 
     def extract_title_and_description(self, article: element):
         title_tag = self.soup.title

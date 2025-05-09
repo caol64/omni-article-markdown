@@ -19,7 +19,9 @@ class Constants:
     ]
 
     TAGS_TO_CLEAN = [
-        lambda el: el.name in ("script", "style", "link", "button", "footer", "header", "aside"),
+        lambda el: el.name in ("style", "link", "button", "footer", "header", "aside"),
+        lambda el: el.name == "script" and "src" not in el.attrs,
+        lambda el: el.name == "script" and "src" in el.attrs and not el.attrs["src"].startswith("https://gist.github.com"),
     ]
 
     ATTRS_TO_CLEAN = [
@@ -105,6 +107,6 @@ def extract_domain(url: str) -> Optional[str]:
     except ValueError:
         return None  # 如果 URL 格式无效，则返回 None
 
-def detect_language(code: str) -> str:
+def detect_language(file_name: str, code: str) -> str:
     # TODO: 添加语言检测逻辑
     return ''
