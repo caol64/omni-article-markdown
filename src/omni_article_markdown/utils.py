@@ -13,6 +13,7 @@ class Constants:
         ("div", {"class": "post-content"}), # Hugo
         ("div", {"class": "article-content"}), # 头条
         ("div", {"class": "Post-RichText"}), # 知乎专栏
+        ("div", {"id": "postBody"}), # quantamagazine
         ("article", None),
         ("main", None),
         ("body", None)
