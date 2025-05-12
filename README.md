@@ -44,6 +44,7 @@ pip install -r requirements.txt
 
 ### **2.2 运行命令**
 ```sh
+mdcli <URL_OR_PATH> [-s [SAVE_PATH]] # or
 python omni_article_md_cli.py <URL_OR_PATH> [-s [SAVE_PATH]]
 ```
 
@@ -62,16 +63,19 @@ python omni_article_md_cli.py <URL_OR_PATH> [-s [SAVE_PATH]]
 
 ### **4.1 仅转换，不保存**
 ```sh
+mdcli https://example.com # or
 python omni_article_md_cli.py https://example.com
 ```
 
 ### **4.2 转换并保存到默认路径**
 ```sh
+mdcli https://example.com -s # or
 python omni_article_md_cli.py https://example.com -s
 ```
 
 ### **4.3 转换并保存到指定路径**
 ```sh
+mdcli https://example.com -s /home/user/data # or
 python omni_article_md_cli.py https://example.com -s /home/user/data
 ```
 
