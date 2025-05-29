@@ -36,21 +36,31 @@
 
 ## **2. 安装与运行**
 
-### **2.1 安装依赖**
-确保 Python 环境可用，并安装必要依赖：
+首先，安装必要依赖项：
 ```sh
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 ```
 
-### **2.2 运行命令**
+然后，可以使用以下两种形式运行：
 ```sh
-mdcli <URL_OR_PATH> [-s [SAVE_PATH]] # or
-python omni_article_md_cli.py <URL_OR_PATH> [-s [SAVE_PATH]]
+uv run mdcli
+```
+
+或者：
+
+```sh
+python -m omni_article_markdown.cli
 ```
 
 ---
 
 ## **3. 参数说明**
+
+运行命令及参数如下：
+
+```sh
+mdcli <URL_OR_PATH> [-s [SAVE_PATH]]
+```
 
 | 参数               | 说明 |
 |--------------------|------|
@@ -63,20 +73,17 @@ python omni_article_md_cli.py <URL_OR_PATH> [-s [SAVE_PATH]]
 
 ### **4.1 仅转换，不保存**
 ```sh
-mdcli https://example.com # or
-python omni_article_md_cli.py https://example.com
+mdcli https://example.com
 ```
 
 ### **4.2 转换并保存到默认路径**
 ```sh
-mdcli https://example.com -s # or
-python omni_article_md_cli.py https://example.com -s
+mdcli https://example.com -s
 ```
 
 ### **4.3 转换并保存到指定路径**
 ```sh
-mdcli https://example.com -s /home/user/data # or
-python omni_article_md_cli.py https://example.com -s /home/user/data
+mdcli https://example.com -s /home/user/data.txt
 ```
 
 ---

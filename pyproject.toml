@@ -1,31 +1,42 @@
-[build-system]
-requires = ["setuptools >= 77.0.3"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "omni-article-markdown"
 version = "0.1.0"
 description = "Easily convert web articles (blogs, news, documents, etc.) into Markdown format."
 authors = [
-    { name = "caol64", email = "caol64@gmail.com" }
+    { name = "Lei", email = "caol64@gmail.com" }
 ]
 readme = "README.md"
 requires-python = ">=3.13"
 license = "MIT"
 dependencies = [
-    "requests",
-    "beautifulsoup4",
-    "html5lib",
+    "requests>=2.32.3",
+    "beautifulsoup4>=4.13.4",
+    "html5lib>=1.1",
+    "click>=8.2.0",
 ]
 
 [project.scripts]
-mdcli = "omni_article_md_cli:cli"
+mdcli = "omni_article_markdown.cli:cli"
 
 [project.urls]
 Homepage = "https://github.com/caol64/omni-article-markdown"
 
-[tool.setuptools]
-package-dir = {"" = "src"}
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.hatch.build]
+packages = [
+    "src/omni_article_markdown",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src/omni_article_markdown",
+    "/README.md",
+    "/pyproject.toml",
+]
+
+[[tool.uv.index]]
+url = "https://mirrors.aliyun.com/pypi/simple"
+default = true
