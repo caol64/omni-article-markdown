@@ -1,0 +1,39 @@
+[project]
+name = "omnimd-zhihu-reader"
+version = "0.1.0"
+description = "A plugin for omni-article-markdown to read Zhihu content."
+authors = [
+    { name = "Lei", email = "caol64@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.13"
+license = "MIT"
+dependencies = [
+    "playwright",
+]
+
+[project.entry-points.mdcli]
+zhihu = "omnimd_zhihu_reader.reader"
+
+[project.urls]
+Homepage = "https://github.com/caol64/omni-article-markdown/plugins/omnimd_zhihu_reader"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+packages = [
+    "src/omnimd_zhihu_reader",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src/omnimd_zhihu_reader",
+    "/README.md",
+    "/pyproject.toml",
+]
+
+[[tool.uv.index]]
+url = "https://mirrors.aliyun.com/pypi/simple"
+default = true

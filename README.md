@@ -6,6 +6,8 @@
 
 ## Recent changes:
 
+- 添加知乎插件，知乎专栏文章可以直接转换了
+- 添加插件机制，复杂的页面可以通过插件进行扩展
 - 添加对github gist的支持
   - 示例：https://towardsdatascience.com/hands-on-multi-agent-llm-restaurant-simulation-with-python-and-openai
 - 添加对katex公式的支持
@@ -13,7 +15,7 @@
 
 ---
 
-## **1. 功能介绍**
+## 1. 功能介绍
 此脚本的开发初衷，是为了解决一个问题：如何将来自互联网上各种不同网站的文章内容，精准且高效地转换成统一的Markdown格式。
 
 众所周知，万维网上的网站设计风格迥异，其HTML结构也呈现出千差万别的特点。这种多样性给自动化内容提取和格式转换带来了巨大的困难。要实现一个能够适应各种复杂HTML结构的通用解决方案，并非易事。
@@ -25,7 +27,7 @@
 - Freedium（先保存至本地）
 - 公众号
 - 简书
-- 知乎专栏（先保存至本地）
+- 知乎专栏
 - 今日头条（先保存至本地）
 - towardsdatascience
 - quantamagazine
@@ -34,11 +36,11 @@
 
 ---
 
-## **2. 安装与运行**
+## 2. 安装与运行
 
 首先，安装必要依赖项：
 ```sh
-uv pip install -r requirements.txt
+uv pip install .
 ```
 
 然后，可以使用以下两种形式运行：
@@ -54,7 +56,7 @@ python -m omni_article_markdown.cli
 
 ---
 
-## **3. 参数说明**
+## 3. 参数说明
 
 运行命令及参数如下：
 
@@ -69,37 +71,95 @@ mdcli <URL_OR_PATH> [-s [SAVE_PATH]]
 
 ---
 
-## **4. 使用示例**
+## 4. 使用示例
 
-### **4.1 仅转换，不保存**
+### 4.1 仅转换，不保存
 ```sh
 mdcli https://example.com
 ```
 
-### **4.2 转换并保存到默认路径**
+### 4.2 转换并保存到默认路径
 ```sh
 mdcli https://example.com -s
 ```
 
-### **4.3 转换并保存到指定路径**
+### 4.3 转换并保存到指定路径
 ```sh
 mdcli https://example.com -s /home/user/data.txt
 ```
 
 ---
 
-## **5. 贡献与反馈**
+## 5. 安装和使用插件
+
+`omni-article-markdown` 支持通过插件机制来扩展对特定网站或复杂页面的解析能力。这使得社区可以贡献针对不同网站的定制化解析器，而无需修改核心代码。
+
+### 5.1 什么是插件？
+
+插件是独立的 Python 包，它们实现了 `omni-article-markdown` 定义的特定接口（钩子），从而能够被主程序发现和调用。例如，一个插件可以提供一个专门用于解析知乎专栏文章的 `Reader`。
+
+### 5.2 如何安装插件？
+
+你可以使用 `mdcli` 提供的 `install` 命令来安装插件。插件通常会发布到 PyPI（Python Package Index）。
+
+**安装命令格式：**
+
+```sh
+mdcli install <PLUGIN_NAME_OR_PACKAGE_NAME> [-U]
+```
+
+| 参数                             | 说明                                                                 |
+|----------------------------------|----------------------------------------------------------------------|
+| `<PLUGIN_NAME_OR_PACKAGE_NAME>` | **必填**，插件的名称或其在 PyPI 上的完整包名。 |
+| `-U, --upgrade`                  | **可选**，如果插件已安装，则尝试升级到最新版本。                          |
+
+**示例：安装知乎解析插件**
+
+```sh
+mdcli install omnimd_zhihu_reader
+```
+
+安装成功后，当下一次运行 `mdcli` 解析知乎链接时，如果该插件正确实现了接口，它将被自动用于处理该链接。
+
+### 5.3 如何卸载插件？
+
+如果你想移除一个已安装的插件，可以使用 `mdcli` 提供的 `uninstall` 命令。
+
+**卸载命令格式：**
+
+```sh
+mdcli uninstall <PLUGIN_NAME_OR_PACKAGE_NAME> [-y]
+```
+
+| 参数                             | 说明                                                     |
+|----------------------------------|----------------------------------------------------------|
+| `<PLUGIN_NAME_OR_PACKAGE_NAME>` | **必填**，要卸载的插件的名称或其在 PyPI 上的完整包名。 |
+| `-y, --yes`                      | **可选**，在卸载前不进行确认提示。                         |
+
+**示例：卸载知乎解析插件**
+
+```sh
+mdcli uninstall omnimd_zhihu_reader
+```
+
+卸载后，该插件的功能将不再可用。对于之前由该插件处理的 URL，`mdcli` 将会回退到其默认的解析逻辑。
+
+### 5.4 开发自己的插件
+
+---
+
+## 6. 贡献与反馈
 - 发现解析问题？欢迎提交 [Issue](https://github.com/caol64/omni-article-markdown/issues)
 - 改进解析？欢迎贡献 [Pull Request](https://github.com/caol64/omni-article-markdown/pulls)
 
 ---
 
-## **6. 赞助**
+## 7. 赞助
 
 如果您觉得不错，可以给我家猫咪买点罐头吃。[喂猫❤️](https://yuzhi.tech/sponsor)
 
 ---
 
-## **7. License**
+## 8. License
 
 MIT License
