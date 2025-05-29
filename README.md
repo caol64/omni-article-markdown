@@ -6,7 +6,9 @@
 
 ## Recent changes:
 
-- 添加知乎插件，知乎专栏文章可以直接转换了
+- 添加Freedium插件，Freedium文章可以直接转换了，使用方式：`mdcli install omnimd_freedium_reader`
+- 添加今日头条插件，今日头条文章可以直接转换了，使用方式：`mdcli install omnimd_toutiao_reader`
+- 添加知乎插件，知乎专栏文章可以直接转换了，使用方式：`mdcli install omnimd_zhihu_reader`
 - 添加插件机制，复杂的页面可以通过插件进行扩展
 - 添加对github gist的支持
   - 示例：https://towardsdatascience.com/hands-on-multi-agent-llm-restaurant-simulation-with-python-and-openai
@@ -20,19 +22,20 @@
 
 众所周知，万维网上的网站设计风格迥异，其HTML结构也呈现出千差万别的特点。这种多样性给自动化内容提取和格式转换带来了巨大的困难。要实现一个能够适应各种复杂HTML结构的通用解决方案，并非易事。
 
-我的想法是：从特定的网站开始适配，以点到面，逐步抽取出通用的解决方案，最后尽可能多的覆盖更多网站。目前支持较好的网站有：
+我的想法是：从特定的网站开始适配，以点到面，逐步抽取出通用的解决方案，最后尽可能多的覆盖更多网站。较有代表性的网站：
 
 - 掘金
+- CSDN
 - Medium
-- Freedium（先保存至本地）
+- Freedium
 - 公众号
 - 简书
 - 知乎专栏
-- 今日头条（先保存至本地）
+- 今日头条
 - towardsdatascience
 - quantamagazine
 
-其它网站暂未适配，但理论上都可以转换。需要注意的是有些网站不支持python直接抓取，或者有防机器人检测机制，这样的网站需要手动保存为 HTML 文件，再使用本工具。
+你还可以将网页手动保存为 HTML 文件，再使用本工具，也是支持的。
 
 ---
 

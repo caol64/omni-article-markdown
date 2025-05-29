@@ -1,7 +1,7 @@
 [project]
-name = "omnimd-zhihu-reader"
+name = "omnimd-freedium-reader"
 version = "0.1.0"
-description = "A plugin for omni-article-markdown to read Zhihu content."
+description = "A plugin for omni-article-markdown to read Freedium content."
 authors = [
     { name = "Lei", email = "caol64@gmail.com" }
 ]
@@ -13,10 +13,10 @@ dependencies = [
 ]
 
 [project.entry-points.mdcli]
-zhihu = "omnimd_zhihu_reader.reader"
+freedium = "omnimd_freedium_reader.reader"
 
 [project.urls]
-Homepage = "https://github.com/caol64/omni-article-markdown/tree/main/src/plugins/omnimd_zhihu_reader"
+Homepage = "https://github.com/caol64/omni-article-markdown/tree/main/src/plugins/omnimd_freedium_reader"
 
 [build-system]
 requires = ["hatchling"]
@@ -24,12 +24,12 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build]
 packages = [
-    "src/omnimd_zhihu_reader",
+    "src/omnimd_freedium_reader",
 ]
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "/src/omnimd_zhihu_reader",
+    "/src/omnimd_freedium_reader",
     "/README.md",
     "/pyproject.toml",
 ]

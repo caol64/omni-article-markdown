@@ -16,7 +16,6 @@ class ReaderFactory:
     @staticmethod
     def create(url_or_path: str) -> Reader:
         custom_plugin_reader = pm.hook.get_custom_reader(url=url_or_path)
-        print(f"Using custom plugin reader: {custom_plugin_reader}")
         if custom_plugin_reader:
             class PluginReaderAdapter(Reader):
                 def __init__(self, plugin: ReaderPlugin, url: str):
@@ -36,7 +35,7 @@ class HtmlReader(Reader):
         self.url_or_path = url_or_path
 
     def read(self) -> str:
-        print(f"Using default HtmlReader for: {self.url_or_path}")
+        # print(f"Using default HtmlReader for: {self.url_or_path}")
         response = requests.get(self.url_or_path, headers=REQUEST_HEADERS)
         response.encoding = "utf-8"
         return response.text

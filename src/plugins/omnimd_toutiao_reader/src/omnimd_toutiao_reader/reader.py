@@ -10,26 +10,26 @@ import importlib.resources
 import requests
 
 
-class ZhihuReader(ReaderPlugin):
+class ToutiaoReader(ReaderPlugin):
     def can_handle(self, url: str) -> bool:
-        return "zhihu.com" in url
+        return "toutiao.com" in url
 
     def read(self, url: str) -> str:
-        # print(f"Using ZhihuReaderImpl for: {url}")
+        # print(f"Using ToutiaoReader for: {url}")
         store = Store()
-        playwright_cookies = store.load("zhihu_cookies")
+        playwright_cookies = store.load("toutiao_cookies")
         if not playwright_cookies:
-            print("模拟登录知乎")
-            playwright_cookies = self._get_zhihu_cookies(url)
+            print("模拟登录头条")
+            playwright_cookies = self._get_toutiao_cookies(url)
         if not playwright_cookies:
-            raise Exception("无法获取知乎登录信息")
+            raise Exception("无法获取头条登录信息")
         cookies = self._convert_playwright_cookies_to_requests_dict(playwright_cookies)
         response = requests.get(url, headers=REQUEST_HEADERS, cookies=cookies)
         response.encoding = "utf-8"
         html = response.text
         return html
 
-    def _get_zhihu_cookies(self, url: str) -> List[Dict[str, Any]]:
+    def _get_toutiao_cookies(self, url: str) -> List[Dict[str, Any]]:
         def try_launch_browser(p):
             try:
                 return p.chromium.launch(headless=True)
@@ -59,7 +59,7 @@ class ZhihuReader(ReaderPlugin):
             page.goto(url, wait_until="networkidle")
             cookies = context.cookies()
             store = Store()
-            store.save("zhihu_cookies", cookies)
+            store.save("toutiao_cookies", cookies)
             page.close()
             context.close()
             browser.close()
@@ -72,10 +72,10 @@ class ZhihuReader(ReaderPlugin):
         return requests_cookies
 
 # 实例化插件
-zhihu_plugin_instance = ZhihuReader()
+toutiao_plugin_instance = ToutiaoReader()
 
 @hookimpl
 def get_custom_reader(url: str) -> Optional[ReaderPlugin]:
-    if zhihu_plugin_instance.can_handle(url):
-        return zhihu_plugin_instance
+    if toutiao_plugin_instance.can_handle(url):
+        return toutiao_plugin_instance
     return None
