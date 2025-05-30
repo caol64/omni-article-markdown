@@ -10,26 +10,36 @@ import importlib.resources
 import requests
 
 
-class ToutiaoReader(ReaderPlugin):
+class ZhihuReader(ReaderPlugin):
     def can_handle(self, url: str) -> bool:
-        return "toutiao.com" in url
+        return "zhihu.com" in url
 
     def read(self, url: str) -> str:
-        # print(f"Using ToutiaoReader for: {url}")
         store = Store()
-        playwright_cookies = store.load("toutiao_cookies")
-        if not playwright_cookies:
-            print("模拟登录头条")
-            playwright_cookies = self._get_toutiao_cookies(url)
-        if not playwright_cookies:
-            raise Exception("无法获取头条登录信息")
-        cookies = self._convert_playwright_cookies_to_requests_dict(playwright_cookies)
-        response = requests.get(url, headers=REQUEST_HEADERS, cookies=cookies)
-        response.encoding = "utf-8"
-        html = response.text
-        return html
+        cookies_raw = store.load("zhihu_cookies")
 
-    def _get_toutiao_cookies(self, url: str) -> List[Dict[str, Any]]:
+        if not cookies_raw:
+            print("未找到知乎登录信息，尝试模拟登录...")
+            cookies_raw = self._get_zhihu_cookies(url)
+            if not cookies_raw:
+                raise Exception("无法获取知乎登录信息")
+
+        cookies = self._convert_playwright_cookies_to_requests_dict(cookies_raw)
+        response = requests.get(url, headers=REQUEST_HEADERS, cookies=cookies)
+
+        # 如果初始请求失败，则尝试重新获取 cookie 并重试
+        if response.status_code == 403:
+            print("Cookie 失效，重新模拟登录知乎...")
+            cookies_raw = self._get_zhihu_cookies(url)
+            if not cookies_raw:
+                raise Exception("重新模拟登录失败，无法访问知乎内容")
+            cookies = self._convert_playwright_cookies_to_requests_dict(cookies_raw)
+            response = requests.get(url, headers=REQUEST_HEADERS, cookies=cookies)
+
+        response.encoding = "utf-8"
+        return response.text
+
+    def _get_zhihu_cookies(self, url: str) -> List[Dict[str, Any]]:
         def try_launch_browser(p):
             try:
                 return p.chromium.launch(headless=True)
@@ -59,7 +69,7 @@ class ToutiaoReader(ReaderPlugin):
             page.goto(url, wait_until="networkidle")
             cookies = context.cookies()
             store = Store()
-            store.save("toutiao_cookies", cookies)
+            store.save("zhihu_cookies", cookies)
             page.close()
             context.close()
             browser.close()
@@ -72,10 +82,10 @@ class ToutiaoReader(ReaderPlugin):
         return requests_cookies
 
 # 实例化插件
-toutiao_plugin_instance = ToutiaoReader()
+zhihu_plugin_instance = ZhihuReader()
 
 @hookimpl
 def get_custom_reader(url: str) -> Optional[ReaderPlugin]:
-    if toutiao_plugin_instance.can_handle(url):
-        return toutiao_plugin_instance
+    if zhihu_plugin_instance.can_handle(url):
+        return zhihu_plugin_instance
     return None

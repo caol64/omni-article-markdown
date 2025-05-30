@@ -47,7 +47,7 @@ def install(plugin_name, upgrade):
     For example, to install the 'zhihu' plugin: mdcli install zhihu
     """
     if plugin_name in DEFAULT_PLUGINS:
-        actual_package_name = f"./src/plugins/{DEFAULT_PLUGINS.get(plugin_name)}"
+        actual_package_name = f"./plugins/{DEFAULT_PLUGINS.get(plugin_name)}"
     else:
         actual_package_name = plugin_name
 
@@ -80,21 +80,25 @@ def uninstall(plugin_name, yes):
     Uninstalls a plugin for this application.
     For example, to uninstall the 'zhihu' plugin: mdcli uninstall zhihu
     """
+    if plugin_name in DEFAULT_PLUGINS:
+        actual_package_name = DEFAULT_PLUGINS.get(plugin_name)
+    else:
+        actual_package_name = plugin_name
 
-    click.echo(f"Attempting to uninstall plugin: {plugin_name}...")
+    click.echo(f"Attempting to uninstall plugin: {actual_package_name}...")
     args = ["pip", "uninstall"]
     if yes:
         args.append("-y")
-    args.append(plugin_name)
+    args.append(actual_package_name)
 
     original_argv = sys.argv
     try:
         sys.argv = args
         run_module("pip", run_name="__main__")
-        click.echo(f"Plugin '{plugin_name}' uninstallation processed by pip.")
+        click.echo(f"Plugin '{actual_package_name}' uninstallation processed by pip.")
         click.echo("The plugin's functionality should no longer be available after the next application start (or if dynamically unloaded).")
     except Exception as e:
-        click.echo(f"Failed to process uninstallation of plugin '{plugin_name}' with pip: {e}", err=True)
+        click.echo(f"Failed to process uninstallation of plugin '{actual_package_name}' with pip: {e}", err=True)
         click.echo("Please ensure pip is installed and the package name is correct.", err=True)
     finally:
         sys.argv = original_argv

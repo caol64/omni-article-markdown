@@ -65,7 +65,7 @@ class HtmlMarkdownParser:
         elif element.name == "ul" or element.name == "ol":
             parts.append(self.process_list(element, level))
         elif element.name == "img":
-            src = element.get("src") or element.get("data-src")
+            src = element.get("data-src") or element.get("src")
             parts.append(self.process_image(src, element.get("alt", "")))
         elif element.name == "blockquote":
             blockquote = self.process_children(element, level, is_pre=is_pre)
