@@ -1,5 +1,0 @@
-requests>=2.32.3
-beautifulsoup4>=4.13.4
-html5lib>=1.1
-click>=8.2.0
-pluggy>=1.6.0
