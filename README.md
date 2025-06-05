@@ -2,6 +2,8 @@
 
 轻松将网页文章（博客、新闻、文档等）转换为 `Markdown` 格式。
 
+![](data/1.gif)
+
 ---
 
 ## Recent changes:
