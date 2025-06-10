@@ -41,15 +41,15 @@ def parse_article(url_or_path, save):
 @click.option(
     "-U", "--upgrade", is_flag=True, help="Upgrade the plugin if already installed."
 )
-def install(plugin_name, upgrade):
+@click.option(
+    "-e", "--editable", is_flag=True, help="Install the editable package based on the provided local file path"
+)
+def install(plugin_name, upgrade, editable):
     """
     Installs a plugin for this application.
     For example, to install the 'zhihu' plugin: mdcli install zhihu
     """
-    if plugin_name in DEFAULT_PLUGINS:
-        actual_package_name = f"./plugins/{DEFAULT_PLUGINS.get(plugin_name)}"
-    else:
-        actual_package_name = plugin_name
+    actual_package_name = plugin_name if editable or plugin_name not in DEFAULT_PLUGINS else DEFAULT_PLUGINS[plugin_name]
 
     click.echo(f"Attempting to install plugin: {actual_package_name}...")
     args = ["pip", "install"]
@@ -80,10 +80,7 @@ def uninstall(plugin_name, yes):
     Uninstalls a plugin for this application.
     For example, to uninstall the 'zhihu' plugin: mdcli uninstall zhihu
     """
-    if plugin_name in DEFAULT_PLUGINS:
-        actual_package_name = DEFAULT_PLUGINS.get(plugin_name)
-    else:
-        actual_package_name = plugin_name
+    actual_package_name = plugin_name if plugin_name not in DEFAULT_PLUGINS else DEFAULT_PLUGINS[plugin_name]
 
     click.echo(f"Attempting to uninstall plugin: {actual_package_name}...")
     args = ["pip", "uninstall"]

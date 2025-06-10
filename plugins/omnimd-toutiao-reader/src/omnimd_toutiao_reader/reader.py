@@ -1,5 +1,5 @@
 import sys
-from typing import Optional, List, Dict, Any
+from typing import Optional, Any
 from omni_article_markdown.hookspecs import hookimpl, ReaderPlugin
 from omni_article_markdown.utils import REQUEST_HEADERS
 from omni_article_markdown.store import Store
@@ -42,7 +42,7 @@ class ToutiaoReader(ReaderPlugin):
         response.encoding = "utf-8"
         return response.text
 
-    def _get_toutiao_cookies(self, url: str) -> List[Dict[str, Any]]:
+    def _get_toutiao_cookies(self, url: str) -> list[dict[str, Any]]:
         def try_launch_browser(p):
             try:
                 return p.chromium.launch(headless=True)
@@ -78,7 +78,7 @@ class ToutiaoReader(ReaderPlugin):
             browser.close()
             return cookies
 
-    def _convert_playwright_cookies_to_requests_dict(self, playwright_cookies: List[Dict[str, Any]]) -> Dict[str, str]:
+    def _convert_playwright_cookies_to_requests_dict(self, playwright_cookies: list[dict[str, Any]]) -> dict[str, str]:
         requests_cookies = {}
         for cookie in playwright_cookies:
             requests_cookies[cookie['name']] = cookie['value']

@@ -131,18 +131,25 @@ mdcli https://example.com -s /home/user/data.md
 **安装命令格式：**
 
 ```sh
-mdcli install <PLUGIN_NAME_OR_PACKAGE_NAME> [-U]
+mdcli install <PLUGIN_NAME_OR_PACKAGE_NAME> [-U] [-e]
 ```
 
 | 参数                             | 说明                                                                 |
 |----------------------------------|----------------------------------------------------------------------|
 | `<PLUGIN_NAME_OR_PACKAGE_NAME>` | **必填**，插件的名称或其在 PyPI 上的完整包名。 |
 | `-U, --upgrade`                  | **可选**，如果插件已安装，则尝试升级到最新版本。                          |
+| `-e, --editable`                  | **可选**，基于提供的本地文件路径安装可编辑的包。                          |
 
 **示例：安装知乎解析插件**
 
 ```sh
 mdcli install zhihu
+```
+
+或者，你可以使用 `-e` 参数安装本地可编辑的包。
+
+```sh
+mdcli install -e "./plugins/omnimd-zhihu-reader"
 ```
 
 安装成功后，当下一次运行 `mdcli` 解析知乎链接时，如果该插件正确实现了接口，它将被自动用于处理该链接。
@@ -166,6 +173,12 @@ mdcli uninstall <PLUGIN_NAME_OR_PACKAGE_NAME> [-y]
 
 ```sh
 mdcli uninstall zhihu
+```
+
+或者，使用插件的全称删除
+
+```sh
+mdcli uninstall omnimd-zhihu-reader
 ```
 
 卸载后，该插件的功能将不再可用。对于之前由该插件处理的 URL，`mdcli` 将会回退到其默认的解析逻辑。
