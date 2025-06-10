@@ -34,36 +34,26 @@
 - towardsdatascience
 - quantamagazine
 
-只需要一条命令：
-
-```sh
-mdcli https://example.com
-```
-
-你还可以将网页手动保存为 HTML 文件，再使用本工具解析，也是支持的。
-
-```sh
-mdcli your/path/example.html
-```
-
 ---
 
-## 2. 安装与运行
+## 2. 快速开始
 
-首先，安装必要依赖项：
+1. 安装主程序
+
 ```sh
-uv pip install .
+pip install omni-article-markdown
 ```
 
-然后，可以使用以下两种形式运行：
+2. 安装插件（可选）
+
 ```sh
-uv run mdcli
+mdcli install zhihu
 ```
 
-或者：
+3. 运行命令：
 
 ```sh
-python -m omni_article_markdown.cli
+mdcli https://zhuanlan.zhihu.com/p/123456789 -s
 ```
 
 ---
@@ -118,15 +108,7 @@ mdcli https://example.com -s /home/user/data.md
 
 ## 5. 安装和使用插件
 
-墨探支持通过插件机制来扩展自身的能力。这使得社区可以贡献针对不同网站的定制化解析器，而无需修改核心代码。
-
-### 5.1 什么是插件？
-
-插件是独立的 Python 包，它们实现了墨探定义的特定接口（钩子），从而能够被主程序发现和调用。例如，一个插件可以提供一个专门用于解析知乎专栏文章的 `Reader`。插件往往需要安装额外的依赖，因此不包含在主程序中，有需要的用户可自行安装。
-
-### 5.2 如何安装插件？
-
-你可以使用 `mdcli` 提供的 `install` 命令来安装插件。插件通常会发布到 PyPI（Python Package Index）。
+[「墨探」是如何使用插件机制构建可扩展架构的](https://babyno.top/posts/2025/06/a-deep-dive-into-the-extensible-architecture-of-omni-article-markdown/)
 
 **安装命令格式：**
 
