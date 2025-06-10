@@ -1,6 +1,6 @@
 [project]
 name = "omnimd-freedium-reader"
-version = "0.1.0"
+version = "0.1.1"
 description = "A plugin for omni-article-markdown to read Freedium content."
 authors = [
     { name = "Lei", email = "caol64@gmail.com" }
@@ -23,8 +23,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
-packages = [
-    "src/omnimd_freedium_reader",
+exclude = [
+    "/dist",
 ]
 
 [tool.hatch.build.targets.sdist]
@@ -33,7 +33,3 @@ include = [
     "/README.md",
     "/pyproject.toml",
 ]
-
-[[tool.uv.index]]
-url = "https://mirrors.aliyun.com/pypi/simple"
-default = true
