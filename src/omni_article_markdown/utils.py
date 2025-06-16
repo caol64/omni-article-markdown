@@ -54,7 +54,9 @@ class Constants:
         lambda el: el.replace(f"{Constants.LB_SYMBOL}{Constants.LB_SYMBOL}", Constants.LB_SYMBOL).replace(Constants.LB_SYMBOL, "\n\n").strip(), # 添加换行使文章更美观
         lambda el: re.sub(r"`\*\*(.*?)\*\*`", r"**`\1`**", el), # 纠正不规范格式 `**code**` 替换为 **`code`**
         lambda el: re.sub(r"`\*(.*?)\*`", r"*`\1`*", el), # 纠正不规范格式 `*code*` 替换为 *`code`*
-        lambda el: re.sub(r"`\s*\[([^\]]+)\]\(([^)]+)\)\s*`", r"[`\1`](\2)", el) # 纠正不规范格式 `[code](url)` 替换为 [`code`](url)
+        lambda el: re.sub(r"`\s*\[([^\]]+)\]\(([^)]+)\)\s*`", r"[`\1`](\2)", el), # 纠正不规范格式 `[code](url)` 替换为 [`code`](url)
+        lambda el: re.sub(r"\\\((.+?)\\\)", r"$\1$", el), # 将 \( ... \) 替换为 $ ... $
+        lambda el: re.sub(r"\\\[(.+?)\\\]", r"$$\1$$", el), # 将 \[ ... \] 替换为 $$ ... $$
     ]
 
     INLINE_ELEMENTS = [
