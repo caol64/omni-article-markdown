@@ -1,7 +1,11 @@
 import re
 from bs4 import BeautifulSoup, element, NavigableString
 import requests
+import importlib
+import pkgutil
+from pathlib import Path
 
+from .extractor import Extractor
 from .utils import (
     Constants,
     is_sequentially_increasing,
@@ -17,6 +21,7 @@ class HtmlMarkdownParser:
     def __init__(self, raw_html: str):
         self.raw_html = raw_html
         self.soup = BeautifulSoup(self.raw_html, "html5lib")
+        self.extractors = self.load_extractors()
         self.title = None
         self.description = None
         self.url = None
@@ -229,7 +234,11 @@ class HtmlMarkdownParser:
         self.url = og_url["content"].strip() if og_url and "content" in og_url.attrs else None
 
     def extract_article(self) -> element:
-        for e in Constants.ARTICLE_CONTAINERS:
+        article_containers = []
+        for extract in self.extractors:
+            article_containers.append(extract.extract())
+        article_containers.extend(Constants.ARTICLE_CONTAINERS)
+        for e in article_containers:
             article = self._extract_article(e)
             if article:
                 return article
@@ -240,3 +249,14 @@ class HtmlMarkdownParser:
             return self.soup.find(template[0], attrs=template[1])
         else:
             return self.soup.find(template[0])
+
+    def load_extractors(self, package_name="extractors") -> list[Extractor]:
+        extractors_package = Path(__file__).parent / package_name
+        extractors = []
+        for loader, module_name, is_pkg in pkgutil.iter_modules([extractors_package.resolve()]):
+            module = importlib.import_module(f"omni_article_markdown.{package_name}.{module_name}")
+            for attr in dir(module):
+                cls = getattr(module, attr)
+                if isinstance(cls, type) and issubclass(cls, Extractor) and cls is not Extractor:
+                    extractors.append(cls())
+        return extractors

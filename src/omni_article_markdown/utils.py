@@ -24,12 +24,6 @@ class Constants:
     LB_SYMBOL = "[|lb_bl|]"
 
     ARTICLE_CONTAINERS = [
-        ("div", {"class": "main-content"}), # Freedium
-        ("div", {"id": "page-content"}), # 公众号
-        ("div", {"class": "post-content"}), # Hugo
-        ("div", {"class": "article-content"}), # 头条
-        ("div", {"class": "Post-RichText"}), # 知乎专栏
-        ("div", {"id": "postBody"}), # quantamagazine
         ("article", None),
         ("main", None),
         ("body", None)
