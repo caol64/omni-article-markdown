@@ -6,4 +6,5 @@ DEFAULT_PLUGINS = {
     "zhihu": "omnimd-zhihu-reader",
     "freedium": "omnimd-freedium-reader",
     "toutiao": "omnimd-toutiao-reader",
+    "appledev": "omnimd-appledev-reader",
 }

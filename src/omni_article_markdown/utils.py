@@ -1,6 +1,7 @@
 import re
 from urllib.parse import urlparse
 from typing import Optional
+from bs4 import BeautifulSoup, element
 
 
 REQUEST_HEADERS = {
@@ -30,16 +31,13 @@ class Constants:
     ]
 
     TAGS_TO_CLEAN = [
-        lambda el: el.name in ("style", "link", "button", "footer", "header", "aside"),
-        lambda el: el.name == "script" and "src" not in el.attrs,
-        lambda el: el.name == "script" and "src" in el.attrs and not el.attrs["src"].startswith("https://gist.github.com"),
+        lambda el: el.name in ("style", "link", "button", "footer", "header", "aside", "script"),
+        # lambda el: el.name == "script" and "src" not in el.attrs,
+        # lambda el: el.name == "script" and "src" in el.attrs and not el.attrs["src"].startswith("https://gist.github.com"),
     ]
 
     ATTRS_TO_CLEAN = [
         lambda el: 'style' in el.attrs and re.search(r'display\s*:\s*none', el.attrs['style'], re.IGNORECASE),
-        lambda el: 'id' in el.attrs and el.attrs['id'] == 'meta_content', # 公众号
-        lambda el: 'data-testid' in el.attrs, # Medium
-        lambda el: 'class' in el.attrs and 'speechify-ignore' in el.attrs['class'], # Medium
         lambda el: 'hidden' in el.attrs,
         lambda el: 'class' in el.attrs and 'katex-html' in el.attrs['class'], # katex
     ]
@@ -123,3 +121,10 @@ def extract_domain(url: str) -> Optional[str]:
 def detect_language(file_name: str, code: str) -> str:
     # TODO: 添加语言检测逻辑
     return ''
+
+
+def extract_article_from_soup(soup: BeautifulSoup, template: tuple) -> element.Tag:
+    if template[1] is not None:
+        return soup.find(template[0], attrs=template[1])
+    else:
+        return soup.find(template[0])

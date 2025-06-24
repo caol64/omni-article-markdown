@@ -16,7 +16,7 @@ dependencies = [
 freedium = "omnimd_freedium_reader.reader"
 
 [project.urls]
-Homepage = "https://github.com/caol64/omni-article-markdown/tree/main/plugins/omnimd_freedium_reader"
+Homepage = "https://github.com/caol64/omni-article-markdown/tree/main/plugins/omnimd-freedium-reader"
 
 [build-system]
 requires = ["hatchling"]

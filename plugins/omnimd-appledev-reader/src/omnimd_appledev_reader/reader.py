@@ -1,5 +1,4 @@
 import sys
-import importlib
 from typing import Optional
 from omni_article_markdown.hookspecs import hookimpl, ReaderPlugin
 from omni_article_markdown.utils import REQUEST_HEADERS
@@ -7,9 +6,9 @@ from playwright.sync_api import sync_playwright
 from runpy import run_module
 
 
-class FreediumReader(ReaderPlugin):
+class AppleDevelopReader(ReaderPlugin):
     def can_handle(self, url: str) -> bool:
-        return "freedium.cfd" in url
+        return "developer.apple.com/documentation/" in url
 
     def read(self, url: str) -> str:
         def try_launch_browser(p):
@@ -35,8 +34,6 @@ class FreediumReader(ReaderPlugin):
                 java_script_enabled=True,
                 extra_http_headers=REQUEST_HEADERS,
             )
-            with importlib.resources.path("omni_article_markdown.libs", "stealth.min.js") as js_path:
-                context.add_init_script(path=str(js_path))
             page = context.new_page()
             page.goto(url, wait_until="networkidle")
             html = page.content()
@@ -48,10 +45,10 @@ class FreediumReader(ReaderPlugin):
 
 
 # 实例化插件
-freedium_plugin_instance = FreediumReader()
+appledev_plugin_instance = AppleDevelopReader()
 
 @hookimpl
 def get_custom_reader(url: str) -> Optional[ReaderPlugin]:
-    if freedium_plugin_instance.can_handle(url):
-        return freedium_plugin_instance
+    if appledev_plugin_instance.can_handle(url):
+        return appledev_plugin_instance
     return None

@@ -15,7 +15,6 @@ class ToutiaoReader(ReaderPlugin):
         return "toutiao.com" in url
 
     def read(self, url: str) -> str:
-        # print(f"Using ToutiaoReader for: {url}")
         store = Store()
         cookies_raw = store.load("toutiao_cookies")
 

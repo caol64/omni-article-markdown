@@ -176,13 +176,14 @@ mdcli uninstall omnimd-zhihu-reader
 
 ### 已支持的插件
 
-目前已发布3个插件，你可以按需安装：
+目前已发布4个插件，你可以按需安装：
 
 | 命令                             | 说明                                                     |
 |----------------------------------|----------------------------------------------------------|
 | `mdcli install zhihu`              | 知乎专栏 |
 | `mdcli install toutiao`            | 今日头条                         |
 | `mdcli install freedium`           | Freedium                         |
+| `mdcli install appledev`           | Apple Developer Documentation                         |
 
 ### 开发自己的插件
 

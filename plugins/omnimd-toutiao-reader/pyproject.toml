@@ -16,7 +16,7 @@ dependencies = [
 toutiao = "omnimd_toutiao_reader.reader"
 
 [project.urls]
-Homepage = "https://github.com/caol64/omni-article-markdown/tree/main/plugins/omnimd_toutiao_reader"
+Homepage = "https://github.com/caol64/omni-article-markdown/tree/main/plugins/omnimd-toutiao-reader"
 
 [build-system]
 requires = ["hatchling"]
