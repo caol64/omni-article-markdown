@@ -6,130 +6,83 @@
 
 ---
 
-## Recent changes:
-
-- extractor模块化，将提取逻辑按网站分割，便于维护和社区贡献。
-- 添加插件机制，复杂的页面可以通过插件进行扩展
-- 添加对github gist的支持
-  - 示例：https://towardsdatascience.com/hands-on-multi-agent-llm-restaurant-simulation-with-python-and-openai
-- 添加对katex公式的支持
-  - 示例：https://quantum.country/qcvc
-
----
-
-## 功能介绍
+## 项目简介
 墨探的开发初衷，是为了解决一个问题：如何将来自互联网上各种不同网站的文章内容，精准且高效地转换成统一的Markdown格式。
 
 众所周知，万维网上的网站设计风格迥异，其HTML结构也呈现出千差万别的特点。这种多样性给自动化内容提取和格式转换带来了巨大的困难。要实现一个能够适应各种复杂HTML结构的通用解决方案，并非易事。
 
-我的想法是：从特定的网站开始适配，以点到面，逐步抽取出通用的解决方案，最后尽可能多的覆盖更多网站。以下是一些我经常访问的的网站，支持的都不错：
-
-- 掘金
-- CSDN
-- Medium
-- Freedium
-- 公众号
-- 简书
-- 知乎专栏
-- 今日头条
-- towardsdatascience
-- quantamagazine
+我的想法是：从特定的网站开始适配，以点到面，逐步抽取出通用的解决方案，最后尽可能多的覆盖更多网站。
 
 ---
 
-## 架构设计
+## 功能介绍
 
-![](data/1.jpg)
+- 支持大部分 html 元素转换
+- 部分页面支持katex公式转换（示例：https://quantum.country/qcvc）
+- 部分页面支持github gist（示例：https://towardsdatascience.com/hands-on-multi-agent-llm-restaurant-simulation-with-python-and-openai）
+- 支持保存成文件或输出至`stdout`
+- 支持突破某些网站的防爬虫策略（需安装插件）
 
-墨探主要分为三个模块：
+以下是一些网站示例，大家可以自己测试下效果。
 
-- **Reader** 模块的功能是读取整个网页内容
-- **Extractor** 模块的功能是提取正文内容，清理无用数据
-- **Parser** 模块的功能是将 HTML 转换为 Markdown
+|站点|链接|备注|
+--|--|--
+|Medium|[link](https://medium.com/perry-street-software-engineering/architectural-linting-for-swift-made-easy-75d7f9f569cd)||
+|csdn|[link](https://blog.csdn.net/weixin_41705306/article/details/148787220?spm=1000.2115.3001.10524)||
+|掘金|[link](https://juejin.cn/post/7405845617282449462)||
+|知乎专栏|[link](https://zhuanlan.zhihu.com/p/1915735485801828475)|需安装插件|
+|公众号|[link](https://mp.weixin.qq.com/s/imHIKy7dqMmpm032eIhIJg)||
+|今日头条|[link](https://www.toutiao.com/article/7518606377116336667/?log_from=731d72141e4128_1750818145306)|需安装插件|
+|网易|[link](https://www.163.com/dy/article/K2SPPGSK0514R9KE.html?clickfrom=w_yw)||
+|简书|[link](https://www.jianshu.com/p/20bd2e9b1f03)||
+|Freedium|[link](https://freedium.cfd/https://medium.com/@devlink/ai-killed-my-coding-brain-but-im-rebuilding-it-8de7e1618bca)|需安装插件|
+|Towards Data Science|[link](https://towardsdatascience.com/hands-on-multi-agent-llm-restaurant-simulation-with-python-and-openai/)||
+|Quantamagazine|[link](https://www.quantamagazine.org/matter-vs-force-why-there-are-exactly-two-types-of-particles-20250623/)||
+|Apple Developer Documentation|[link](https://developer.apple.com/documentation/technologyoverviews/adopting-liquid-glass)|需安装插件|
+
+---
 
 ## 快速开始
 
-1. 安装主程序
+1. 安装
 
 ```sh
 pip install omni-article-markdown
 ```
 
-2. 安装插件（可选）
+2. 运行说明
 
-```sh
-mdcli install zhihu
-```
+**仅转换**
 
-3. 运行命令：
-
-```sh
-mdcli https://zhuanlan.zhihu.com/p/123456789
-```
-
-### 参数说明
-
-运行命令及参数如下：
-
-```sh
-mdcli <URL_OR_PATH> [-s [SAVE_PATH]]
-```
-
-| 参数               | 说明 |
-|--------------------|------|
-| `URL_OR_PATH`     | **必填**，目标网页 URL 或本地 HTML 文件路径。 |
-| `-s, --save`      | **可选**，启用保存：<br> - 仅 `-s`：默认保存至 `./`。<br> - `-s <SAVE_PATH>`：保存至指定路径。 |
-
----
-
-## 使用示例
-
-### 仅转换
 ```sh
 mdcli https://example.com
 ```
 
-内容会输出值`stdout`。
-
-### 转换并保存到当前目录
+**保存到当前目录**
 
 ```sh
 mdcli https://example.com -s
 ```
 
-会在当前目录生成一个`<title>.md`的文件。
-
-### 转换并保存到指定路径
+**保存到指定路径**
 
 ```sh
 mdcli https://example.com -s /home/user/
 ```
 
-会在`/home/user/`目录生成一个`<title>.md`的文件。
-
-```sh
-mdcli https://example.com -s /home/user/data.md
-```
-
-会生成一个`/home/user/data.md`的文件。
-
 ---
 
-## 安装和使用插件
+## 插件机制
 
 [「墨探」是如何使用插件机制构建可扩展架构的](https://babyno.top/posts/2025/06/a-deep-dive-into-the-extensible-architecture-of-omni-article-markdown/)
 
-**安装命令格式：**
+**安装插件**
+
+安装插件和`pip`命令格式相同：
 
 ```sh
 mdcli install <PLUGIN_NAME_OR_PACKAGE_NAME> [-U] [-e]
 ```
-
-| 参数                             | 说明                                                                 |
-|----------------------------------|----------------------------------------------------------------------|
-| `<PLUGIN_NAME_OR_PACKAGE_NAME>` | **必填**，插件的名称或其在 PyPI 上的完整包名。 |
-| `-U, --upgrade`                  | **可选**，如果插件已安装，则尝试升级到最新版本。                          |
-| `-e, --editable`                  | **可选**，基于提供的本地文件路径安装可编辑的包。                          |
 
 **示例：安装知乎解析插件**
 
@@ -143,24 +96,15 @@ mdcli install zhihu
 mdcli install -e "./plugins/omnimd-zhihu-reader"
 ```
 
-安装成功后，当下一次运行 `mdcli` 解析知乎链接时，如果该插件正确实现了接口，它将被自动用于处理该链接。
-
-### 如何卸载插件？
-
-如果你想移除一个已安装的插件，可以使用 `mdcli` 提供的 `uninstall` 命令。
-
-**卸载命令格式：**
+**升级插件**
 
 ```sh
-mdcli uninstall <PLUGIN_NAME_OR_PACKAGE_NAME> [-y]
+mdcli install zhihu -U
 ```
 
-| 参数                             | 说明                                                     |
-|----------------------------------|----------------------------------------------------------|
-| `<PLUGIN_NAME_OR_PACKAGE_NAME>` | **必填**，要卸载的插件的名称或其在 PyPI 上的完整包名。 |
-| `-y, --yes`                      | **可选**，在卸载前不进行确认提示。                         |
+**卸载插件**
 
-**示例：卸载知乎解析插件**
+如果你想移除一个已安装的插件，可以使用 `mdcli` 提供的 `uninstall` 命令。
 
 ```sh
 mdcli uninstall zhihu
@@ -172,9 +116,7 @@ mdcli uninstall zhihu
 mdcli uninstall omnimd-zhihu-reader
 ```
 
-卸载后，该插件的功能将不再可用。对于之前由该插件处理的 URL，`mdcli` 将会回退到其默认的解析逻辑。
-
-### 已支持的插件
+**已支持的插件**
 
 目前已发布4个插件，你可以按需安装：
 
@@ -185,7 +127,20 @@ mdcli uninstall omnimd-zhihu-reader
 | `mdcli install freedium`           | Freedium                         |
 | `mdcli install appledev`           | Apple Developer Documentation                         |
 
-### 开发自己的插件
+**开发自己的插件**
+
+文档编写中。
+
+
+## 架构说明
+
+![](data/1.jpg)
+
+墨探主要分为三个模块：
+
+- **Reader** 模块的功能是读取整个网页内容
+- **Extractor** 模块的功能是提取正文内容，清理无用数据
+- **Parser** 模块的功能是将 HTML 转换为 Markdown
 
 ---
 

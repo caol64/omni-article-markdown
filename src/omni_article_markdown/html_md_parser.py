@@ -120,7 +120,9 @@ class HtmlMarkdownParser:
                             parts.append(result)
                         # print(element.name, level, result)
                 else:
-                    parts.append(self._process_element(child, new_level, is_pre=is_pre))
+                    result = self._process_element(child, new_level, is_pre=is_pre)
+                    if is_pre or len(result.replace(Constants.LB_SYMBOL, "")) != 0:
+                        parts.append(result)
         return ''.join(parts) if is_pre or level > 0 else ''.join(parts).strip()
 
     def _process_list(self, element: element.Tag, level: int) -> str:
@@ -132,11 +134,25 @@ class HtmlMarkdownParser:
         return f'\n{"\n".join(parts)}' if level > 0 else "\n".join(parts)
 
     def _process_codeblock(self, element: element.Tag, level: int) -> str:
-        code_element = element.find("code") or element
-        code = self._process_children(code_element, level, is_pre=True).replace(Constants.LB_SYMBOL, "\n")
+        # 找出所有 code 标签（可能为 0 个、1 个或多个）
+        code_elements = element.find_all("code") or [element]
+
+        # 处理每一个 code 标签并拼接
+        code_parts = [
+            self._process_children(code_el, level, is_pre=True).replace(Constants.LB_SYMBOL, "\n")
+            for code_el in code_elements
+        ]
+        code = "\n".join(code_parts).strip()
+
         if is_sequentially_increasing(code):
-            return ''  # 如果代码块中的内容是连续递增的数字（极有可能是行号），则不输出代码块
-        language = next((cls.split('-')[1] for cls in (code_element.get("class") or []) if cls.startswith("language-")), "")
+            return ''  # 忽略行号
+
+        # 尝试提取语言：从第一个 code 标签的 class 中提取 language
+        first_code_el = code_elements[0]
+        language = next(
+            (cls.split('-')[1] for cls in (first_code_el.get("class") or []) if cls.startswith("language-")),
+            ""
+        )
         if not language:
             language = detect_language(None, code)
         return f"```{language}\n{code}\n```" if language else f"```\n{code}\n```"
@@ -154,7 +170,7 @@ class HtmlMarkdownParser:
         body = [[td.get_text(strip=True) for td in row.find_all("td")] for row in rows]
         # 处理缺失的表头
         if not headers and body:
-            headers = ["Column " + str(i+1) for i in range(len(body[0]))]
+            headers = body.pop(0)
         # 统一列数
         col_count = max(len(headers), max((len(row) for row in body), default=0))
         headers += [""] * (col_count - len(headers))

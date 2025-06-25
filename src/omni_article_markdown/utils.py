@@ -31,9 +31,9 @@ class Constants:
     ]
 
     TAGS_TO_CLEAN = [
-        lambda el: el.name in ("style", "link", "button", "footer", "header", "aside", "script"),
-        # lambda el: el.name == "script" and "src" not in el.attrs,
-        # lambda el: el.name == "script" and "src" in el.attrs and not el.attrs["src"].startswith("https://gist.github.com"),
+        lambda el: el.name in ("style", "link", "button", "footer", "header", "aside"),
+        lambda el: el.name == "script" and "src" not in el.attrs,
+        lambda el: el.name == "script" and "src" in el.attrs and not el.attrs["src"].startswith("https://gist.github.com"),
     ]
 
     ATTRS_TO_CLEAN = [
@@ -56,7 +56,7 @@ class Constants:
     ]
 
     BLOCK_ELEMENTS = [
-        "p", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "blockquote", "pre", "picture", "hr", "figcaption"
+        "p", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "blockquote", "pre", "picture", "hr", "figcaption", "table", "section"
     ]
 
     TRUSTED_ELEMENTS = INLINE_ELEMENTS + BLOCK_ELEMENTS
