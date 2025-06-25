@@ -131,6 +131,7 @@ mdcli uninstall omnimd-zhihu-reader
 
 文档编写中。
 
+---
 
 ## 架构说明
 
