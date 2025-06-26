@@ -1,7 +1,7 @@
 import re
 from urllib.parse import urlparse
 from typing import Optional
-from bs4 import BeautifulSoup, element
+from bs4 import BeautifulSoup, element, NavigableString
 
 
 REQUEST_HEADERS = {
@@ -73,6 +73,15 @@ def is_sequentially_increasing(code: str) -> bool:
 
 def is_block_element(element_name: str) -> bool:
     return element_name in Constants.BLOCK_ELEMENTS
+
+def is_pure_block_children(element: element.Tag) -> bool:
+    for child in element.children:
+        if isinstance(child, NavigableString):
+            if child.strip():  # 有非空文本
+                return False
+        elif not is_block_element(child.name):
+            return False
+    return True
 
 def move_spaces(input_string: str, suffix: str) -> str:
     # 使用正则表达式匹配以指定的suffix结尾，且suffix之前有空格的情况

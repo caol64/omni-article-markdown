@@ -14,6 +14,7 @@ from .utils import (
     detect_language,
     collapse_spaces,
     extract_domain,
+    is_pure_block_children,
 )
 
 class HtmlMarkdownParser:
@@ -103,7 +104,8 @@ class HtmlMarkdownParser:
             parts.append(self._process_children(element, level, is_pre=is_pre))
         result = ''.join(parts)
         if result and is_block_element(element.name):
-            result = f"{Constants.LB_SYMBOL}{result}{Constants.LB_SYMBOL}"
+            if not is_pure_block_children(element):
+                result = f"{Constants.LB_SYMBOL}{result}{Constants.LB_SYMBOL}"
         return result
 
     def _process_children(self, element: element.Tag, level: int = 0, is_pre: bool = False) -> str:
@@ -129,8 +131,14 @@ class HtmlMarkdownParser:
         indent = "    " * level
         li_list = element.find_all("li", recursive=False)
         is_ol = element.name == "ol"
-        parts = [f"{indent}{f'{i + 1}.' if is_ol else '-'} {self._process_children(li, level).replace(Constants.LB_SYMBOL, "")}" for i, li in enumerate(li_list)]
-        # print(level, parts)
+        parts = []
+        for i, li in enumerate(li_list):
+            content = self._process_children(li, level).replace(Constants.LB_SYMBOL, "").strip()
+            if content:  # 忽略空内容
+                prefix = f"{i + 1}." if is_ol else "-"
+                parts.append(f"{indent}{prefix} {content}")
+        if not parts:
+            return ""  # 所有内容都为空则返回空字符串
         return f'\n{"\n".join(parts)}' if level > 0 else "\n".join(parts)
 
     def _process_codeblock(self, element: element.Tag, level: int) -> str:
