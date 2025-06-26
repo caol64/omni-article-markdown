@@ -9,7 +9,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 license = "MIT"
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
     "Intended Audience :: Developers",
     "Intended Audience :: End Users/Desktop",
