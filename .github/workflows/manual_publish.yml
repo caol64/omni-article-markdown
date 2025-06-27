@@ -1,15 +1,10 @@
-name: Build Plugins and Publish to PyPI
+name: Build and Publish to PyPI
 
 on:
   workflow_dispatch:
-    inputs:
-      package_path:
-        description: 'Path to plugin directory (relative to repo root)'
-        required: true
-        default: '.'
 
 jobs:
-  omnimd-plugin-publish:
+  omnimd-publish:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,7 +20,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-${{ github.event.inputs.package_path }}-pip-${{ hashFiles('pyproject.toml') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('pyproject.toml') }}
 
       - name: Install Hatch
         run: |
@@ -36,6 +31,5 @@ jobs:
           HATCH_INDEX_USER: __token__
           HATCH_INDEX_AUTH: ${{ secrets.PYPI_TOKEN }}
         run: |
-          cd "${{ github.event.inputs.package_path }}"
           hatch build --clean
           hatch publish --yes --no-prompt

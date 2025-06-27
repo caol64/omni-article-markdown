@@ -26,13 +26,12 @@ jobs:
 
       - name: Install Hatch
         run: |
-          python -m pip install --upgrade pip
-          pip install hatch
+          pip install -U hatch hatchling
 
       - name: Build and publish with Hatch
         env:
           HATCH_INDEX_USER: __token__
           HATCH_INDEX_AUTH: ${{ secrets.PYPI_TOKEN }}
         run: |
-          hatch build
-          hatch publish
+          hatch build --clean
+          hatch publish --yes --no-prompt
