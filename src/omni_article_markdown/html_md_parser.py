@@ -111,7 +111,7 @@ class HtmlMarkdownParser:
     def _process_children(self, element: element.Tag, level: int = 0, is_pre: bool = False) -> str:
         parts = []
         if element.children:
-            new_level = level + 1 if element.name in Constants.TRUSTED_ELEMENTS else level
+            # new_level = level + 1 if element.name in Constants.TRUSTED_ELEMENTS else level
             for child in element.children:
                 if isinstance(child, NavigableString):
                     if is_pre:
@@ -122,24 +122,30 @@ class HtmlMarkdownParser:
                             parts.append(result)
                         # print(element.name, level, result)
                 else:
-                    result = self._process_element(child, new_level, is_pre=is_pre)
+                    result = self._process_element(child, level, is_pre=is_pre)
                     if is_pre or len(result.replace(Constants.LB_SYMBOL, "")) != 0:
                         parts.append(result)
         return ''.join(parts) if is_pre or level > 0 else ''.join(parts).strip()
 
     def _process_list(self, element: element.Tag, level: int) -> str:
-        indent = "    " * level
-        li_list = element.find_all("li", recursive=False)
+        indent = "  " * level
+        child_list = element.find_all(recursive=False)
         is_ol = element.name == "ol"
         parts = []
-        for i, li in enumerate(li_list):
-            content = self._process_children(li, level).replace(Constants.LB_SYMBOL, "").strip()
-            if content:  # 忽略空内容
-                prefix = f"{i + 1}." if is_ol else "-"
-                parts.append(f"{indent}{prefix} {content}")
+        for i, child in enumerate(child_list):
+            if child.name == "li":
+                content = self._process_children(child, level).replace(Constants.LB_SYMBOL, "").strip()
+                if content:  # 忽略空内容
+                    prefix = f"{i + 1}." if is_ol else "-"
+                    parts.append(f"{indent}{prefix} {content}")
+            elif child.name == "ul" or child.name == "ol":
+                content = self._process_element(child, level + 1)
+                if content:  # 忽略空内容
+                    parts.append(f"{content.replace(Constants.LB_SYMBOL, "")}")
+        print(parts)
         if not parts:
             return ""  # 所有内容都为空则返回空字符串
-        return f'\n{"\n".join(parts)}' if level > 0 else "\n".join(parts)
+        return "\n".join(parts)
 
     def _process_codeblock(self, element: element.Tag, level: int) -> str:
         # 找出所有 code 标签（可能为 0 个、1 个或多个）
