@@ -142,7 +142,6 @@ class HtmlMarkdownParser:
                 content = self._process_element(child, level + 1)
                 if content:  # 忽略空内容
                     parts.append(f"{content.replace(Constants.LB_SYMBOL, "")}")
-        print(parts)
         if not parts:
             return ""  # 所有内容都为空则返回空字符串
         return "\n".join(parts)
