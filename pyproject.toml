@@ -1,6 +1,6 @@
 [project]
 name = "omni-article-markdown"
-version = "0.1.3"
+version = "0.1.5"
 description = "Easily convert web articles (blogs, news, documents, etc.) into Markdown format."
 authors = [
     { name = "Lei", email = "caol64@gmail.com" }
