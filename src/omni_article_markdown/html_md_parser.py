@@ -1,4 +1,5 @@
 import re
+from typing import Optional
 from bs4 import BeautifulSoup, element, NavigableString
 import requests
 import importlib
@@ -228,7 +229,7 @@ class HtmlMarkdownParser:
             print(f"Fetch gist error: {response.status_code}")
             return ""
 
-    def _extract_article(self) -> Article | None:
+    def _extract_article(self) -> Optional[Article]:
         for extract in self.extractors:
             article = extract.extract(self.soup)
             if article:

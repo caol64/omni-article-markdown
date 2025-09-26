@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import Optional
 from bs4 import BeautifulSoup, element
 
 from .utils import Constants, extract_article_from_soup
@@ -18,7 +19,7 @@ class Extractor(ABC):
         self.tags_to_clean = Constants.TAGS_TO_CLEAN
         self.attrs_to_clean = Constants.ATTRS_TO_CLEAN
 
-    def extract(self, soup: BeautifulSoup) -> Article | None:
+    def extract(self, soup: BeautifulSoup) -> Optional[Article]:
         if self.can_handle(soup):
             article_container = self.article_container()
             if isinstance(article_container, tuple):
@@ -26,6 +27,10 @@ class Extractor(ABC):
             for container in article_container:
                 article_tag: element.Tag = extract_article_from_soup(soup, container)
                 if article_tag:
+                    # print(f"Using extractor: {self.__class__.__name__}")
+                    h1 = article_tag.find("h1")
+                    if h1:
+                        h1.decompose()
                     for tag in article_tag.find_all():
                         if any(cond(tag) for cond in self.tags_to_clean):
                             tag.decompose()
@@ -51,17 +56,16 @@ class Extractor(ABC):
         title = og_title_tag["content"].strip() if og_title_tag and "content" in og_title_tag.attrs else None
         if title:
             return title
-        # h1 = article.find("h1", {"class": "wp-block-post-title"})
         title_tag = soup.title
         title = title_tag.text.strip() if title_tag else None
         # 确保 title 不为 None
         return title or "Untitled"
 
-    def extract_description(self, soup: BeautifulSoup) -> str | None:
+    def extract_description(self, soup: BeautifulSoup) -> Optional[str]:
         og_desc_tag = soup.find("meta", {"property": "og:description"})
         return og_desc_tag["content"].strip() if og_desc_tag and "content" in og_desc_tag.attrs else None
 
-    def get_og_site_name(self, soup: BeautifulSoup) -> str | None:
+    def get_og_site_name(self, soup: BeautifulSoup) -> Optional[str]:
         site_name_tag = soup.find("meta", {"property": "og:site_name"})
         return site_name_tag["content"].strip() if site_name_tag and site_name_tag.has_attr("content") else None
 

@@ -1,9 +1,8 @@
 name: Build and Publish to PyPI
 
 on:
-  push:
-    tags:
-      - 'v*'
+  release:
+    types: [created]
 
 jobs:
   omnimd-publish:
