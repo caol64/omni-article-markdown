@@ -1,6 +1,6 @@
 [project]
 name = "omnimd-zhihu-reader"
-version = "0.1.1"
+version = "0.1.2"
 description = "A plugin for omni-article-markdown to read Zhihu content."
 authors = [
     { name = "Lei", email = "caol64@gmail.com" }
@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.entry-points.mdcli]
-zhihu = "omnimd_zhihu_reader.reader"
+zhihu = "zhihu"
 
 [project.urls]
 Homepage = "https://github.com/caol64/omni-article-markdown/tree/main/plugins/omnimd-zhihu-reader"
@@ -27,9 +27,14 @@ exclude = [
     "/dist",
 ]
 
+[tool.hatch.build.targets.wheel]
+include = [
+    "/zhihu.py",
+]
+
 [tool.hatch.build.targets.sdist]
 include = [
-    "/src/omnimd_zhihu_reader",
+    "/zhihu.py",
     "/README.md",
     "/pyproject.toml",
 ]

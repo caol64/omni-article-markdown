@@ -1,6 +1,6 @@
 [project]
 name = "omnimd-freedium-reader"
-version = "0.1.1"
+version = "0.1.2"
 description = "A plugin for omni-article-markdown to read Freedium content."
 authors = [
     { name = "Lei", email = "caol64@gmail.com" }
@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.entry-points.mdcli]
-freedium = "omnimd_freedium_reader.reader"
+freedium = "freedium"
 
 [project.urls]
 Homepage = "https://github.com/caol64/omni-article-markdown/tree/main/plugins/omnimd-freedium-reader"
@@ -27,9 +27,14 @@ exclude = [
     "/dist",
 ]
 
+[tool.hatch.build.targets.wheel]
+include = [
+    "/freedium.py",
+]
+
 [tool.hatch.build.targets.sdist]
 include = [
-    "/src/omnimd_freedium_reader",
+    "/freedium.py",
     "/README.md",
     "/pyproject.toml",
 ]

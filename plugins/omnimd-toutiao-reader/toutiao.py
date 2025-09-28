@@ -1,5 +1,8 @@
 import sys
 from typing import Optional, Any
+
+from bs4 import BeautifulSoup
+from omni_article_markdown.extractor import Extractor
 from omni_article_markdown.hookspecs import hookimpl, ReaderPlugin
 from omni_article_markdown.utils import REQUEST_HEADERS
 from omni_article_markdown.store import Store
@@ -10,36 +13,55 @@ import importlib.resources
 import requests
 
 
-class ZhihuReader(ReaderPlugin):
+class ToutiaoExtractor(Extractor):
+    """
+    今日头条
+    """
+
+    def can_handle(self, soup: BeautifulSoup) -> bool:
+        title_tag = soup.title
+        title = title_tag.text.strip() if title_tag else None
+        return title and title.endswith(" - 今日头条")
+
+    def article_container(self) -> tuple:
+        return ("div", {"class": "article-content"})
+
+
+class ToutiaoPlugin(ReaderPlugin):
     def can_handle(self, url: str) -> bool:
-        return "zhihu.com" in url
+        return "toutiao.com" in url
 
     def read(self, url: str) -> str:
         store = Store()
-        cookies_raw = store.load("zhihu_cookies")
+        cookies_raw = store.load("toutiao_cookies")
 
         if not cookies_raw:
-            print("未找到知乎登录信息，尝试模拟登录...")
-            cookies_raw = self._get_zhihu_cookies(url)
+            print("未找到头条登录信息，尝试模拟登录...")
+            cookies_raw = self._get_toutiao_cookies(url)
             if not cookies_raw:
-                raise Exception("无法获取知乎登录信息")
+                raise Exception("无法获取头条登录信息")
 
         cookies = self._convert_playwright_cookies_to_requests_dict(cookies_raw)
         response = requests.get(url, headers=REQUEST_HEADERS, cookies=cookies)
+        response.encoding = "utf-8"
+        html = response.text
 
         # 如果初始请求失败，则尝试重新获取 cookie 并重试
-        if response.status_code == 403:
-            print("Cookie 失效，重新模拟登录知乎...")
-            cookies_raw = self._get_zhihu_cookies(url)
+        if "您需要允许该网站执行 JavaScript" in html:
+            print("Cookie 失效，重新模拟登录头条...")
+            cookies_raw = self._get_toutiao_cookies(url)
             if not cookies_raw:
-                raise Exception("重新模拟登录失败，无法访问知乎内容")
+                raise Exception("重新模拟登录失败，无法访问头条内容")
             cookies = self._convert_playwright_cookies_to_requests_dict(cookies_raw)
             response = requests.get(url, headers=REQUEST_HEADERS, cookies=cookies)
 
         response.encoding = "utf-8"
         return response.text
 
-    def _get_zhihu_cookies(self, url: str) -> list[dict[str, Any]]:
+    def extractor(self) -> Optional[Extractor]:
+        return ToutiaoExtractor()
+
+    def _get_toutiao_cookies(self, url: str) -> list[dict[str, Any]]:
         def try_launch_browser(p):
             try:
                 return p.chromium.launch(headless=True)
@@ -69,7 +91,7 @@ class ZhihuReader(ReaderPlugin):
             page.goto(url, wait_until="networkidle")
             cookies = context.cookies()
             store = Store()
-            store.save("zhihu_cookies", cookies)
+            store.save("toutiao_cookies", cookies)
             page.close()
             context.close()
             browser.close()
@@ -81,11 +103,9 @@ class ZhihuReader(ReaderPlugin):
             requests_cookies[cookie['name']] = cookie['value']
         return requests_cookies
 
-# 实例化插件
-zhihu_plugin_instance = ZhihuReader()
-
 @hookimpl
 def get_custom_reader(url: str) -> Optional[ReaderPlugin]:
-    if zhihu_plugin_instance.can_handle(url):
-        return zhihu_plugin_instance
+    plugin_instance = ToutiaoPlugin()
+    if plugin_instance.can_handle(url):
+        return plugin_instance
     return None

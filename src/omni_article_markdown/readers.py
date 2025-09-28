@@ -1,5 +1,7 @@
-from typing import Protocol
+from abc import ABC, abstractmethod
+from typing import Optional
 
+from .extractor import Extractor
 from .hookspecs import ReaderPlugin
 from .plugins import pm
 from .utils import REQUEST_HEADERS
@@ -7,9 +9,13 @@ from .utils import REQUEST_HEADERS
 import requests
 
 
-class Reader(Protocol):
+class Reader(ABC):
+    @abstractmethod
     def read(self) -> str:
         ...
+
+    def extractor(self) -> Optional[Extractor]:
+        return None
 
 
 class ReaderFactory:
@@ -23,6 +29,8 @@ class ReaderFactory:
                     self.url = url
                 def read(self) -> str:
                     return self.plugin.read(self.url)
+                def extractor(self) -> Optional[Extractor]:
+                    return self.plugin.extractor()
             return PluginReaderAdapter(custom_plugin_reader, url_or_path)
         if url_or_path.startswith("http"):
             return HtmlReader(url_or_path)

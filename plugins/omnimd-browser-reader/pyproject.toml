@@ -1,7 +1,7 @@
 [project]
-name = "omnimd-appledev-reader"
-version = "0.1.0"
-description = "A plugin for omni-article-markdown to read Apple Developer Documentation content."
+name = "omnimd-browser-reader"
+version = "0.1.1"
+description = "A plugin for omni-article-markdown to read content that needs enabling javascript."
 authors = [
     { name = "Lei", email = "caol64@gmail.com" }
 ]
@@ -13,10 +13,10 @@ dependencies = [
 ]
 
 [project.entry-points.mdcli]
-appledev = "omnimd_appledev_reader.reader"
+browser = "browser"
 
 [project.urls]
-Homepage = "https://github.com/caol64/omni-article-markdown/tree/main/plugins/omnimd-appledev-reader"
+Homepage = "https://github.com/caol64/omni-article-markdown/tree/main/plugins/omnimd-browser-reader"
 
 [build-system]
 requires = ["hatchling"]
@@ -27,9 +27,14 @@ exclude = [
     "/dist",
 ]
 
+[tool.hatch.build.targets.wheel]
+include = [
+    "/browser.py",
+]
+
 [tool.hatch.build.targets.sdist]
 include = [
-    "/src/omnimd_appledev_reader",
+    "/browser.py",
     "/README.md",
     "/pyproject.toml",
 ]

@@ -1,12 +1,8 @@
 import re
-from typing import Optional
-from bs4 import BeautifulSoup, element, NavigableString
+from bs4 import element, NavigableString
 import requests
-import importlib
-import pkgutil
-from pathlib import Path
 
-from .extractor import Article, DefaultExtractor, Extractor
+from .extractor import Article
 from .utils import (
     Constants,
     is_sequentially_increasing,
@@ -20,27 +16,23 @@ from .utils import (
 
 class HtmlMarkdownParser:
 
-    def __init__(self, raw_html: str):
-        self.raw_html = raw_html
-        self.soup = BeautifulSoup(self.raw_html, "html5lib")
-        self.extractors = self._load_extractors()
-        og_url = self.soup.find("meta", {"property": "og:url"})
-        self.url = og_url["content"].strip() if og_url and "content" in og_url.attrs else None
+    def __init__(self, article: Article, og_url: str = None):
+        self.article = article
+        self.url = og_url
 
     def parse(self) -> tuple:
-        article = self._extract_article()
-        if article:
+        if self.article:
             # print(article)
-            markdown = self._process_children(article.body)
+            markdown = self._process_children(self.article.body)
             for handler in Constants.POST_HANDLERS:
                 markdown = handler(markdown)
-            if not article.description or article.description in markdown:
+            if not self.article.description or self.article.description in markdown:
                 description = ""
             else:
-                description = f"> {article.description}\n\n"
-            result = f"# {article.title}\n\n{description}{markdown}"
+                description = f"> {self.article.description}\n\n"
+            result = f"# {self.article.title}\n\n{description}{markdown}"
             # print(result)
-            return (article.title, result)
+            return (self.article.title, result)
         return (None, None)
 
     def _process_element(self, element: element.Tag, level: int = 0, is_pre: bool = False) -> str:
@@ -228,22 +220,3 @@ class HtmlMarkdownParser:
         else:
             print(f"Fetch gist error: {response.status_code}")
             return ""
-
-    def _extract_article(self) -> Optional[Article]:
-        for extract in self.extractors:
-            article = extract.extract(self.soup)
-            if article:
-                return article
-        if not article:
-            return DefaultExtractor().extract(self.soup)
-
-    def _load_extractors(self, package_name="extractors") -> list[Extractor]:
-        extractors_package = Path(__file__).parent / package_name
-        extractors = []
-        for loader, module_name, is_pkg in pkgutil.iter_modules([extractors_package.resolve()]):
-            module = importlib.import_module(f"omni_article_markdown.{package_name}.{module_name}")
-            for attr in dir(module):
-                cls = getattr(module, attr)
-                if isinstance(cls, type) and issubclass(cls, Extractor) and cls is not Extractor:
-                    extractors.append(cls())
-        return extractors

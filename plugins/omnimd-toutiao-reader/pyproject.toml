@@ -1,6 +1,6 @@
 [project]
 name = "omnimd-toutiao-reader"
-version = "0.1.1"
+version = "0.1.2"
 description = "A plugin for omni-article-markdown to read Toutiao content."
 authors = [
     { name = "Lei", email = "caol64@gmail.com" }
@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.entry-points.mdcli]
-toutiao = "omnimd_toutiao_reader.reader"
+toutiao = "toutiao"
 
 [project.urls]
 Homepage = "https://github.com/caol64/omni-article-markdown/tree/main/plugins/omnimd-toutiao-reader"
@@ -27,9 +27,14 @@ exclude = [
     "/dist",
 ]
 
+[tool.hatch.build.targets.wheel]
+include = [
+    "/toutiao.py",
+]
+
 [tool.hatch.build.targets.sdist]
 include = [
-    "/src/omnimd_toutiao_reader",
+    "/toutiao.py",
     "/README.md",
     "/pyproject.toml",
 ]

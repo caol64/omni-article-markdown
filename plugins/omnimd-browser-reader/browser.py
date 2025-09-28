@@ -1,15 +1,15 @@
 import sys
-import importlib
 from typing import Optional
+from omni_article_markdown.extractor import Extractor
 from omni_article_markdown.hookspecs import hookimpl, ReaderPlugin
-from omni_article_markdown.utils import REQUEST_HEADERS
+from omni_article_markdown.utils import REQUEST_HEADERS, BROWSER_TARGET_HOSTS
 from playwright.sync_api import sync_playwright
 from runpy import run_module
 
 
-class FreediumReader(ReaderPlugin):
+class BrowserPlugin(ReaderPlugin):
     def can_handle(self, url: str) -> bool:
-        return "freedium.cfd" in url
+        return any(host in url for host in BROWSER_TARGET_HOSTS)
 
     def read(self, url: str) -> str:
         def try_launch_browser(p):
@@ -35,8 +35,6 @@ class FreediumReader(ReaderPlugin):
                 java_script_enabled=True,
                 extra_http_headers=REQUEST_HEADERS,
             )
-            with importlib.resources.path("omni_article_markdown.libs", "stealth.min.js") as js_path:
-                context.add_init_script(path=str(js_path))
             page = context.new_page()
             page.goto(url, wait_until="networkidle")
             html = page.content()
@@ -45,13 +43,12 @@ class FreediumReader(ReaderPlugin):
             browser.close()
         return html
 
-
-
-# 实例化插件
-freedium_plugin_instance = FreediumReader()
+    def extractor(self) -> Optional[Extractor]:
+        return None
 
 @hookimpl
 def get_custom_reader(url: str) -> Optional[ReaderPlugin]:
-    if freedium_plugin_instance.can_handle(url):
-        return freedium_plugin_instance
+    plugin_instance = BrowserPlugin()
+    if plugin_instance.can_handle(url):
+        return plugin_instance
     return None

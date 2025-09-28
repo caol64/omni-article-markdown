@@ -20,6 +20,11 @@ REQUEST_HEADERS = {
     "Upgrade-Insecure-Requests": "1"
 }
 
+BROWSER_TARGET_HOSTS = [
+    "developer.apple.com/documentation/",
+    "www.infoq.cn/",
+]
+
 class Constants:
 
     LB_SYMBOL = "[|lb_bl|]"

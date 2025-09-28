@@ -125,7 +125,7 @@ mdcli uninstall omnimd-zhihu-reader
 | `mdcli install zhihu`              | 知乎专栏 |
 | `mdcli install toutiao`            | 今日头条                         |
 | `mdcli install freedium`           | Freedium                         |
-| `mdcli install appledev`           | Apple Developer Documentation                         |
+| `mdcli install browser`           | 需要启用浏览器的JS功能才能访问的页面（如Apple Developer Documentation）                         |
 
 **开发自己的插件**
 
