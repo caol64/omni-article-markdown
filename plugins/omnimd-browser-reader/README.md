@@ -1,1 +1,1 @@
-# 墨探 (omni-article-markdown) Apple Developer Documentation 插件
+# 墨探 (omni-article-markdown) 浏览器插件
