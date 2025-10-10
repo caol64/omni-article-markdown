@@ -1,5 +1,7 @@
+from typing import override
 from bs4 import BeautifulSoup
-from ..extractor import Extractor
+
+from ..extractor import Extractor, get_og_site_name
 
 
 class QuantamagazineExtractor(Extractor):
@@ -13,8 +15,10 @@ class QuantamagazineExtractor(Extractor):
             lambda el: 'class' in el.attrs and 'post__title__title' in el.attrs['class'],
         ])
 
+    @override
     def can_handle(self, soup: BeautifulSoup) -> bool:
-        return self.get_og_site_name(soup) == "Quanta Magazine"
+        return get_og_site_name(soup) == "Quanta Magazine"
 
+    @override
     def article_container(self) -> tuple:
         return ("div", {"id": "postBody"})

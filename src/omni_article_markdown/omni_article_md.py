@@ -1,89 +1,76 @@
-from dataclasses import dataclass
 import importlib
-from pathlib import Path
 import pkgutil
-from typing import Optional
-
-from bs4 import BeautifulSoup
+from dataclasses import dataclass
+from pathlib import Path
 
 from .extractor import Article, DefaultExtractor, Extractor
-from .readers import Reader, ReaderFactory
 from .html_md_parser import HtmlMarkdownParser
+from .readers import ReaderFactory
 from .utils import to_snake_case
 
 
 @dataclass
-class Context:
-    url_or_path: str
-    reader: Optional[Reader] = None
-    extractor: Optional[Extractor] = None
-    raw_html: Optional[str] = None
-    og_url: Optional[str] = None
-    article: Optional[Article] = None
-    title: Optional[str] = None
-    markdown: Optional[str] = None
+class ReaderContext:
+    extractor: Extractor | None
+    raw_html: str
+
+
+@dataclass
+class ExtractorContext:
+    article: Article
+
+
+@dataclass
+class ParserContext:
+    title: str
+    markdown: str
 
 
 class OmniArticleMarkdown:
-
     DEFAULT_SAVE_PATH = "./"
 
     def __init__(self, url_or_path: str):
         self.url_or_path = url_or_path
-        self.title = None
-        self.markdown = None
-        self.save_path = None
 
-    def parse(self) -> str:
-        context = Context(url_or_path=self.url_or_path)
-        steps = [
-            self._create_reader,
-            self._read_html,
-            self._extract_article,
-            self._parse_html,
-        ]
-        for step in steps:
-            step(context)
-        self.title = context.title
-        self.markdown = context.markdown
-        return self.markdown
+    def parse(self) -> ParserContext:
+        reader_ctx = self._read_html(self.url_or_path)
+        extractor_ctx = self._extract_article(reader_ctx)
+        parser_ctx = self._parse_html(extractor_ctx)
+        return parser_ctx
 
-    def save(self, save_path: str = None):
+    def save(self, ctx: ParserContext, save_path: str = "") -> str:
         save_path = save_path or self.DEFAULT_SAVE_PATH
         file_path = Path(save_path)
         if file_path.is_dir():
-            filename = f"{to_snake_case(self.title)}.md"
+            filename = f"{to_snake_case(ctx.title)}.md"
             file_path = file_path / filename
         with file_path.open("w", encoding="utf-8") as f:
-            f.write(self.markdown)
-        self.save_path = str(file_path.resolve())
+            f.write(ctx.markdown)
+        return str(file_path.resolve())
 
-    def _create_reader(self, ctx: Context):
-        ctx.reader = ReaderFactory.create(ctx.url_or_path)
-        ctx.extractor = ctx.reader.extractor()
+    def _read_html(self, url_or_path: str) -> ReaderContext:
+        reader = ReaderFactory.create(url_or_path)
+        raw_html = reader.read()
+        return ReaderContext(extractor=reader.extractor(), raw_html=raw_html)
 
-    def _read_html(self, ctx: Context):
-        ctx.raw_html = ctx.reader.read()
-        print(ctx.raw_html)
-
-    def _extract_article(self, ctx: Context):
-        soup = BeautifulSoup(ctx.raw_html, "html5lib")
-        og_url = soup.find("meta", {"property": "og:url"})
-        ctx.og_url = og_url["content"].strip() if og_url and "content" in og_url.attrs else None
+    def _extract_article(self, ctx: ReaderContext) -> ExtractorContext:
         if ctx.extractor:
-            ctx.article = ctx.extractor.extract(soup)
+            article = ctx.extractor.extract(ctx.raw_html)
         else:
             for extract in load_extractors():
-                article = extract.extract(soup)
+                article = extract.extract(ctx.raw_html)
                 if article:
-                    ctx.article = article
                     break
             else:
-                ctx.article = DefaultExtractor().extract(soup)
+                article = DefaultExtractor().extract(ctx.raw_html)
+        if not article:
+            raise ValueError("Failed to extract article content.")
+        return ExtractorContext(article=article)
 
-    def _parse_html(self, ctx: Context):
-        parser = HtmlMarkdownParser(ctx.article, ctx.og_url)
-        ctx.title, ctx.markdown = parser.parse()
+    def _parse_html(self, ctx: ExtractorContext) -> ParserContext:
+        parser = HtmlMarkdownParser(ctx.article)
+        result = parser.parse()
+        return ParserContext(title=result[0], markdown=result[1])
 
 
 def load_extractors(package_name="extractors") -> list[Extractor]:

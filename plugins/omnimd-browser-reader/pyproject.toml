@@ -1,6 +1,6 @@
 [project]
 name = "omnimd-browser-reader"
-version = "0.1.1"
+version = "0.1.2"
 description = "A plugin for omni-article-markdown to read content that needs enabling javascript."
 authors = [
     { name = "Lei", email = "caol64@gmail.com" }

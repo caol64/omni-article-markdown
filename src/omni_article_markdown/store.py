@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class Store:
@@ -13,7 +13,7 @@ class Store:
         with open(file_path, "w", encoding="utf8") as f:
             json.dump(obj, f, indent=4, ensure_ascii=False)
 
-    def load(self, key: str) -> Optional[Any]:
+    def load(self, key: str) -> Any | None:
         file_path = self.path / f"{key}.json"
         if not file_path.exists() or not file_path.is_file():
             return None

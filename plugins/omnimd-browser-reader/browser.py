@@ -1,18 +1,22 @@
 import sys
-from typing import Optional
-from omni_article_markdown.extractor import Extractor
-from omni_article_markdown.hookspecs import hookimpl, ReaderPlugin
-from omni_article_markdown.utils import REQUEST_HEADERS, BROWSER_TARGET_HOSTS
-from playwright.sync_api import sync_playwright
 from runpy import run_module
+from typing import override
+
+from playwright.sync_api import sync_playwright, Playwright, Browser
+
+from omni_article_markdown.extractor import Extractor
+from omni_article_markdown.hookspecs import ReaderPlugin, hookimpl
+from omni_article_markdown.utils import BROWSER_TARGET_HOSTS, REQUEST_HEADERS
 
 
 class BrowserPlugin(ReaderPlugin):
+    @override
     def can_handle(self, url: str) -> bool:
         return any(host in url for host in BROWSER_TARGET_HOSTS)
 
+    @override
     def read(self, url: str) -> str:
-        def try_launch_browser(p):
+        def try_launch_browser(p: Playwright) -> Browser:
             try:
                 return p.chromium.launch(headless=True)
             except Exception as e:
@@ -28,6 +32,7 @@ class BrowserPlugin(ReaderPlugin):
                     return p.chromium.launch(headless=True)
                 else:
                     raise  # re-raise other exceptions
+
         with sync_playwright() as p:
             browser = try_launch_browser(p)
             context = browser.new_context(
@@ -43,11 +48,13 @@ class BrowserPlugin(ReaderPlugin):
             browser.close()
         return html
 
-    def extractor(self) -> Optional[Extractor]:
+    @override
+    def extractor(self) -> Extractor | None:
         return None
 
+
 @hookimpl
-def get_custom_reader(url: str) -> Optional[ReaderPlugin]:
+def get_custom_reader(url: str) -> ReaderPlugin | None:
     plugin_instance = BrowserPlugin()
     if plugin_instance.can_handle(url):
         return plugin_instance

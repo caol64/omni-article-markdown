@@ -1,5 +1,7 @@
+from typing import override
 from bs4 import BeautifulSoup
-from ..extractor import Extractor
+
+from ..extractor import Extractor, get_og_site_name
 
 
 class AppleDevelopExtractor(Extractor):
@@ -15,8 +17,10 @@ class AppleDevelopExtractor(Extractor):
             lambda el: 'class' in el.attrs and 'title' in el.attrs['class'],
         ])
 
+    @override
     def can_handle(self, soup: BeautifulSoup) -> bool:
-        return self.get_og_site_name(soup) == "Apple Developer Documentation"
+        return get_og_site_name(soup) == "Apple Developer Documentation"
 
+    @override
     def article_container(self) -> tuple:
         return ("main", {"class": "main"})

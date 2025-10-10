@@ -1,5 +1,7 @@
+from typing import override
 from bs4 import BeautifulSoup
-from ..extractor import Extractor
+
+from ..extractor import Extractor, is_matched_canonical
 
 
 class Netease163Extractor(Extractor):
@@ -7,10 +9,10 @@ class Netease163Extractor(Extractor):
     163.com
     """
 
+    @override
     def can_handle(self, soup: BeautifulSoup) -> bool:
-        canonical_tag = soup.find("link", {"rel": "canonical"})
-        canonical = canonical_tag["href"].strip() if canonical_tag and canonical_tag.has_attr("href") else None
-        return canonical and canonical.startswith("https://www.163.com")
+        return is_matched_canonical("https://www.163.com", soup)
 
+    @override
     def article_container(self) -> tuple:
         return ("div", {"class": "post_body"})

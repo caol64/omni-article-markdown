@@ -18,8 +18,8 @@
 ## 功能介绍
 
 - 支持大部分 html 元素转换
-- 部分页面支持katex公式转换（示例：https://quantum.country/qcvc）
-- 部分页面支持github gist（示例：https://towardsdatascience.com/hands-on-multi-agent-llm-restaurant-simulation-with-python-and-openai）
+- 部分页面支持katex公式转换（示例：[https://quantum.country/qcvc](https://quantum.country/qcvc)）
+- 部分页面支持github gist（示例：[https://towardsdatascience.com/hands-on-multi-agent-llm-restaurant-simulation-with-python-and-openai](https://towardsdatascience.com/hands-on-multi-agent-llm-restaurant-simulation-with-python-and-openai)）
 - 支持保存成文件或输出至`stdout`
 - 支持突破某些网站的防爬虫策略（需安装插件）
 

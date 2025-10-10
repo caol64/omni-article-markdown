@@ -1,6 +1,6 @@
 [project]
 name = "omnimd-zhihu-reader"
-version = "0.1.2"
+version = "0.1.3"
 description = "A plugin for omni-article-markdown to read Zhihu content."
 authors = [
     { name = "Lei", email = "caol64@gmail.com" }

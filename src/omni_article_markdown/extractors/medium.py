@@ -1,5 +1,7 @@
+from typing import override
 from bs4 import BeautifulSoup
-from ..extractor import Extractor
+
+from ..extractor import Extractor, get_og_site_name
 
 
 class MediumExtractor(Extractor):
@@ -14,8 +16,10 @@ class MediumExtractor(Extractor):
             lambda el: 'class' in el.attrs and 'speechify-ignore' in el.attrs['class'],
         ])
 
+    @override
     def can_handle(self, soup: BeautifulSoup) -> bool:
-        return self.get_og_site_name(soup) == "Medium"
+        return get_og_site_name(soup) == "Medium"
 
+    @override
     def article_container(self) -> tuple:
         return ("article", None)

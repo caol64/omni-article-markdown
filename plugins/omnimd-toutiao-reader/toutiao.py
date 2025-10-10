@@ -1,16 +1,16 @@
+from importlib import resources
 import sys
-from typing import Optional, Any
-
-from bs4 import BeautifulSoup
-from omni_article_markdown.extractor import Extractor
-from omni_article_markdown.hookspecs import hookimpl, ReaderPlugin
-from omni_article_markdown.utils import REQUEST_HEADERS
-from omni_article_markdown.store import Store
-from playwright.sync_api import sync_playwright
 from runpy import run_module
+from typing import override
 
-import importlib.resources
 import requests
+from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright, Playwright, Browser, Cookie
+
+from omni_article_markdown.extractor import Extractor
+from omni_article_markdown.hookspecs import ReaderPlugin, hookimpl
+from omni_article_markdown.store import Store
+from omni_article_markdown.utils import REQUEST_HEADERS
 
 
 class ToutiaoExtractor(Extractor):
@@ -18,19 +18,23 @@ class ToutiaoExtractor(Extractor):
     今日头条
     """
 
+    @override
     def can_handle(self, soup: BeautifulSoup) -> bool:
         title_tag = soup.title
-        title = title_tag.text.strip() if title_tag else None
-        return title and title.endswith(" - 今日头条")
+        title = title_tag.get_text(strip=True) if title_tag else None
+        return title is not None and title.endswith(" - 今日头条")
 
+    @override
     def article_container(self) -> tuple:
         return ("div", {"class": "article-content"})
 
 
 class ToutiaoPlugin(ReaderPlugin):
+    @override
     def can_handle(self, url: str) -> bool:
         return "toutiao.com" in url
 
+    @override
     def read(self, url: str) -> str:
         store = Store()
         cookies_raw = store.load("toutiao_cookies")
@@ -58,11 +62,12 @@ class ToutiaoPlugin(ReaderPlugin):
         response.encoding = "utf-8"
         return response.text
 
-    def extractor(self) -> Optional[Extractor]:
+    @override
+    def extractor(self) -> Extractor | None:
         return ToutiaoExtractor()
 
-    def _get_toutiao_cookies(self, url: str) -> list[dict[str, Any]]:
-        def try_launch_browser(p):
+    def _get_toutiao_cookies(self, url: str) -> list[Cookie]:
+        def try_launch_browser(p: Playwright) -> Browser:
             try:
                 return p.chromium.launch(headless=True)
             except Exception as e:
@@ -78,6 +83,7 @@ class ToutiaoPlugin(ReaderPlugin):
                     return p.chromium.launch(headless=True)
                 else:
                     raise  # re-raise other exceptions
+
         with sync_playwright() as p:
             browser = try_launch_browser(p)
             context = browser.new_context(
@@ -85,7 +91,7 @@ class ToutiaoPlugin(ReaderPlugin):
                 java_script_enabled=True,
                 extra_http_headers=REQUEST_HEADERS,
             )
-            with importlib.resources.path("omni_article_markdown.libs", "stealth.min.js") as js_path:
+            with resources.path("omni_article_markdown.libs", "stealth.min.js") as js_path:
                 context.add_init_script(path=str(js_path))
             page = context.new_page()
             page.goto(url, wait_until="networkidle")
@@ -97,14 +103,15 @@ class ToutiaoPlugin(ReaderPlugin):
             browser.close()
             return cookies
 
-    def _convert_playwright_cookies_to_requests_dict(self, playwright_cookies: list[dict[str, Any]]) -> dict[str, str]:
+    def _convert_playwright_cookies_to_requests_dict(self, playwright_cookies: list[Cookie]) -> dict[str, str]:
         requests_cookies = {}
         for cookie in playwright_cookies:
-            requests_cookies[cookie['name']] = cookie['value']
+            requests_cookies[cookie.get("name")] = cookie.get("value")
         return requests_cookies
 
+
 @hookimpl
-def get_custom_reader(url: str) -> Optional[ReaderPlugin]:
+def get_custom_reader(url: str) -> ReaderPlugin | None:
     plugin_instance = ToutiaoPlugin()
     if plugin_instance.can_handle(url):
         return plugin_instance
