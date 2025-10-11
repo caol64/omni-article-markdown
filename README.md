@@ -47,6 +47,7 @@
 |阿里云开发者社区|[link](https://developer.aliyun.com/article/791514)||
 |微软技术文档|[link](https://learn.microsoft.com/en-us/dotnet/ai/get-started-app-chat-template)||
 |InfoQ|[link](https://www.infoq.com/articles/ai-ml-data-engineering-trends-2025/)||
+|博客园|[link](https://www.cnblogs.com/hez2010/p/19097937/runtime-async)||
 
 ---
 

@@ -13,13 +13,13 @@ TAGS_TO_CLEAN: list[Callable[[Tag], bool]] = [
     lambda el: el.name in ("style", "link", "button", "footer", "header", "aside"),
     lambda el: el.name == "script" and "src" not in el.attrs,
     lambda el: el.name == "script"
-    and el.has_attr("src")
-    and not get_attr_text(el.attrs["src"]).startswith("https://gist.github.com"),
+        and el.has_attr("src")
+        and not get_attr_text(el.attrs["src"]).startswith("https://gist.github.com"),
 ]
 
 ATTRS_TO_CLEAN: list[Callable[[Tag], bool]] = [
     lambda el: "style" in el.attrs
-    and re.search(r"display\s*:\s*none", get_attr_text(el.attrs.get("style")), re.IGNORECASE) is not None,
+        and re.search(r"display\s*:\s*none", get_attr_text(el.attrs.get("style")), re.IGNORECASE) is not None,
     lambda el: "hidden" in el.attrs,
     lambda el: "class" in el.attrs and "katex-html" in el.attrs["class"],  # katex
 ]

@@ -6,7 +6,7 @@ on:
       package_path:
         description: 'Path to plugin directory (relative to repo root)'
         required: true
-        default: '.'
+        default: 'plugins/omnimd-freedium-reader'
 
 jobs:
   omnimd-plugin-publish:
