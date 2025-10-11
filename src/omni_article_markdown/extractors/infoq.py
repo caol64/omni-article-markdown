@@ -1,7 +1,8 @@
 from typing import override
 from bs4 import BeautifulSoup
 
-from ..extractor import Extractor, is_matched_canonical
+from ..extractor import Extractor
+from ..utils import is_matched_canonical
 
 
 class InfoQExtractor(Extractor):

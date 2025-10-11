@@ -8,7 +8,7 @@ from playwright.sync_api import sync_playwright, Playwright, Browser
 
 from omni_article_markdown.extractor import Extractor
 from omni_article_markdown.hookspecs import ReaderPlugin, hookimpl
-from omni_article_markdown.utils import REQUEST_HEADERS, filter_tag
+from omni_article_markdown.utils import filter_tag, REQUEST_HEADERS
 
 
 class FreediumExtractor(Extractor):

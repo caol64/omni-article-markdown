@@ -1,31 +1,65 @@
 import re
+from typing import Callable
+from urllib.parse import urljoin
 from bs4.element import NavigableString, Tag
 import requests
 
 from .extractor import Article
 from .utils import (
-    Constants,
     filter_tag,
     get_attr_text,
     is_sequentially_increasing,
-    is_block_element,
     move_spaces,
     detect_language,
     collapse_spaces,
-    extract_domain,
-    is_pure_block_children,
 )
+
+LB_SYMBOL = "[|lb_bl|]"
+
+POST_HANDLERS: list[Callable[[str], str]] = [
+    lambda el: el.replace(f"{LB_SYMBOL}{LB_SYMBOL}", LB_SYMBOL)
+    .replace(LB_SYMBOL, "\n\n")
+    .strip(),  # 添加换行使文章更美观
+    lambda el: re.sub(r"`\*\*(.*?)\*\*`", r"**`\1`**", el),  # 纠正不规范格式 `**code**` 替换为 **`code`**
+    lambda el: re.sub(r"`\*(.*?)\*`", r"*`\1`*", el),  # 纠正不规范格式 `*code*` 替换为 *`code`*
+    lambda el: re.sub(
+        r"`\s*\[([^\]]+)\]\(([^)]+)\)\s*`", r"[`\1`](\2)", el
+    ),  # 纠正不规范格式 `[code](url)` 替换为 [`code`](url)
+    lambda el: re.sub(r"\\\((.+?)\\\)", r"$\1$", el),  # 将 \( ... \) 替换为 $ ... $
+    lambda el: re.sub(r"\\\[(.+?)\\\]", r"$$\1$$", el),  # 将 \[ ... \] 替换为 $$ ... $$
+]
+
+INLINE_ELEMENTS = ["span", "code", "li", "a", "strong", "em", "img", "b", "i"]
+
+BLOCK_ELEMENTS = [
+    "p",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "ul",
+    "ol",
+    "blockquote",
+    "pre",
+    "picture",
+    "hr",
+    "figcaption",
+    "table",
+    "section",
+]
+
+TRUSTED_ELEMENTS = INLINE_ELEMENTS + BLOCK_ELEMENTS
 
 
 class HtmlMarkdownParser:
     def __init__(self, article: Article):
         self.article = article
-        self.url = article.og_url
 
     def parse(self) -> tuple[str, str]:
-        # print(article)
         markdown = self._process_children(self.article.body)
-        for handler in Constants.POST_HANDLERS:
+        for handler in POST_HANDLERS:
             markdown = handler(markdown)
         if not self.article.description or self.article.description in markdown:
             description = ""
@@ -35,18 +69,17 @@ class HtmlMarkdownParser:
         # print(result)
         return (self.article.title, result)
 
-
     def _process_element(self, element: Tag, level: int = 0, is_pre: bool = False) -> str:
         parts = []
         if element.name == "br":
-            parts.append(Constants.LB_SYMBOL)
+            parts.append(LB_SYMBOL)
         elif element.name == "hr":
             parts.append("---")
         elif element.name in {"h1", "h2", "h3", "h4", "h5", "h6"}:
             heading = self._process_children(element, level, is_pre=is_pre)
             parts.append(f"{'#' * int(element.name[1])} {heading}")
         elif element.name == "a":
-            link = self._process_children(element, level, is_pre=is_pre).replace(Constants.LB_SYMBOL, "")
+            link = self._process_children(element, level, is_pre=is_pre).replace(LB_SYMBOL, "")
             if link:
                 parts.append(f"[{link}]({element.get('href')})")
         elif element.name == "strong" or element.name == "b":
@@ -56,39 +89,32 @@ class HtmlMarkdownParser:
         elif element.name == "ul" or element.name == "ol":
             parts.append(self._process_list(element, level))
         elif element.name == "img":
-            src = get_attr_text(element.attrs.get("data-src")) or get_attr_text(element.attrs.get("src"))
-            alt = get_attr_text(element.attrs.get("alt"))
-            parts.append(self._process_image(src, alt))
+            parts.append(self._process_image(element, None))
         elif element.name == "blockquote":
             blockquote = self._process_children(element, level, is_pre=is_pre)
-            if blockquote.startswith(Constants.LB_SYMBOL):
-                blockquote = blockquote.removeprefix(Constants.LB_SYMBOL)
-            if blockquote.endswith(Constants.LB_SYMBOL):
-                blockquote = blockquote.removesuffix(Constants.LB_SYMBOL)
-            parts.append("\n".join(f"> {line}" for line in blockquote.split(Constants.LB_SYMBOL)))
+            if blockquote.startswith(LB_SYMBOL):
+                blockquote = blockquote.removeprefix(LB_SYMBOL)
+            if blockquote.endswith(LB_SYMBOL):
+                blockquote = blockquote.removesuffix(LB_SYMBOL)
+            parts.append("\n".join(f"> {line}" for line in blockquote.split(LB_SYMBOL)))
         elif element.name == "pre":
             parts.append(self._process_codeblock(element, level))
         elif element.name == "code":  # inner code
             code = self._process_children(element, level, is_pre=is_pre)
-            if Constants.LB_SYMBOL not in code:
+            if LB_SYMBOL not in code:
                 parts.append(f"`{code}`")
             else:
                 parts.append(code)
         elif element.name == "picture":
             source_elements = element.find_all("source")
-            img_element = element.find("img")
+            img_element = filter_tag(element.find("img"))
             if img_element and source_elements:
                 el = source_elements[0]
                 src_el = filter_tag(el)
                 if src_el:
-                    src_set = get_attr_text(src_el.attrs.get("srcset"))
-                    src = src_set.split()[0]
-                    alt = get_attr_text(element.attrs.get("alt"))
-                    parts.append(self._process_image(src, alt))
+                    parts.append(self._process_image(img_element, src_el))
         elif element.name == "figcaption":
-            figcaption = (
-                self._process_children(element, level, is_pre=is_pre).replace(Constants.LB_SYMBOL, "\n").strip()
-            )
+            figcaption = self._process_children(element, level, is_pre=is_pre).replace(LB_SYMBOL, "\n").strip()
             figcaptions = figcaption.replace("\n\n", "\n").split("\n")
             parts.append("\n".join([f"*{caption}*" for caption in figcaptions]))
         elif element.name == "table":
@@ -106,13 +132,13 @@ class HtmlMarkdownParser:
         result = "".join(parts)
         if result and is_block_element(element.name):
             if not is_pure_block_children(element):
-                result = f"{Constants.LB_SYMBOL}{result}{Constants.LB_SYMBOL}"
+                result = f"{LB_SYMBOL}{result}{LB_SYMBOL}"
         return result
 
     def _process_children(self, element: Tag, level: int = 0, is_pre: bool = False) -> str:
         parts = []
         if element.children:
-            # new_level = level + 1 if element.name in Constants.TRUSTED_ELEMENTS else level
+            # new_level = level + 1 if element.name in HtmlMarkdownParser.TRUSTED_ELEMENTS else level
             for child in element.children:
                 if isinstance(child, NavigableString):
                     if is_pre:
@@ -124,7 +150,7 @@ class HtmlMarkdownParser:
                         # print(element.name, level, result)
                 elif isinstance(child, Tag):
                     result = self._process_element(child, level, is_pre=is_pre)
-                    if is_pre or len(result.replace(Constants.LB_SYMBOL, "")) != 0:
+                    if is_pre or len(result.replace(LB_SYMBOL, "")) != 0:
                         parts.append(result)
         return "".join(parts) if is_pre or level > 0 else "".join(parts).strip()
 
@@ -137,14 +163,14 @@ class HtmlMarkdownParser:
             child = filter_tag(child)
             if child:
                 if child.name == "li":
-                    content = self._process_children(child, level).replace(Constants.LB_SYMBOL, "").strip()
+                    content = self._process_children(child, level).replace(LB_SYMBOL, "").strip()
                     if content:  # 忽略空内容
                         prefix = f"{i + 1}." if is_ol else "-"
                         parts.append(f"{indent}{prefix} {content}")
                 elif child.name == "ul" or child.name == "ol":
                     content = self._process_element(child, level + 1)
                     if content:  # 忽略空内容
-                        parts.append(f"{content.replace(Constants.LB_SYMBOL, '')}")
+                        parts.append(f"{content.replace(LB_SYMBOL, '')}")
         if not parts:
             return ""  # 所有内容都为空则返回空字符串
         return "\n".join(parts)
@@ -155,8 +181,9 @@ class HtmlMarkdownParser:
 
         # 处理每一个 code 标签并拼接
         code_parts = [
-            self._process_children(code_el, level, is_pre=True).replace(Constants.LB_SYMBOL, "\n")
-            for code_el in code_elements if isinstance(code_el, Tag)
+            self._process_children(code_el, level, is_pre=True).replace(LB_SYMBOL, "\n")
+            for code_el in code_elements
+            if isinstance(code_el, Tag)
         ]
         code = "\n".join(code_parts).strip()
 
@@ -165,9 +192,11 @@ class HtmlMarkdownParser:
 
         # 尝试提取语言：从第一个 code 标签的 class 中提取 language
         first_code_el = code_elements[0]
-        language = next(
-            (cls.split("-")[1] for cls in (first_code_el.get("class") or []) if cls.startswith("language-")), ""
-        ) if isinstance(first_code_el, Tag) else ""
+        language = (
+            next((cls.split("-")[1] for cls in (first_code_el.get("class") or []) if cls.startswith("language-")), "")
+            if isinstance(first_code_el, Tag)
+            else ""
+        )
         if not language:
             language = detect_language(None, code)
         return f"```{language}\n{code}\n```" if language else f"```\n{code}\n```"
@@ -202,11 +231,16 @@ class HtmlMarkdownParser:
             markdown_table.append("| " + " | ".join(row) + " |")
         return "\n".join(markdown_table)
 
-    def _process_image(self, src: str, alt: str) -> str:
+    def _process_image(self, element: Tag, source: Tag | None) -> str:
+        src = (
+            get_attr_text(element.attrs.get("src"))
+            if source is None
+            else get_attr_text(source.attrs.get("srcset")).split()[0]
+        )
+        alt = get_attr_text(element.attrs.get("alt"))
         if src:
-            if src.startswith("/") and self.url:
-                domain = extract_domain(self.url)
-                src = f"{domain}{src}"
+            if not src.startswith("http") and self.article.url:
+                src = urljoin(self.article.url, src)
             return f"![{alt}]({src})"
         return ""
 
@@ -230,3 +264,17 @@ class HtmlMarkdownParser:
             else:
                 print(f"Fetch gist error: {response.status_code}")
         return ""
+
+
+def is_block_element(element_name: str) -> bool:
+    return element_name in BLOCK_ELEMENTS
+
+
+def is_pure_block_children(element: Tag) -> bool:
+    for child in element.children:
+        if isinstance(child, NavigableString):
+            if child.strip():  # 有非空文本
+                return False
+        elif isinstance(child, Tag) and not is_block_element(child.name):
+            return False
+    return True

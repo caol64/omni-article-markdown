@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .extractor import Article, DefaultExtractor, Extractor
-from .html_md_parser import HtmlMarkdownParser
+from .parser import HtmlMarkdownParser
 from .readers import ReaderFactory
 from .utils import to_snake_case
 

@@ -5,12 +5,13 @@ from typing import override
 
 import requests
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 from playwright.sync_api import sync_playwright, Playwright, Browser, Cookie
 
 from omni_article_markdown.extractor import Extractor
 from omni_article_markdown.hookspecs import ReaderPlugin, hookimpl
 from omni_article_markdown.store import Store
-from omni_article_markdown.utils import REQUEST_HEADERS
+from omni_article_markdown.utils import filter_tag, get_attr_text, REQUEST_HEADERS
 
 
 class ToutiaoExtractor(Extractor):
@@ -27,6 +28,17 @@ class ToutiaoExtractor(Extractor):
     @override
     def article_container(self) -> tuple:
         return ("div", {"class": "article-content"})
+
+    @override
+    def extract_img(self, element: Tag) -> Tag:
+        img_els = element.find_all("img")
+        for img_el in img_els:
+            img_tag = filter_tag(img_el)
+            if img_tag:
+                src = get_attr_text(img_tag.attrs.get("data-src"))
+                if src:
+                    img_tag.attrs["src"] = src
+        return element
 
 
 class ToutiaoPlugin(ReaderPlugin):

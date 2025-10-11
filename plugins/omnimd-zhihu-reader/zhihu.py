@@ -7,10 +7,10 @@ import requests
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright, Playwright, Browser, Cookie
 
-from omni_article_markdown.extractor import Extractor, get_og_site_name
+from omni_article_markdown.extractor import Extractor
 from omni_article_markdown.hookspecs import ReaderPlugin, hookimpl
 from omni_article_markdown.store import Store
-from omni_article_markdown.utils import REQUEST_HEADERS
+from omni_article_markdown.utils import get_og_site_name, REQUEST_HEADERS
 
 
 class ZhihuExtractor(Extractor):

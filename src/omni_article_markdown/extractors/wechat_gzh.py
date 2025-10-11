@@ -1,7 +1,9 @@
 from typing import override
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
-from ..extractor import Extractor, get_og_site_name
+from ..extractor import Extractor
+from ..utils import filter_tag, get_attr_text, get_og_site_name
 
 
 class WechatGZHExtractor(Extractor):
@@ -20,3 +22,14 @@ class WechatGZHExtractor(Extractor):
     @override
     def article_container(self) -> tuple:
         return ("div", {"class": "rich_media_content"})
+
+    @override
+    def extract_img(self, element: Tag) -> Tag:
+        img_els = element.find_all("img")
+        for img_el in img_els:
+            img_tag = filter_tag(img_el)
+            if img_tag:
+                src = get_attr_text(img_tag.attrs.get("data-src"))
+                if src:
+                    img_tag.attrs["src"] = src
+        return element

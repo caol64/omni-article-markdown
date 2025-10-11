@@ -1,5 +1,9 @@
 # 墨探 (omni-article-markdown)
 
+[![PyPI](https://img.shields.io/pypi/v/omni-article-markdown.svg)](https://pypi.org/project/omni-article-markdown/)
+[![Python](https://img.shields.io/pypi/pyversions/omni-article-markdown.svg)](https://pypi.org/project/omni-article-markdown/)
+[![License](https://img.shields.io/pypi/l/omni-article-markdown.svg)](LICENSE)
+
 轻松将网页文章（博客、新闻、文档等）转换为 `Markdown` 格式。
 
 ![](data/1.gif)
@@ -28,17 +32,21 @@
 |站点|链接|备注|
 --|--|--
 |Medium|[link](https://medium.com/perry-street-software-engineering/architectural-linting-for-swift-made-easy-75d7f9f569cd)||
-|csdn|[link](https://blog.csdn.net/weixin_41705306/article/details/148787220?spm=1000.2115.3001.10524)||
+|csdn|[link](https://blog.csdn.net/weixin_41705306/article/details/148787220)||
 |掘金|[link](https://juejin.cn/post/7405845617282449462)||
-|知乎专栏|[link](https://zhuanlan.zhihu.com/p/1915735485801828475)|需安装插件|
+|知乎专栏|[link](https://zhuanlan.zhihu.com/p/1915735485801828475)|需安装zhihu插件|
 |公众号|[link](https://mp.weixin.qq.com/s/imHIKy7dqMmpm032eIhIJg)||
-|今日头条|[link](https://www.toutiao.com/article/7518606377116336667/?log_from=731d72141e4128_1750818145306)|需安装插件|
-|网易|[link](https://www.163.com/dy/article/K2SPPGSK0514R9KE.html?clickfrom=w_yw)||
+|今日头条|[link](https://www.toutiao.com/article/7283050053155947062/)|需安装toutiao插件|
+|网易|[link](https://www.163.com/dy/article/K2SPPGSK0514R9KE.html)||
 |简书|[link](https://www.jianshu.com/p/20bd2e9b1f03)||
-|Freedium|[link](https://freedium.cfd/https://medium.com/@devlink/ai-killed-my-coding-brain-but-im-rebuilding-it-8de7e1618bca)|需安装插件|
+|Freedium|[link](https://freedium.cfd/https://medium.com/@devlink/ai-killed-my-coding-brain-but-im-rebuilding-it-8de7e1618bca)|需安装freedium插件|
 |Towards Data Science|[link](https://towardsdatascience.com/hands-on-multi-agent-llm-restaurant-simulation-with-python-and-openai/)||
 |Quantamagazine|[link](https://www.quantamagazine.org/matter-vs-force-why-there-are-exactly-two-types-of-particles-20250623/)||
-|Apple Developer Documentation|[link](https://developer.apple.com/documentation/technologyoverviews/adopting-liquid-glass)|需安装插件|
+|苹果开发者文档|[link](https://developer.apple.com/documentation/technologyoverviews/adopting-liquid-glass)|需安装browser插件|
+|Cloudflare博客|[link](https://blog.cloudflare.com/20-percent-internet-upgrade/)||
+|阿里云开发者社区|[link](https://developer.aliyun.com/article/791514)||
+|微软技术文档|[link](https://learn.microsoft.com/en-us/dotnet/ai/get-started-app-chat-template)||
+|InfoQ|[link](https://www.infoq.com/articles/ai-ml-data-engineering-trends-2025/)||
 
 ---
 

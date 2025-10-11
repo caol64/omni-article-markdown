@@ -2,10 +2,10 @@ from abc import ABC, abstractmethod
 
 import requests
 
+from .utils import REQUEST_HEADERS
 from .extractor import Extractor
 from .hookspecs import ReaderPlugin
 from .plugins import pm
-from .utils import REQUEST_HEADERS
 
 
 class Reader(ABC):

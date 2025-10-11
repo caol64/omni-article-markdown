@@ -1,30 +1,48 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import override
+import re
+from typing import Callable, override
 
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-from .utils import Constants, filter_tag, get_attr_text
+from .utils import filter_tag, get_attr_text, get_canonical_url, get_og_description, get_og_title, get_og_url, get_title
+
+
+TAGS_TO_CLEAN: list[Callable[[Tag], bool]] = [
+    lambda el: el.name in ("style", "link", "button", "footer", "header", "aside"),
+    lambda el: el.name == "script" and "src" not in el.attrs,
+    lambda el: el.name == "script"
+    and el.has_attr("src")
+    and not get_attr_text(el.attrs["src"]).startswith("https://gist.github.com"),
+]
+
+ATTRS_TO_CLEAN: list[Callable[[Tag], bool]] = [
+    lambda el: "style" in el.attrs
+    and re.search(r"display\s*:\s*none", get_attr_text(el.attrs.get("style")), re.IGNORECASE) is not None,
+    lambda el: "hidden" in el.attrs,
+    lambda el: "class" in el.attrs and "katex-html" in el.attrs["class"],  # katex
+]
+
+ARTICLE_CONTAINERS = [("article", None), ("main", None), ("body", None)]
 
 
 @dataclass
 class Article:
     title: str
-    og_url: str | None
+    url: str | None
     description: str | None
     body: Tag
 
 
 class Extractor(ABC):
     def __init__(self):
-        self.tags_to_clean = Constants.TAGS_TO_CLEAN
-        self.attrs_to_clean = Constants.ATTRS_TO_CLEAN
+        self.tags_to_clean = TAGS_TO_CLEAN
+        self.attrs_to_clean = ATTRS_TO_CLEAN
 
     def extract(self, raw_html: str) -> Article | None:
         soup = BeautifulSoup(raw_html, "html5lib")
         if self.can_handle(soup):
-            og_url = get_og_url(soup)
             article_container = self.article_container()
             if isinstance(article_container, tuple):
                 article_container = [article_container]
@@ -32,9 +50,6 @@ class Extractor(ABC):
                 article_tag = extract_article_from_soup(soup, container)
                 if article_tag:
                     # print(f"Using extractor: {self.__class__.__name__}")
-                    h1 = article_tag.find("h1")
-                    if h1:
-                        h1.decompose()
                     for el in article_tag.find_all():
                         tag = filter_tag(el)
                         if tag:
@@ -44,11 +59,13 @@ class Extractor(ABC):
                             if tag.attrs:
                                 if any(cond(tag) for cond in self.attrs_to_clean):
                                     tag.decompose()
+                    self.extract_img(article_tag)
                     title = self.extract_title(soup)
                     description = self.extract_description(soup)
-                    return Article(
-                        title=title, og_url=og_url, description=description, body=article_tag
-                    )
+                    url = self.extract_url(soup)
+                    article = Article(title=title, url=url, description=description, body=article_tag)
+                    remove_duplicate_titles(article)
+                    return article
         return None
 
     @abstractmethod
@@ -63,6 +80,13 @@ class Extractor(ABC):
     def extract_description(self, soup: BeautifulSoup) -> str:
         return get_og_description(soup)
 
+    def extract_url(self, soup: BeautifulSoup) -> str:
+        return get_og_url(soup) or get_canonical_url(soup)
+
+    def extract_img(self, element: Tag) -> Tag:
+        return element
+
+
 class DefaultExtractor(Extractor):
     @override
     def can_handle(self, soup: BeautifulSoup) -> bool:
@@ -70,8 +94,7 @@ class DefaultExtractor(Extractor):
 
     @override
     def article_container(self) -> tuple | list:
-        return Constants.ARTICLE_CONTAINERS
-
+        return ARTICLE_CONTAINERS
 
 
 def extract_article_from_soup(soup: BeautifulSoup, template: tuple) -> Tag | None:
@@ -82,45 +105,9 @@ def extract_article_from_soup(soup: BeautifulSoup, template: tuple) -> Tag | Non
     return filter_tag(result)
 
 
-def get_og_url(soup: BeautifulSoup) -> str:
-    og_tag = filter_tag(soup.find("meta", {"property": "og:url"}))
-    return get_tag_text(og_tag, "content")
-
-
-def get_og_site_name(soup: BeautifulSoup) -> str:
-    og_tag = filter_tag(soup.find("meta", {"property": "og:site_name"}))
-    return get_tag_text(og_tag, "content")
-
-
-def get_og_description(soup: BeautifulSoup) -> str:
-    og_tag = filter_tag(soup.find("meta", {"property": "og:description"}))
-    return get_tag_text(og_tag, "content")
-
-
-def get_canonical_url(soup: BeautifulSoup) -> str:
-    canonical_tag = filter_tag(soup.find("link", {"rel": "canonical"}))
-    return get_tag_text(canonical_tag, "href")
-
-
-def is_matched_canonical(url: str, soup: BeautifulSoup) -> bool:
-    canonical = get_canonical_url(soup)
-    if not canonical:
-        return False
-    return canonical.startswith(url)
-
-
-def get_og_title(soup: BeautifulSoup) -> str:
-    og_tag = filter_tag(soup.find("meta", {"property": "og:title"}))
-    return get_tag_text(og_tag, "content")
-
-
-def get_tag_text(tag: Tag | None, attr: str) -> str:
-    if tag is not None and tag.has_attr(attr):
-        el = tag[attr]
-        return get_attr_text(el)
-    return ""
-
-
-def get_title(soup: BeautifulSoup) -> str:
-    title_tag = soup.title
-    return title_tag.get_text(strip=True) if title_tag else ""
+def remove_duplicate_titles(article: Article):
+    if article.body:
+        first_h1 = article.body.find("h1")
+        if first_h1:
+            article.title = first_h1.get_text(strip=True)
+            first_h1.decompose()

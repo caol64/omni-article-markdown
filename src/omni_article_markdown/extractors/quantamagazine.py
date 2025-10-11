@@ -1,7 +1,8 @@
 from typing import override
 from bs4 import BeautifulSoup
 
-from ..extractor import Extractor, get_og_site_name
+from ..extractor import Extractor
+from ..utils import get_og_site_name
 
 
 class QuantamagazineExtractor(Extractor):

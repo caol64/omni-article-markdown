@@ -1,7 +1,7 @@
 import re
-from typing import Callable
 from urllib.parse import urlparse
 
+from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag, PageElement, AttributeValueList
 
 REQUEST_HEADERS = {
@@ -25,63 +25,6 @@ BROWSER_TARGET_HOSTS = [
     "www.infoq.cn/",
 ]
 
-
-class Constants:
-    LB_SYMBOL = "[|lb_bl|]"
-
-    ARTICLE_CONTAINERS = [("article", None), ("main", None), ("body", None)]
-
-    TAGS_TO_CLEAN: list[Callable[[Tag], bool]] = [
-        lambda el: el.name in ("style", "link", "button", "footer", "header", "aside"),
-        lambda el: el.name == "script" and "src" not in el.attrs,
-        lambda el: el.name == "script"
-        and el.has_attr("src")
-        and not get_attr_text(el.attrs["src"]).startswith("https://gist.github.com"),
-    ]
-
-    ATTRS_TO_CLEAN: list[Callable[[Tag], bool]] = [
-        lambda el: "style" in el.attrs and re.search(r"display\s*:\s*none", get_attr_text(el.attrs.get("style")), re.IGNORECASE) is not None,
-        lambda el: "hidden" in el.attrs,
-        lambda el: "class" in el.attrs and "katex-html" in el.attrs["class"],  # katex
-    ]
-
-    POST_HANDLERS: list[Callable[[str], str]] = [
-        lambda el: el.replace(f"{Constants.LB_SYMBOL}{Constants.LB_SYMBOL}", Constants.LB_SYMBOL)
-        .replace(Constants.LB_SYMBOL, "\n\n")
-        .strip(),  # 添加换行使文章更美观
-        lambda el: re.sub(r"`\*\*(.*?)\*\*`", r"**`\1`**", el),  # 纠正不规范格式 `**code**` 替换为 **`code`**
-        lambda el: re.sub(r"`\*(.*?)\*`", r"*`\1`*", el),  # 纠正不规范格式 `*code*` 替换为 *`code`*
-        lambda el: re.sub(
-            r"`\s*\[([^\]]+)\]\(([^)]+)\)\s*`", r"[`\1`](\2)", el
-        ),  # 纠正不规范格式 `[code](url)` 替换为 [`code`](url)
-        lambda el: re.sub(r"\\\((.+?)\\\)", r"$\1$", el),  # 将 \( ... \) 替换为 $ ... $
-        lambda el: re.sub(r"\\\[(.+?)\\\]", r"$$\1$$", el),  # 将 \[ ... \] 替换为 $$ ... $$
-    ]
-
-    INLINE_ELEMENTS = ["span", "code", "li", "a", "strong", "em", "img", "b", "i"]
-
-    BLOCK_ELEMENTS = [
-        "p",
-        "h1",
-        "h2",
-        "h3",
-        "h4",
-        "h5",
-        "h6",
-        "ul",
-        "ol",
-        "blockquote",
-        "pre",
-        "picture",
-        "hr",
-        "figcaption",
-        "table",
-        "section",
-    ]
-
-    TRUSTED_ELEMENTS = INLINE_ELEMENTS + BLOCK_ELEMENTS
-
-
 def is_sequentially_increasing(code: str) -> bool:
     try:
         # 解码并按换行符拆分
@@ -90,20 +33,6 @@ def is_sequentially_increasing(code: str) -> bool:
         return all(numbers[i] + 1 == numbers[i + 1] for i in range(len(numbers) - 1))
     except ValueError:
         return False  # 处理非数字情况
-
-
-def is_block_element(element_name: str) -> bool:
-    return element_name in Constants.BLOCK_ELEMENTS
-
-
-def is_pure_block_children(element: Tag) -> bool:
-    for child in element.children:
-        if isinstance(child, NavigableString):
-            if child.strip():  # 有非空文本
-                return False
-        elif isinstance(child, Tag) and not is_block_element(child.name):
-            return False
-    return True
 
 
 def move_spaces(input_string: str, suffix: str) -> str:
@@ -172,3 +101,47 @@ def get_attr_text(el: str | AttributeValueList | None) -> str:
         return el.strip()
     else:
         return " ".join(el).strip()
+
+
+def get_og_url(soup: BeautifulSoup) -> str:
+    og_tag = filter_tag(soup.find("meta", {"property": "og:url"}))
+    return get_tag_text(og_tag, "content")
+
+
+def get_og_site_name(soup: BeautifulSoup) -> str:
+    og_tag = filter_tag(soup.find("meta", {"property": "og:site_name"}))
+    return get_tag_text(og_tag, "content")
+
+
+def get_og_description(soup: BeautifulSoup) -> str:
+    og_tag = filter_tag(soup.find("meta", {"property": "og:description"}))
+    return get_tag_text(og_tag, "content")
+
+
+def get_canonical_url(soup: BeautifulSoup) -> str:
+    canonical_tag = filter_tag(soup.find("link", {"rel": "canonical"}))
+    return get_tag_text(canonical_tag, "href")
+
+
+def is_matched_canonical(url: str, soup: BeautifulSoup) -> bool:
+    canonical = get_canonical_url(soup)
+    if not canonical:
+        return False
+    return canonical.startswith(url)
+
+
+def get_og_title(soup: BeautifulSoup) -> str:
+    og_tag = filter_tag(soup.find("meta", {"property": "og:title"}))
+    return get_tag_text(og_tag, "content")
+
+
+def get_tag_text(tag: Tag | None, attr: str) -> str:
+    if tag is not None and tag.has_attr(attr):
+        el = tag[attr]
+        return get_attr_text(el)
+    return ""
+
+
+def get_title(soup: BeautifulSoup) -> str:
+    title_tag = soup.title
+    return title_tag.get_text(strip=True) if title_tag else ""
