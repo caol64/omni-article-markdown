@@ -17,19 +17,21 @@ from .utils import (
 LB_SYMBOL = "[|lb_bl|]"
 
 POST_HANDLERS: list[Callable[[str], str]] = [
-    lambda el: el.replace(f"{LB_SYMBOL}{LB_SYMBOL}", LB_SYMBOL)
-    .replace(LB_SYMBOL, "\n\n")
-    .strip(),  # 添加换行使文章更美观
-    lambda el: re.sub(r"`\*\*(.*?)\*\*`", r"**`\1`**", el),  # 纠正不规范格式 `**code**` 替换为 **`code`**
-    lambda el: re.sub(r"`\*(.*?)\*`", r"*`\1`*", el),  # 纠正不规范格式 `*code*` 替换为 *`code`*
-    lambda el: re.sub(
-        r"`\s*\[([^\]]+)\]\(([^)]+)\)\s*`", r"[`\1`](\2)", el
-    ),  # 纠正不规范格式 `[code](url)` 替换为 [`code`](url)
-    lambda el: re.sub(r"\\\((.+?)\\\)", r"$\1$", el),  # 将 \( ... \) 替换为 $ ... $
-    lambda el: re.sub(r"\\\[(.+?)\\\]", r"$$\1$$", el),  # 将 \[ ... \] 替换为 $$ ... $$
+    # 添加换行使文章更美观
+    lambda el: re.sub(f"(?:{re.escape(LB_SYMBOL)})+", LB_SYMBOL, el).replace(LB_SYMBOL, "\n\n").strip(),
+    # 纠正不规范格式 `**code**` 替换为 **`code`**
+    lambda el: re.sub(r"`\*\*(.*?)\*\*`", r"**`\1`**", el),
+    # 纠正不规范格式 `*code*` 替换为 *`code`*
+    lambda el: re.sub(r"`\*(.*?)\*`", r"*`\1`*", el),
+    # 纠正不规范格式 `[code](url)` 替换为 [`code`](url)
+    lambda el: re.sub(r"`\s*\[([^\]]+)\]\(([^)]+)\)\s*`", r"[`\1`](\2)", el),
+    # 将 \( ... \) 替换为 $ ... $
+    lambda el: re.sub(r"\\\((.+?)\\\)", r"$\1$", el),
+    # 将 \[ ... \] 替换为 $$ ... $$
+    lambda el: re.sub(r"\\\[(.+?)\\\]", r"$$\1$$", el),
 ]
 
-INLINE_ELEMENTS = ["span", "code", "li", "a", "strong", "em", "img", "b", "i"]
+INLINE_ELEMENTS = ["span", "code", "li", "a", "strong", "em", "b", "i"]
 
 BLOCK_ELEMENTS = [
     "p",
@@ -43,6 +45,7 @@ BLOCK_ELEMENTS = [
     "ol",
     "blockquote",
     "pre",
+    "img",
     "picture",
     "hr",
     "figcaption",
@@ -150,8 +153,10 @@ class HtmlMarkdownParser:
                         # print(element.name, level, result)
                 elif isinstance(child, Tag):
                     result = self._process_element(child, level, is_pre=is_pre)
-                    if is_pre or len(result.replace(LB_SYMBOL, "")) != 0:
+                    if is_pre:
                         parts.append(result)
+                    elif result.strip():
+                        parts.append(result.strip())
         return "".join(parts) if is_pre or level > 0 else "".join(parts).strip()
 
     def _process_list(self, element: Tag, level: int) -> str:
@@ -163,14 +168,14 @@ class HtmlMarkdownParser:
             child = filter_tag(child)
             if child:
                 if child.name == "li":
-                    content = self._process_children(child, level).replace(LB_SYMBOL, "").strip()
+                    content = self._process_children(child, level).replace(LB_SYMBOL, "\n").strip()
                     if content:  # 忽略空内容
                         prefix = f"{i + 1}." if is_ol else "-"
                         parts.append(f"{indent}{prefix} {content}")
                 elif child.name == "ul" or child.name == "ol":
                     content = self._process_element(child, level + 1)
                     if content:  # 忽略空内容
-                        parts.append(f"{content.replace(LB_SYMBOL, '')}")
+                        parts.append(f"{content.replace(LB_SYMBOL, '\n')}")
         if not parts:
             return ""  # 所有内容都为空则返回空字符串
         return "\n".join(parts)

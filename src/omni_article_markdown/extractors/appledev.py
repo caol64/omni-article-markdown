@@ -12,11 +12,13 @@ class AppleDevelopExtractor(Extractor):
 
     def __init__(self):
         super().__init__()
-        self.attrs_to_clean.extend([
-            lambda el: 'class' in el.attrs and 'eyebrow' in el.attrs['class'],
-            lambda el: 'class' in el.attrs and 'platform' in el.attrs['class'],
-            lambda el: 'class' in el.attrs and 'title' in el.attrs['class'],
-        ])
+        self.attrs_to_clean.extend(
+            [
+                lambda el: "class" in el.attrs and "eyebrow" in el.attrs["class"],
+                lambda el: "class" in el.attrs and "platform" in el.attrs["class"],
+                lambda el: "class" in el.attrs and "title" in el.attrs["class"],
+            ]
+        )
 
     @override
     def can_handle(self, soup: BeautifulSoup) -> bool:

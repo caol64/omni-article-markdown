@@ -4,7 +4,7 @@ import re
 from typing import Callable, override
 
 from bs4 import BeautifulSoup
-from bs4.element import Tag
+from bs4.element import Tag, Comment
 
 from .utils import filter_tag, get_attr_text, get_canonical_url, get_og_description, get_og_title, get_og_url, get_title
 
@@ -59,6 +59,8 @@ class Extractor(ABC):
                             if tag.attrs:
                                 if any(cond(tag) for cond in self.attrs_to_clean):
                                     tag.decompose()
+                    for comment in article_tag.find_all(string=lambda text: isinstance(text, Comment)):
+                        comment.extract()
                     self.extract_img(article_tag)
                     title = self.extract_title(soup)
                     description = self.extract_description(soup)
@@ -109,5 +111,7 @@ def remove_duplicate_titles(article: Article):
     if article.body:
         first_h1 = article.body.find("h1")
         if first_h1:
-            article.title = first_h1.get_text(strip=True)
-            first_h1.decompose()
+            h1_text = first_h1.get_text(strip=True)
+            if h1_text.lower() in article.title.lower():
+                article.title = h1_text
+                first_h1.decompose()
