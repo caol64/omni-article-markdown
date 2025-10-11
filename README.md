@@ -48,6 +48,8 @@
 |微软技术文档|[link](https://learn.microsoft.com/en-us/dotnet/ai/get-started-app-chat-template)||
 |InfoQ|[link](https://www.infoq.com/articles/ai-ml-data-engineering-trends-2025/)||
 |博客园|[link](https://www.cnblogs.com/hez2010/p/19097937/runtime-async)||
+|思否|[link](https://segmentfault.com/a/1190000047273730)||
+|开源中国|[link](https://my.oschina.net/SeaTunnel/blog/18694930)||
 
 ---
 
