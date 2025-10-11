@@ -4,41 +4,11 @@ from runpy import run_module
 from typing import override
 
 import requests
-from bs4 import BeautifulSoup
-from bs4.element import Tag
 from playwright.sync_api import sync_playwright, Playwright, Browser, Cookie
 
-from omni_article_markdown.extractor import Extractor
 from omni_article_markdown.hookspecs import ReaderPlugin, hookimpl
 from omni_article_markdown.store import Store
-from omni_article_markdown.utils import filter_tag, get_attr_text, REQUEST_HEADERS
-
-
-class ToutiaoExtractor(Extractor):
-    """
-    今日头条
-    """
-
-    @override
-    def can_handle(self, soup: BeautifulSoup) -> bool:
-        title_tag = soup.title
-        title = title_tag.get_text(strip=True) if title_tag else None
-        return title is not None and title.endswith(" - 今日头条")
-
-    @override
-    def article_container(self) -> tuple:
-        return ("div", {"class": "article-content"})
-
-    @override
-    def extract_img(self, element: Tag) -> Tag:
-        img_els = element.find_all("img")
-        for img_el in img_els:
-            img_tag = filter_tag(img_el)
-            if img_tag:
-                src = get_attr_text(img_tag.attrs.get("data-src"))
-                if src:
-                    img_tag.attrs["src"] = src
-        return element
+from omni_article_markdown.utils import REQUEST_HEADERS
 
 
 class ToutiaoPlugin(ReaderPlugin):
@@ -73,10 +43,6 @@ class ToutiaoPlugin(ReaderPlugin):
 
         response.encoding = "utf-8"
         return response.text
-
-    @override
-    def extractor(self) -> Extractor | None:
-        return ToutiaoExtractor()
 
     def _get_toutiao_cookies(self, url: str) -> list[Cookie]:
         def try_launch_browser(p: Playwright) -> Browser:

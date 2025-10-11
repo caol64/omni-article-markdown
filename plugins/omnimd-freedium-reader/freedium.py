@@ -3,46 +3,10 @@ import sys
 from runpy import run_module
 from typing import override
 
-from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright, Playwright, Browser
 
-from omni_article_markdown.extractor import Extractor
 from omni_article_markdown.hookspecs import ReaderPlugin, hookimpl
-from omni_article_markdown.utils import filter_tag, REQUEST_HEADERS
-
-
-class FreediumExtractor(Extractor):
-    """
-    freedium.cfd
-    """
-
-    @override
-    def can_handle(self, soup: BeautifulSoup) -> bool:
-        title_tag = soup.title
-        title = title_tag.get_text(strip=True) if title_tag else None
-        return title is not None and title.endswith(" - Freedium")
-
-    @override
-    def article_container(self) -> tuple:
-        return ("div", {"class": "main-content"})
-
-    @override
-    def extract_title(self, soup: BeautifulSoup) -> str:
-        title_tag = filter_tag(soup.find("h1"))
-        if not title_tag:
-            return ""
-        title = title_tag.get_text(strip=True)
-        title_tag.decompose()
-        return title
-
-    @override
-    def extract_description(self, soup: BeautifulSoup) -> str:
-        description_tag = soup.find("h2")
-        if description_tag:
-            description = description_tag.text.strip()
-            description_tag.decompose()
-            return description
-        return super().extract_description(soup)
+from omni_article_markdown.utils import REQUEST_HEADERS
 
 
 class FreediumPlugin(ReaderPlugin):
@@ -85,10 +49,6 @@ class FreediumPlugin(ReaderPlugin):
             context.close()
             browser.close()
         return html
-
-    @override
-    def extractor(self) -> Extractor | None:
-        return FreediumExtractor()
 
 
 @hookimpl

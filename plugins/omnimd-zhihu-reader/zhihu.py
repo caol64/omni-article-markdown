@@ -4,27 +4,11 @@ from runpy import run_module
 from typing import override
 
 import requests
-from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright, Playwright, Browser, Cookie
 
-from omni_article_markdown.extractor import Extractor
 from omni_article_markdown.hookspecs import ReaderPlugin, hookimpl
 from omni_article_markdown.store import Store
-from omni_article_markdown.utils import get_og_site_name, REQUEST_HEADERS
-
-
-class ZhihuExtractor(Extractor):
-    """
-    知乎专栏
-    """
-
-    @override
-    def can_handle(self, soup: BeautifulSoup) -> bool:
-        return get_og_site_name(soup) == "知乎专栏"
-
-    @override
-    def article_container(self) -> tuple:
-        return ("div", {"class": "Post-RichText"})
+from omni_article_markdown.utils import REQUEST_HEADERS
 
 
 class ZhihuPlugin(ReaderPlugin):
@@ -57,10 +41,6 @@ class ZhihuPlugin(ReaderPlugin):
 
         response.encoding = "utf-8"
         return response.text
-
-    @override
-    def extractor(self) -> Extractor | None:
-        return ZhihuExtractor()
 
     def _get_zhihu_cookies(self, url: str) -> list[Cookie]:
         def try_launch_browser(p: Playwright) -> Browser:

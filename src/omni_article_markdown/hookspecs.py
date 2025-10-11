@@ -2,8 +2,6 @@ from typing import Protocol
 
 from pluggy import HookimplMarker, HookspecMarker
 
-from .extractor import Extractor
-
 hookspec = HookspecMarker("mdcli")
 hookimpl = HookimplMarker("mdcli")
 
@@ -12,8 +10,6 @@ class ReaderPlugin(Protocol):
     def can_handle(self, url: str) -> bool: ...
 
     def read(self, url: str) -> str: ...
-
-    def extractor(self) -> Extractor | None: ...
 
 
 @hookspec(firstresult=True)

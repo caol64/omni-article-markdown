@@ -30,9 +30,6 @@ class ReaderFactory:
                 def read(self) -> str:
                     return self.plugin.read(self.url)
 
-                def extractor(self) -> Extractor | None:
-                    return self.plugin.extractor()
-
             return PluginReaderAdapter(custom_plugin_reader, url_or_path)
         if url_or_path.startswith("http"):
             return HtmlReader(url_or_path)

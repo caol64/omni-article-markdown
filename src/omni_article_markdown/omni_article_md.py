@@ -11,7 +11,6 @@ from .utils import to_snake_case
 
 @dataclass
 class ReaderContext:
-    extractor: Extractor | None
     raw_html: str
 
 
@@ -51,21 +50,18 @@ class OmniArticleMarkdown:
     def _read_html(self, url_or_path: str) -> ReaderContext:
         reader = ReaderFactory.create(url_or_path)
         raw_html = reader.read()
-        return ReaderContext(extractor=reader.extractor(), raw_html=raw_html)
+        return ReaderContext(raw_html)
 
     def _extract_article(self, ctx: ReaderContext) -> ExtractorContext:
-        if ctx.extractor:
-            article = ctx.extractor.extract(ctx.raw_html)
+        for extract in load_extractors():
+            article = extract.extract(ctx.raw_html)
+            if article:
+                break
         else:
-            for extract in load_extractors():
-                article = extract.extract(ctx.raw_html)
-                if article:
-                    break
-            else:
-                article = DefaultExtractor().extract(ctx.raw_html)
+            article = DefaultExtractor().extract(ctx.raw_html)
         if not article:
             raise ValueError("Failed to extract article content.")
-        return ExtractorContext(article=article)
+        return ExtractorContext(article)
 
     def _parse_html(self, ctx: ExtractorContext) -> ParserContext:
         parser = HtmlMarkdownParser(ctx.article)
