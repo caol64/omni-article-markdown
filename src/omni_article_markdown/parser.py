@@ -61,7 +61,10 @@ class HtmlMarkdownParser:
         self.article = article
 
     def parse(self) -> tuple[str, str]:
-        markdown = self._process_children(self.article.body)
+        if isinstance(self.article.body, str):
+            markdown = self.article.body
+        else:
+            markdown = self._process_children(self.article.body)
         for handler in POST_HANDLERS:
             markdown = handler(markdown)
         if not self.article.description or self.article.description in markdown:

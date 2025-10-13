@@ -32,7 +32,7 @@ class Article:
     title: str
     url: str | None
     description: str | None
-    body: Tag
+    body: Tag | str
 
 
 class Extractor(ABC):
@@ -43,13 +43,16 @@ class Extractor(ABC):
     def extract(self, raw_html: str) -> Article | None:
         soup = BeautifulSoup(raw_html, "html5lib")
         if self.can_handle(soup):
+            # print(f"Using extractor: {self.__class__.__name__}")
             article_container = self.article_container()
             if isinstance(article_container, tuple):
                 article_container = [article_container]
             for container in article_container:
+                article = self.extract_article(soup)
+                if article:
+                    return article
                 article_tag = extract_article_from_soup(soup, container)
                 if article_tag:
-                    # print(f"Using extractor: {self.__class__.__name__}")
                     for el in article_tag.find_all():
                         tag = filter_tag(el)
                         if tag:
@@ -88,6 +91,9 @@ class Extractor(ABC):
     def extract_img(self, element: Tag) -> Tag:
         return element
 
+    def extract_article(self, soup: BeautifulSoup) -> Article | None:
+        return None
+
 
 class DefaultExtractor(Extractor):
     @override
@@ -108,7 +114,7 @@ def extract_article_from_soup(soup: BeautifulSoup, template: tuple) -> Tag | Non
 
 
 def remove_duplicate_titles(article: Article):
-    if article.body:
+    if article.body and isinstance(article.body, Tag):
         first_h1 = article.body.find("h1")
         if first_h1:
             h1_text = first_h1.get_text(strip=True)
