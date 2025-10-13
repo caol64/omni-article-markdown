@@ -51,6 +51,7 @@
 |思否|[link](https://segmentfault.com/a/1190000047273730)||
 |开源中国|[link](https://my.oschina.net/SeaTunnel/blog/18694930)||
 |Forbes|[link](https://www.forbes.com/sites/danalexander/2025/10/10/trump-is-now-one-of-americas-biggest-bitcoin-investors/)||
+|少数派|[link](https://sspai.com/post/102861)||
 
 ---
 
