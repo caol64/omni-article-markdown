@@ -53,6 +53,7 @@
 |Forbes|[link](https://www.forbes.com/sites/danalexander/2025/10/10/trump-is-now-one-of-americas-biggest-bitcoin-investors/)||
 |少数派|[link](https://sspai.com/post/102861)||
 |语雀|[link](https://www.yuque.com/yuque/ng1qth/about)||
+|腾讯云开发者社区|[link](https://cloud.tencent.com/developer/article/2571935)||
 
 ---
 
