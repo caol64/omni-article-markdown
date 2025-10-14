@@ -40,8 +40,7 @@ class Extractor(ABC):
         self.tags_to_clean = TAGS_TO_CLEAN
         self.attrs_to_clean = ATTRS_TO_CLEAN
 
-    def extract(self, raw_html: str) -> Article | None:
-        soup = BeautifulSoup(raw_html, "html5lib")
+    def extract(self, soup: BeautifulSoup) -> Article | None:
         if self.can_handle(soup):
             # print(f"Using extractor: {self.__class__.__name__}")
             article_container = self.article_container()

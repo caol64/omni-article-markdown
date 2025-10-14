@@ -1,9 +1,9 @@
 # 墨探 (omni-article-markdown)
 
-[![PyPI](https://img.shields.io/pypi/v/omni-article-markdown.svg)](https://pypi.org/project/omni-article-markdown/)
-![Python](https://img.shields.io/pypi/pyversions/omni-article-markdown.svg)
+[![PyPI](https://img.shields.io/pypi/v/omni-article-markdown?logo=pypi)](https://pypi.org/project/omni-article-markdown/)
+![Python](https://img.shields.io/pypi/pyversions/omni-article-markdown?logo=python)
 [![License](https://img.shields.io/github/license/caol64/omni-article-markdown)](LICENSE)
-![PyPI Downloads](https://img.shields.io/pypi/dm/omni-article-markdown)
+![PyPI Downloads](https://img.shields.io/pypi/dm/omni-article-markdown?logo=pypi)
 [![Stars](https://img.shields.io/github/stars/caol64/omni-article-markdown?style=social)](https://github.com/caol64/omni-article-markdown)
 
 轻松将网页文章（博客、新闻、文档等）转换为 `Markdown` 格式。

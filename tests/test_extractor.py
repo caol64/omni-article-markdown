@@ -1,3 +1,4 @@
+from bs4.element import Tag
 from omni_article_markdown.extractor import (
     DefaultExtractor,
     extract_article_from_soup,
@@ -40,7 +41,7 @@ def test_default_extractor_basic_behavior(make_soup):
     assert isinstance(extractor.article_container(), list | tuple)
 
 
-def test_cleaning_tags_and_attrs():
+def test_cleaning_tags_and_attrs(make_soup):
     html = make_html("""
         <article>
             <p>Visible</p>
@@ -51,8 +52,9 @@ def test_cleaning_tags_and_attrs():
         </article>
     """)
     extractor = DefaultExtractor()
-    article = extractor.extract(html)
+    article = extractor.extract(make_soup(html))
     assert article is not None
+    assert isinstance(article.body, Tag)
     text = article.body.get_text()
     # 不应包含隐藏元素、style、注释内容
     assert "Visible" in text
@@ -109,6 +111,7 @@ def test_custom_extractor_can_handle(make_soup):
     soup = make_soup(html)
     assert extractor.can_handle(soup) is True
 
-    article = extractor.extract(html)
+    article = extractor.extract(soup)
     assert article is not None
+    assert isinstance(article.body, Tag)
     assert "Hello" in article.body.text

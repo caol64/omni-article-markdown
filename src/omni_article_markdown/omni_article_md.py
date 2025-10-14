@@ -3,6 +3,8 @@ import pkgutil
 from dataclasses import dataclass
 from pathlib import Path
 
+from bs4 import BeautifulSoup
+
 from .extractor import Article, DefaultExtractor, Extractor
 from .parser import HtmlMarkdownParser
 from .readers import ReaderFactory
@@ -53,12 +55,13 @@ class OmniArticleMarkdown:
         return ReaderContext(raw_html)
 
     def _extract_article(self, ctx: ReaderContext) -> ExtractorContext:
+        soup = BeautifulSoup(ctx.raw_html, "html5lib")
         for extract in load_extractors():
-            article = extract.extract(ctx.raw_html)
+            article = extract.extract(soup)
             if article:
                 break
         else:
-            article = DefaultExtractor().extract(ctx.raw_html)
+            article = DefaultExtractor().extract(soup)
         if not article:
             raise ValueError("Failed to extract article content.")
         return ExtractorContext(article)
