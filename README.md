@@ -1,9 +1,9 @@
 # 墨探 (omni-article-markdown)
 
-[![PyPI](https://img.shields.io/pypi/v/omni-article-markdown?logo=pypi)](https://pypi.org/project/omni-article-markdown/)
-![Python](https://img.shields.io/pypi/pyversions/omni-article-markdown?logo=python)
+[![PyPI](https://img.shields.io/pypi/v/omni-article-markdown)](https://pypi.org/project/omni-article-markdown/)
+![Python](https://img.shields.io/pypi/pyversions/omni-article-markdown)
 [![License](https://img.shields.io/github/license/caol64/omni-article-markdown)](LICENSE)
-![PyPI Downloads](https://img.shields.io/pypi/dm/omni-article-markdown?logo=pypi)
+![PyPI Downloads](https://img.shields.io/pypi/dm/omni-article-markdown)
 [![Stars](https://img.shields.io/github/stars/caol64/omni-article-markdown?style=social)](https://github.com/caol64/omni-article-markdown)
 
 轻松将网页文章（博客、新闻、文档等）转换为 `Markdown` 格式。
@@ -56,6 +56,7 @@
 |少数派|[link](https://sspai.com/post/102861)||
 |语雀|[link](https://www.yuque.com/yuque/ng1qth/about)||
 |腾讯云开发者社区|[link](https://cloud.tencent.com/developer/article/2571935)||
+|百家号|[link](https://baijiahao.baidu.com/s?id=1846135703319246634)||
 
 ---
 

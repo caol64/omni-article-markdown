@@ -23,6 +23,8 @@ REQUEST_HEADERS = {
 BROWSER_TARGET_HOSTS = [
     "developer.apple.com/documentation/",
     "www.infoq.cn/",
+    "pcsx2.net/",
+    "baijiahao.baidu.com/",
 ]
 
 def is_sequentially_increasing(code: str) -> bool:

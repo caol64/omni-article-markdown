@@ -43,6 +43,7 @@ class Extractor(ABC):
     def extract(self, soup: BeautifulSoup) -> Article | None:
         if self.can_handle(soup):
             # print(f"Using extractor: {self.__class__.__name__}")
+            self.pre_handle_soup(soup)
             article_container = self.article_container()
             if isinstance(article_container, tuple):
                 article_container = [article_container]
@@ -92,6 +93,9 @@ class Extractor(ABC):
 
     def extract_article(self, soup: BeautifulSoup) -> Article | None:
         return None
+
+    def pre_handle_soup(self, soup: BeautifulSoup):
+        ...
 
 
 class DefaultExtractor(Extractor):
