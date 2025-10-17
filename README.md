@@ -56,7 +56,7 @@
 |少数派|[link](https://sspai.com/post/102861)||
 |语雀|[link](https://www.yuque.com/yuque/ng1qth/about)||
 |腾讯云开发者社区|[link](https://cloud.tencent.com/developer/article/2571935)||
-|百家号|[link](https://baijiahao.baidu.com/s?id=1846135703319246634)||
+|百家号|[link](https://baijiahao.baidu.com/s?id=1846135703319246634)|需安装browser插件|
 
 ---
 
