@@ -58,6 +58,7 @@
 |腾讯云开发者社区|[link](https://cloud.tencent.com/developer/article/2571935)||
 |百家号|[link](https://baijiahao.baidu.com/s?id=1846135703319246634)|需安装browser插件|
 |人人都是产品经理|[link](https://www.woshipm.com/data-analysis/6276761.html)||
+|Jetbrains博客|[link](https://blog.jetbrains.com/teamcity/2025/10/the-state-of-cicd/)||
 
 ---
 
