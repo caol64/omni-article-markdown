@@ -77,64 +77,66 @@ class HtmlMarkdownParser:
 
     def _process_element(self, element: Tag, level: int = 0, is_pre: bool = False) -> str:
         parts = []
-        if element.name == "br":
-            parts.append(LB_SYMBOL)
-        elif element.name == "hr":
-            parts.append("---")
-        elif element.name in {"h1", "h2", "h3", "h4", "h5", "h6"}:
-            heading = self._process_children(element, level, is_pre=is_pre)
-            parts.append(f"{'#' * int(element.name[1])} {heading}")
-        elif element.name == "a":
-            link = self._process_children(element, level, is_pre=is_pre).replace(LB_SYMBOL, "")
-            if link:
-                parts.append(f"[{link}]({element.get('href')})")
-        elif element.name == "strong" or element.name == "b":
-            parts.append(move_spaces(f"**{self._process_children(element, level, is_pre=is_pre)}**", "**"))
-        elif element.name == "em" or element.name == "i":
-            parts.append(move_spaces(f"*{self._process_children(element, level, is_pre=is_pre)}*", "*"))
-        elif element.name == "ul" or element.name == "ol":
-            parts.append(self._process_list(element, level))
-        elif element.name == "img":
-            parts.append(self._process_image(element, None))
-        elif element.name == "blockquote":
-            blockquote = self._process_children(element, level, is_pre=is_pre)
-            if blockquote.startswith(LB_SYMBOL):
-                blockquote = blockquote.removeprefix(LB_SYMBOL)
-            if blockquote.endswith(LB_SYMBOL):
-                blockquote = blockquote.removesuffix(LB_SYMBOL)
-            parts.append("\n".join(f"> {line}" for line in blockquote.split(LB_SYMBOL)))
-        elif element.name == "pre":
-            parts.append(self._process_codeblock(element, level))
-        elif element.name == "code":  # inner code
-            code = self._process_children(element, level, is_pre=is_pre)
-            if LB_SYMBOL not in code:
-                parts.append(f"`{code}`")
-            else:
-                parts.append(code)
-        elif element.name == "picture":
-            source_elements = element.find_all("source")
-            img_element = filter_tag(element.find("img"))
-            if img_element and source_elements:
-                el = source_elements[0]
-                src_el = filter_tag(el)
-                if src_el:
-                    parts.append(self._process_image(img_element, src_el))
-        elif element.name == "figcaption":
-            figcaption = self._process_children(element, level, is_pre=is_pre).replace(LB_SYMBOL, "\n").strip()
-            figcaptions = figcaption.replace("\n\n", "\n").split("\n")
-            parts.append("\n".join([f"*{caption}*" for caption in figcaptions]))
-        elif element.name == "table":
-            parts.append(self._process_table(element, level))
-        elif element.name == "math":  # 处理latex公式
-            semantics = filter_tag(element.find("semantics"))
-            if semantics:
-                tex = filter_tag(semantics.find(attrs={"encoding": "application/x-tex"}))
-                if tex:
-                    parts.append(f"$$ {tex.text} $$")
-        elif element.name == "script":  # 处理github gist
-            parts.append(self._process_gist(element))
-        else:
-            parts.append(self._process_children(element, level, is_pre=is_pre))
+        tag = element.name
+        match tag:
+            case "br":
+                parts.append(LB_SYMBOL)
+            case "hr":
+                parts.append("---")
+            case "h1" | "h2" | "h3" | "h4" | "h5" | "h6":
+                heading = self._process_children(element, level, is_pre=is_pre)
+                parts.append(f"{'#' * int(element.name[1])} {heading}")
+            case "a":
+                link = self._process_children(element, level, is_pre=is_pre).replace(LB_SYMBOL, "")
+                if link:
+                    parts.append(f"[{link}]({element.get('href')})")
+            case "strong" | "b":
+                parts.append(move_spaces(f"**{self._process_children(element, level, is_pre=is_pre)}**", "**"))
+            case "em" | "i":
+                parts.append(move_spaces(f"*{self._process_children(element, level, is_pre=is_pre)}*", "*"))
+            case "ul" | "ol":
+                parts.append(self._process_list(element, level))
+            case "img":
+                parts.append(self._process_image(element, None))
+            case "blockquote":
+                blockquote = self._process_children(element, level, is_pre=is_pre)
+                if blockquote.startswith(LB_SYMBOL):
+                    blockquote = blockquote.removeprefix(LB_SYMBOL)
+                if blockquote.endswith(LB_SYMBOL):
+                    blockquote = blockquote.removesuffix(LB_SYMBOL)
+                parts.append("\n".join(f"> {line}" for line in blockquote.split(LB_SYMBOL)))
+            case "pre":
+                parts.append(self._process_codeblock(element, level))
+            case "code":  # inner code
+                code = self._process_children(element, level, is_pre=is_pre)
+                if LB_SYMBOL not in code:
+                    parts.append(f"`{code}`")
+                else:
+                    parts.append(code)
+            case "picture":
+                source_elements = element.find_all("source")
+                img_element = filter_tag(element.find("img"))
+                if img_element and source_elements:
+                    el = source_elements[0]
+                    src_el = filter_tag(el)
+                    if src_el:
+                        parts.append(self._process_image(img_element, src_el))
+            case "figcaption":
+                figcaption = self._process_children(element, level, is_pre=is_pre).replace(LB_SYMBOL, "\n").strip()
+                figcaptions = figcaption.replace("\n\n", "\n").split("\n")
+                parts.append("\n".join([f"*{caption}*" for caption in figcaptions]))
+            case "table":
+                parts.append(self._process_table(element, level))
+            case "math":  # 处理latex公式
+                semantics = filter_tag(element.find("semantics"))
+                if semantics:
+                    tex = filter_tag(semantics.find(attrs={"encoding": "application/x-tex"}))
+                    if tex:
+                        parts.append(f"$$ {tex.text} $$")
+            case "script":  # 处理github gist
+                parts.append(self._process_gist(element))
+            case _:
+                parts.append(self._process_children(element, level, is_pre=is_pre))
         result = "".join(parts)
         if result and is_block_element(element.name):
             if not is_pure_block_children(element):
