@@ -121,6 +121,8 @@ class HtmlMarkdownParser:
                     src_el = filter_tag(el)
                     if src_el:
                         parts.append(self._process_image(img_element, src_el))
+                elif img_element:
+                    parts.append(self._process_image(img_element, None))
             case "figcaption":
                 figcaption = self._process_children(element, level, is_pre=is_pre).replace(LB_SYMBOL, "\n").strip()
                 figcaptions = figcaption.replace("\n\n", "\n").split("\n")
@@ -139,7 +141,7 @@ class HtmlMarkdownParser:
                 parts.append(self._process_children(element, level, is_pre=is_pre))
         result = "".join(parts)
         if result and is_block_element(element.name):
-            if not is_pure_block_children(element):
+            if not element.children or not is_pure_block_children(element):
                 result = f"{LB_SYMBOL}{result}{LB_SYMBOL}"
         return result
 
