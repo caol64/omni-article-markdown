@@ -1,4 +1,5 @@
 from typing import override
+
 from bs4 import BeautifulSoup
 
 from ..extractor import Extractor
@@ -21,10 +22,11 @@ class Netease163Extractor(Extractor):
         return ("div", {"data-testid": "article"})
 
     @override
-    def pre_handle_soup(self, soup: BeautifulSoup):
+    def pre_handle_soup(self, soup: BeautifulSoup) -> BeautifulSoup:
         for tag in soup.find_all("span", {"class": "bjh-p"}):
             span_tag = filter_tag(tag)
             if span_tag:
                 span_tag.name = "p"
         # for tag in soup.find_all("img"):
         #     tag.wrap(soup.new_tag("p"))
+        return soup

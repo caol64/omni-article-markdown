@@ -2,7 +2,7 @@ import re
 from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
-from bs4.element import NavigableString, Tag, PageElement, AttributeValueList
+from bs4.element import AttributeValueList, NavigableString, PageElement, Tag
 
 REQUEST_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0",
@@ -101,8 +101,7 @@ def get_attr_text(el: str | AttributeValueList | None) -> str:
         return ""
     if isinstance(el, str):
         return el.strip()
-    else:
-        return " ".join(el).strip()
+    return " ".join(el).strip()
 
 
 def get_og_url(soup: BeautifulSoup) -> str:

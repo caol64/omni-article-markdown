@@ -1,4 +1,5 @@
 import pluggy
+
 from . import hookspecs
 
 pm = pluggy.PluginManager("mdcli")

@@ -2,10 +2,10 @@ from abc import ABC, abstractmethod
 
 import requests
 
-from .utils import REQUEST_HEADERS
 from .extractor import Extractor
 from .hookspecs import ReaderPlugin
 from .plugins import pm
+from .utils import REQUEST_HEADERS
 
 
 class Reader(ABC):
@@ -33,8 +33,7 @@ class ReaderFactory:
             return PluginReaderAdapter(custom_plugin_reader, url_or_path)
         if url_or_path.startswith("http"):
             return HtmlReader(url_or_path)
-        else:
-            return FileReader(url_or_path)
+        return FileReader(url_or_path)
 
 
 class HtmlReader(Reader):
@@ -52,5 +51,5 @@ class FileReader(Reader):
         self.url_or_path = url_or_path
 
     def read(self) -> str:
-        with open(self.url_or_path, "r", encoding="utf8") as f:
+        with open(self.url_or_path, encoding="utf8") as f:
             return f.read()

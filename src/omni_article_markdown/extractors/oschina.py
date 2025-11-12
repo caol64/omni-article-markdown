@@ -1,7 +1,9 @@
 from typing import override
+
 from bs4 import BeautifulSoup
 
 from ..extractor import Extractor
+
 
 class OsChinaExtractor(Extractor):
     """

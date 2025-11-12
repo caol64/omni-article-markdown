@@ -75,7 +75,7 @@ class OmniArticleMarkdown:
 def load_extractors(package_name="extractors") -> list[Extractor]:
     extractors_package = Path(__file__).parent / package_name
     extractors = []
-    for loader, module_name, is_pkg in pkgutil.iter_modules([extractors_package.resolve()]):
+    for _loader, module_name, _is_pkg in pkgutil.iter_modules([extractors_package.resolve()]):
         module = importlib.import_module(f"omni_article_markdown.{package_name}.{module_name}")
         for attr in dir(module):
             cls = getattr(module, attr)

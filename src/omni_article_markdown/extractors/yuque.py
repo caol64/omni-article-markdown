@@ -1,8 +1,9 @@
 import json
 import re
 from typing import override
-from bs4 import BeautifulSoup
+
 import requests
+from bs4 import BeautifulSoup
 
 from ..extractor import Article, Extractor
 from ..utils import REQUEST_HEADERS, filter_tag, get_og_url

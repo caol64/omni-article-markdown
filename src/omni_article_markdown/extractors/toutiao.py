@@ -1,9 +1,11 @@
 from typing import override
+
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 from ..extractor import Extractor
 from ..utils import filter_tag, get_attr_text
+
 
 class ToutiaoExtractor(Extractor):
     """

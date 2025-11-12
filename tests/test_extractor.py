@@ -1,9 +1,10 @@
 from bs4.element import Tag
+
 from omni_article_markdown.extractor import (
+    Article,
     DefaultExtractor,
     extract_article_from_soup,
     remove_duplicate_titles,
-    Article,
 )
 
 # ---- mock utils ----

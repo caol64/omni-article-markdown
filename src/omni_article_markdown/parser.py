@@ -1,17 +1,18 @@
 import re
-from typing import Callable
+from collections.abc import Callable
 from urllib.parse import urljoin
-from bs4.element import NavigableString, Tag
+
 import requests
+from bs4.element import NavigableString, Tag
 
 from .extractor import Article
 from .utils import (
+    collapse_spaces,
+    detect_language,
     filter_tag,
     get_attr_text,
     is_sequentially_increasing,
     move_spaces,
-    detect_language,
-    collapse_spaces,
 )
 
 LB_SYMBOL = "[|lb_bl|]"
@@ -140,9 +141,8 @@ class HtmlMarkdownParser:
             case _:
                 parts.append(self._process_children(element, level, is_pre=is_pre))
         result = "".join(parts)
-        if result and is_block_element(element.name):
-            if not element.children or not is_pure_block_children(element):
-                result = f"{LB_SYMBOL}{result}{LB_SYMBOL}"
+        if result and is_block_element(element.name) and not element.children or not is_pure_block_children(element):
+            result = f"{LB_SYMBOL}{result}{LB_SYMBOL}"
         return result
 
     def _process_children(self, element: Tag, level: int = 0, is_pre: bool = False) -> str:
@@ -273,8 +273,7 @@ class HtmlMarkdownParser:
                     language = detect_language(filename, code)
                     gists.append(f"```{language}\n{code}\n```")
                 return "\n\n".join(gists)
-            else:
-                print(f"Fetch gist error: {response.status_code}")
+            print(f"Fetch gist error: {response.status_code}")
         return ""
 
 

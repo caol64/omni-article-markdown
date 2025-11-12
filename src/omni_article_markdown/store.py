@@ -17,5 +17,5 @@ class Store:
         file_path = self.path / f"{key}.json"
         if not file_path.exists() or not file_path.is_file():
             return None
-        with open(file_path, "r", encoding="utf8") as f:
+        with open(file_path, encoding="utf8") as f:
             return json.load(f)

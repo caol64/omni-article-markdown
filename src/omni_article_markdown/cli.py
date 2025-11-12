@@ -1,10 +1,11 @@
-import click
 import sys
 from runpy import run_module
+
+import click
 from click_default_group import DefaultGroup
 
-from .omni_article_md import OmniArticleMarkdown
 from . import DEFAULT_PLUGINS
+from .omni_article_md import OmniArticleMarkdown
 
 
 @click.group(cls=DefaultGroup, default="parse", default_if_no_args=True)
@@ -87,7 +88,7 @@ def uninstall(plugin_name: str, yes: bool):
     Uninstalls a plugin for this application.
     For example, to uninstall the 'zhihu' plugin: mdcli uninstall zhihu
     """
-    actual_package_name = plugin_name if plugin_name not in DEFAULT_PLUGINS else DEFAULT_PLUGINS[plugin_name]
+    actual_package_name = DEFAULT_PLUGINS.get(plugin_name, plugin_name)
 
     click.echo(f"Attempting to uninstall plugin: {actual_package_name}...")
     args = ["pip", "uninstall"]

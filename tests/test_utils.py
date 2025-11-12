@@ -1,22 +1,23 @@
 import pytest
-from bs4.element import NavigableString, AttributeValueList
+from bs4.element import AttributeValueList, NavigableString
+
 from omni_article_markdown.utils import (
+    collapse_spaces,
+    detect_language,
+    extract_domain,
+    filter_tag,
+    get_attr_text,
+    get_canonical_url,
+    get_og_description,
+    get_og_site_name,
+    get_og_title,
+    get_og_url,
+    get_tag_text,
+    get_title,
+    is_matched_canonical,
     is_sequentially_increasing,
     move_spaces,
     to_snake_case,
-    collapse_spaces,
-    extract_domain,
-    detect_language,
-    filter_tag,
-    get_attr_text,
-    get_og_url,
-    get_og_site_name,
-    get_og_description,
-    get_canonical_url,
-    is_matched_canonical,
-    get_og_title,
-    get_tag_text,
-    get_title,
 )
 
 

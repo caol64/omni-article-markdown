@@ -1,10 +1,10 @@
-from importlib import resources
 import sys
+from importlib import resources
 from runpy import run_module
 from typing import override
 
 import requests
-from playwright.sync_api import sync_playwright, Playwright, Browser, Cookie
+from playwright.sync_api import Browser, Cookie, Playwright, sync_playwright
 
 from omni_article_markdown.hookspecs import ReaderPlugin, hookimpl
 from omni_article_markdown.store import Store
@@ -59,8 +59,7 @@ class ToutiaoPlugin(ReaderPlugin):
                     sys.argv = original_argv
                     # Try again
                     return p.chromium.launch(headless=True)
-                else:
-                    raise  # re-raise other exceptions
+                raise  # re-raise other exceptions
 
         with sync_playwright() as p:
             browser = try_launch_browser(p)

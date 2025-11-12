@@ -2,10 +2,10 @@ import sys
 from runpy import run_module
 from typing import override
 
-from playwright.sync_api import sync_playwright, Playwright, Browser
+from playwright.sync_api import Browser, Playwright, sync_playwright
 
 from omni_article_markdown.hookspecs import ReaderPlugin, hookimpl
-from omni_article_markdown.utils import REQUEST_HEADERS, BROWSER_TARGET_HOSTS
+from omni_article_markdown.utils import BROWSER_TARGET_HOSTS, REQUEST_HEADERS
 
 
 class BrowserPlugin(ReaderPlugin):
@@ -29,8 +29,7 @@ class BrowserPlugin(ReaderPlugin):
                     sys.argv = original_argv
                     # Try again
                     return p.chromium.launch(headless=True)
-                else:
-                    raise  # re-raise other exceptions
+                raise  # re-raise other exceptions
 
         with sync_playwright() as p:
             browser = try_launch_browser(p)

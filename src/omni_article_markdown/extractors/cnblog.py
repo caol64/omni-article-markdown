@@ -1,8 +1,10 @@
 from typing import override
+
 from bs4 import BeautifulSoup
 
 from ..extractor import Extractor
 from ..utils import is_matched_canonical
+
 
 class CnBlogsExtractor(Extractor):
     """

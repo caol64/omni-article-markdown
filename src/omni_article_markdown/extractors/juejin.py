@@ -1,8 +1,9 @@
 from typing import override
+
 from bs4 import BeautifulSoup
 
 from ..extractor import Extractor
-from ..utils import is_matched_canonical, filter_tag
+from ..utils import filter_tag, is_matched_canonical
 
 
 class JuejinExtractor(Extractor):
