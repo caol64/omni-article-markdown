@@ -156,6 +156,25 @@ mdcli uninstall omnimd-zhihu-reader
 
 ---
 
+## 使用Docker镜像
+
+**直接下载**
+
+暂未提供
+
+**自行构建**
+
+```
+docker build --build-arg PYPI_REGISTRY=https://pypi.tuna.tsinghua.edu.cn/simple -t omni-article-markdown .
+# 可以指定PYPI镜像源，默认使用官方源
+```
+
+现在你可以在`docker`容器中使用墨探了：
+
+```
+docker run --rm omni-article-markdown /path/to/your/url
+```
+
 ## 架构说明
 
 ![](data/1.jpg)

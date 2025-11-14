@@ -141,7 +141,7 @@ class HtmlMarkdownParser:
             case _:
                 parts.append(self._process_children(element, level, is_pre=is_pre))
         result = "".join(parts)
-        if result and is_block_element(element.name) and not element.children or not is_pure_block_children(element):
+        if result and is_block_element(element.name) and (not element.children or not is_pure_block_children(element)):
             result = f"{LB_SYMBOL}{result}{LB_SYMBOL}"
         return result
 
