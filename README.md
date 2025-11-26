@@ -62,6 +62,7 @@
 |Claude文档|[link](https://docs.claude.com/en/docs/build-with-claude/prompt-caching)||
 |Anthropic|[link](https://www.anthropic.com/news/claude-sonnet-4-5)||
 |Meta博客|[link](https://engineering.fb.com/2025/10/06/developer-tools/openzl-open-source-format-aware-compression-framework/)||
+|Android Developers Blog|[link](https://android-developers.googleblog.com/2025/11/jetpack-navigation-3-is-stable.html)||
 
 ---
 

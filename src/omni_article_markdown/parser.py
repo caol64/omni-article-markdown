@@ -92,9 +92,13 @@ class HtmlMarkdownParser:
                 if link:
                     parts.append(f"[{link}]({element.get('href')})")
             case "strong" | "b":
-                parts.append(move_spaces(f"**{self._process_children(element, level, is_pre=is_pre)}**", "**"))
+                s = self._process_children(element, level, is_pre=is_pre).replace(LB_SYMBOL, "")
+                if s:
+                    parts.append(move_spaces(f"**{s}**", "**"))
             case "em" | "i":
-                parts.append(move_spaces(f"*{self._process_children(element, level, is_pre=is_pre)}*", "*"))
+                s = self._process_children(element, level, is_pre=is_pre).replace(LB_SYMBOL, "")
+                if s:
+                    parts.append(move_spaces(f"*{s}*", "*"))
             case "ul" | "ol":
                 parts.append(self._process_list(element, level))
             case "img":
@@ -160,11 +164,9 @@ class HtmlMarkdownParser:
                         # print(element.name, level, result)
                 elif isinstance(child, Tag):
                     result = self._process_element(child, level, is_pre=is_pre)
-                    if is_pre:
+                    if is_pre or result.strip():
                         parts.append(result)
-                    elif result.strip():
-                        parts.append(result.strip())
-        return "".join(parts) if is_pre or level > 0 else "".join(parts).strip()
+        return "".join(parts) if is_pre or level > 0 else "".join(parts)
 
     def _process_list(self, element: Tag, level: int) -> str:
         indent = "  " * level
