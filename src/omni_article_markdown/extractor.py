@@ -10,7 +10,7 @@ from bs4.element import Comment, Tag
 from .utils import filter_tag, get_attr_text, get_canonical_url, get_og_description, get_og_title, get_og_url, get_title
 
 TAGS_TO_CLEAN: list[Callable[[Tag], bool]] = [
-    lambda el: el.name in ("style", "link", "button", "footer", "header", "aside"),
+    lambda el: el.name in ("style", "link", "button", "footer", "header"),
     lambda el: el.name == "script" and "src" not in el.attrs,
     lambda el: el.name == "script"
         and el.has_attr("src")
