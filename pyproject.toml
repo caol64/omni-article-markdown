@@ -2,9 +2,7 @@
 name = "omni-article-markdown"
 version = "0.1.10"
 description = "Easily convert web articles (blogs, news, documents, etc.) into Markdown format."
-authors = [
-    { name = "Lei", email = "caol64@gmail.com" }
-]
+authors = [{ name = "Lei", email = "caol64@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.13"
 license = "MIT"
@@ -32,9 +30,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = [
-    "pytest",
-]
+dev = ["pytest"]
 
 [project.scripts]
 mdcli = "omni_article_markdown.cli:cli"

@@ -1,6 +1,6 @@
 [project]
 name = "omnimd-toutiao-reader"
-version = "0.1.3"
+version = "0.1.4"
 description = "A plugin for omni-article-markdown to read Toutiao content."
 authors = [
     { name = "Lei", email = "caol64@gmail.com" }
@@ -9,7 +9,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 license = "MIT"
 dependencies = [
-    "playwright",
+    "playwright==1.57.0",
 ]
 
 [project.entry-points.mdcli]

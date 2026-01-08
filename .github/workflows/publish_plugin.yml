@@ -3,10 +3,15 @@ name: Build Plugins and Publish to PyPI
 on:
   workflow_dispatch:
     inputs:
-      package_path:
-        description: 'Path to plugin directory (relative to repo root)'
+      package:
+        description: "Choose the package to publish"
         required: true
-        default: 'plugins/omnimd-freedium-reader'
+        type: choice
+        options:
+          - 'plugins/omnimd-browser-reader'
+          - 'plugins/omnimd-freedium-reader'
+          - 'plugins/omnimd-toutiao-reader'
+          - 'plugins/omnimd-zhihu-reader'
 
 jobs:
   omnimd-plugin-publish:
@@ -25,7 +30,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-${{ github.event.inputs.package_path }}-pip-${{ hashFiles('pyproject.toml') }}
+          key: ${{ runner.os }}-${{ github.event.inputs.package }}-pip-${{ hashFiles('pyproject.toml') }}
 
       - name: Install Hatch
         run: |
@@ -36,6 +41,6 @@ jobs:
           HATCH_INDEX_USER: __token__
           HATCH_INDEX_AUTH: ${{ secrets.PYPI_TOKEN }}
         run: |
-          cd "${{ github.event.inputs.package_path }}"
+          cd "${{ github.event.inputs.package }}"
           hatch build --clean
           hatch publish --yes --no-prompt
