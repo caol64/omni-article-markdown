@@ -14,4 +14,4 @@ RUN mdcli install freedium
 RUN mdcli install browser
 
 ENTRYPOINT ["mdcli"]
-CMD []
+CMD ["--help"]

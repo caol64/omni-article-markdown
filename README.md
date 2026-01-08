@@ -4,22 +4,20 @@
 ![Python](https://img.shields.io/pypi/pyversions/omni-article-markdown)
 [![License](https://img.shields.io/github/license/caol64/omni-article-markdown)](LICENSE)
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/omni-article-markdown?period=total&units=INTERNATIONAL_SYSTEM&left_color=GRAY&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/omni-article-markdown)
+[![Docker Pulls](https://img.shields.io/docker/pulls/caol64/omnimd)](https://hub.docker.com/r/caol64/omnimd)
 [![Stars](https://img.shields.io/github/stars/caol64/omni-article-markdown?style=social)](https://github.com/caol64/omni-article-markdown)
 
 轻松将网页文章（博客、新闻、文档等）转换为 `Markdown` 格式。
 
 ![](data/1.gif)
 
----
+## 简介
 
-## 项目简介
 墨探的开发初衷，是为了解决一个问题：如何将来自互联网上各种不同网站的文章内容，精准且高效地转换成统一的Markdown格式。
 
 众所周知，万维网上的网站设计风格迥异，其HTML结构也呈现出千差万别的特点。这种多样性给自动化内容提取和格式转换带来了巨大的困难。要实现一个能够适应各种复杂HTML结构的通用解决方案，并非易事。
 
 我的想法是：从特定的网站开始适配，以点到面，逐步抽取出通用的解决方案，最后尽可能多的覆盖更多网站。
-
----
 
 ## 功能介绍
 
@@ -64,17 +62,52 @@
 |Meta博客|[link](https://engineering.fb.com/2025/10/06/developer-tools/openzl-open-source-format-aware-compression-framework/)||
 |Android Developers Blog|[link](https://android-developers.googleblog.com/2025/11/jetpack-navigation-3-is-stable.html)||
 
----
+## 安装方式
 
-## 快速开始
-
-1. 安装
+### 方式一：pip（推荐）
 
 ```sh
 pip install omni-article-markdown
 ```
 
-2. 运行说明
+安装完成后即可使用：
+
+```bash
+mdcli --help
+```
+
+### 方式二：Docker（无需 Python 环境）
+
+如果你不想在本地安装 Python，也可以直接使用 Docker。
+
+**拉取镜像**
+
+```bash
+docker pull caol64/omnimd
+```
+
+**查看帮助**
+
+```bash
+docker run --rm caol64/omnimd --help
+```
+
+**Markdown转换示例**
+
+```bash
+docker run --rm \
+  -v ~/.ommimd:/root/.ommimd \
+  caol64/omnimd \
+  https://zhuanlan.zhihu.com/p/1915735485801828475
+```
+
+> 说明：
+>
+> * 使用 `-v` 挂载本地目录以保存网站cookie
+> * 容器启动即执行 `mdcli` 命令
+
+
+## 基本用法
 
 **仅转换**
 
@@ -94,13 +127,13 @@ mdcli https://example.com -s
 mdcli https://example.com -s /home/user/
 ```
 
----
-
 ## 插件机制
 
 [「墨探」是如何使用插件机制构建可扩展架构的](https://babyno.top/posts/2025/06/a-deep-dive-into-the-extensible-architecture-of-omni-article-markdown/)
 
 **安装插件**
+
+⚠️ docker镜像已安装所有插件。
 
 安装插件和`pip`命令格式相同：
 
@@ -155,27 +188,6 @@ mdcli uninstall omnimd-zhihu-reader
 
 文档编写中。
 
----
-
-## 使用Docker镜像
-
-**直接下载**
-
-暂未提供
-
-**自行构建**
-
-```
-docker build --build-arg PYPI_REGISTRY=https://pypi.tuna.tsinghua.edu.cn/simple -t omni-article-markdown .
-# 可以指定PYPI镜像源，默认使用官方源
-```
-
-现在你可以在`docker`容器中使用墨探了：
-
-```
-docker run --rm omni-article-markdown /path/to/your/url
-```
-
 ## 架构说明
 
 ![](data/1.jpg)
@@ -186,20 +198,16 @@ docker run --rm omni-article-markdown /path/to/your/url
 - **Extractor** 模块的功能是提取正文内容，清理无用数据
 - **Parser** 模块的功能是将 HTML 转换为 Markdown
 
----
-
 ## 贡献与反馈
 - 发现解析问题？欢迎提交 [Issue](https://github.com/caol64/omni-article-markdown/issues)
 - 改进解析？欢迎贡献 [Pull Request](https://github.com/caol64/omni-article-markdown/pulls)
 - 开发插件？文档正在筹备中
 
----
-
 ## 赞助
 
-如果您觉得不错，可以给我家猫咪买点罐头吃。[喂猫❤️](https://yuzhi.tech/sponsor)
+如果你觉得墨探对你有帮助，可以给我家猫咪买点罐头 ❤️
 
----
+[https://yuzhi.tech/sponsor](https://yuzhi.tech/sponsor)
 
 ## License
 
