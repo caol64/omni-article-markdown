@@ -22,8 +22,11 @@ def cli():
 @click.option(
     "-s",
     "--save",
-    help="Save result (default: ./). Provide a path to save elsewhere.",
+    help="Save result. Use -s alone to save to './', or -s /path to save elsewhere.",
     type=click.Path(dir_okay=True, writable=True),
+    is_flag=False,
+    flag_value="./",
+    default=None,
 )
 def parse_article(url_or_path: str, save: str | None):
     """

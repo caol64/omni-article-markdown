@@ -133,7 +133,9 @@ mdcli https://example.com -s /home/user/
 
 **安装插件**
 
-⚠️ docker镜像已安装所有插件。
+> [!NOTE]
+>
+> docker 镜像已安装所有插件。
 
 安装插件和`pip`命令格式相同：
 
