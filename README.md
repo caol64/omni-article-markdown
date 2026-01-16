@@ -29,20 +29,18 @@
 
 以下是一些网站示例，大家可以自己测试下效果。
 
+### 无需安装插件
+
 |站点|链接|备注|
 --|--|--
 |Medium|[link](https://medium.com/perry-street-software-engineering/architectural-linting-for-swift-made-easy-75d7f9f569cd)||
 |csdn|[link](https://blog.csdn.net/weixin_41705306/article/details/148787220)||
 |掘金|[link](https://juejin.cn/post/7405845617282449462)||
-|知乎专栏|[link](https://zhuanlan.zhihu.com/p/1915735485801828475)|需安装zhihu插件|
 |公众号|[link](https://mp.weixin.qq.com/s/imHIKy7dqMmpm032eIhIJg)||
-|今日头条|[link](https://www.toutiao.com/article/7283050053155947062/)|需安装toutiao插件|
 |网易|[link](https://www.163.com/dy/article/K2SPPGSK0514R9KE.html)||
 |简书|[link](https://www.jianshu.com/p/20bd2e9b1f03)||
-|Freedium|[link](https://freedium.cfd/https://medium.com/@devlink/ai-killed-my-coding-brain-but-im-rebuilding-it-8de7e1618bca)|需安装freedium插件|
 |Towards Data Science|[link](https://towardsdatascience.com/hands-on-multi-agent-llm-restaurant-simulation-with-python-and-openai/)||
 |Quantamagazine|[link](https://www.quantamagazine.org/matter-vs-force-why-there-are-exactly-two-types-of-particles-20250623/)||
-|苹果开发者文档|[link](https://developer.apple.com/documentation/technologyoverviews/adopting-liquid-glass)|需安装browser插件|
 |Cloudflare博客|[link](https://blog.cloudflare.com/20-percent-internet-upgrade/)||
 |阿里云开发者社区|[link](https://developer.aliyun.com/article/791514)||
 |微软技术文档|[link](https://learn.microsoft.com/en-us/dotnet/ai/get-started-app-chat-template)||
@@ -54,13 +52,28 @@
 |少数派|[link](https://sspai.com/post/102861)||
 |语雀|[link](https://www.yuque.com/yuque/ng1qth/about)||
 |腾讯云开发者社区|[link](https://cloud.tencent.com/developer/article/2571935)||
-|百家号|[link](https://baijiahao.baidu.com/s?id=1846135703319246634)|需安装browser插件|
 |人人都是产品经理|[link](https://www.woshipm.com/data-analysis/6276761.html)||
 |Jetbrains博客|[link](https://blog.jetbrains.com/teamcity/2025/10/the-state-of-cicd/)||
 |Claude文档|[link](https://docs.claude.com/en/docs/build-with-claude/prompt-caching)||
 |Anthropic|[link](https://www.anthropic.com/news/claude-sonnet-4-5)||
 |Meta博客|[link](https://engineering.fb.com/2025/10/06/developer-tools/openzl-open-source-format-aware-compression-framework/)||
 |Android Developers Blog|[link](https://android-developers.googleblog.com/2025/11/jetpack-navigation-3-is-stable.html)||
+|Spring Blog|[link](https://spring.io/blog/2026/01/13/spring-ai-generic-agent-skills)||
+
+### 需安装 browser 插件
+
+|站点|链接|备注|
+--|--|--
+|苹果开发者文档|[link](https://developer.apple.com/documentation/technologyoverviews/adopting-liquid-glass)|需安装browser插件|
+|百家号|[link](https://baijiahao.baidu.com/s?id=1846135703319246634)|需安装browser插件|
+
+### 需安装专有插件
+
+|站点|链接|备注|
+--|--|--
+|知乎专栏|[link](https://zhuanlan.zhihu.com/p/1915735485801828475)|需安装zhihu插件|
+|今日头条|[link](https://www.toutiao.com/article/7283050053155947062/)|需安装toutiao插件|
+|Freedium|[link](https://freedium.cfd/https://medium.com/@devlink/ai-killed-my-coding-brain-but-im-rebuilding-it-8de7e1618bca)|需安装freedium插件|
 
 ## 安装方式
 

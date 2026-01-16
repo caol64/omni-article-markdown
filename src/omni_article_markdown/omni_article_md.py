@@ -1,4 +1,5 @@
 import importlib
+import os
 import pkgutil
 from dataclasses import dataclass
 from pathlib import Path
@@ -52,6 +53,9 @@ class OmniArticleMarkdown:
     def _read_html(self, url_or_path: str) -> ReaderContext:
         reader = ReaderFactory.create(url_or_path)
         raw_html = reader.read()
+        if os.getenv("IS_DEBUG") == "1":
+            with Path("r.html").open("w", encoding="utf-8") as f:
+                f.write(raw_html)
         return ReaderContext(raw_html)
 
     def _extract_article(self, ctx: ReaderContext) -> ExtractorContext:
