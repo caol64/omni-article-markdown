@@ -29,5 +29,5 @@ class TowardsDataScienceExtractor(Extractor):
         return get_og_site_name(soup) == "Towards Data Science"
 
     @override
-    def article_container(self) -> tuple | list:
+    def article_container(self) -> tuple:
         return ("main", None)

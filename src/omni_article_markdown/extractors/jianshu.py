@@ -17,7 +17,7 @@ class JianshuExtractor(Extractor):
         return get_og_site_name(soup) == "简书"
 
     @override
-    def article_container(self) -> tuple | list:
+    def article_container(self) -> list[tuple]:
         return ARTICLE_CONTAINERS
 
     @override
