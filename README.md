@@ -60,6 +60,7 @@
 |Android Developers Blog|[link](https://android-developers.googleblog.com/2025/11/jetpack-navigation-3-is-stable.html)||
 |Spring Blog|[link](https://spring.io/blog/2026/01/13/spring-ai-generic-agent-skills)||
 |Hackernoon|[link](https://hackernoon.com/attention-is-currency-ai-is-the-printing-press)||
+|领英博客|[link](https://www.linkedin.com/blog/engineering/infrastructure/scalable-multi-language-service-discovery-at-linkedin)||
 
 ### 需安装 browser 插件
 
