@@ -59,6 +59,7 @@
 |Meta博客|[link](https://engineering.fb.com/2025/10/06/developer-tools/openzl-open-source-format-aware-compression-framework/)||
 |Android Developers Blog|[link](https://android-developers.googleblog.com/2025/11/jetpack-navigation-3-is-stable.html)||
 |Spring Blog|[link](https://spring.io/blog/2026/01/13/spring-ai-generic-agent-skills)||
+|Hackernoon|[link](https://hackernoon.com/attention-is-currency-ai-is-the-printing-press)||
 
 ### 需安装 browser 插件
 
