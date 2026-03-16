@@ -31,6 +31,8 @@ class ReaderFactory:
                     return self.plugin.read(self.url)
 
             return PluginReaderAdapter(custom_plugin_reader, url_or_path)
+        if url_or_path.startswith("https://wallstreetcn.com/articles/"):
+            return CurlReader(url_or_path)
         if url_or_path.startswith("http"):
             return HtmlReader(url_or_path)
         return FileReader(url_or_path)
@@ -53,3 +55,14 @@ class FileReader(Reader):
     def read(self) -> str:
         with open(self.url_or_path, encoding="utf8") as f:
             return f.read()
+
+class CurlReader(Reader):
+    def __init__(self, url_or_path: str):
+        self.url_or_path = url_or_path
+
+    def read(self) -> str:
+        headers = REQUEST_HEADERS.copy()
+        headers.update({"User-Agent": "curl/8.7.1"})
+        response = requests.get(self.url_or_path, headers=headers)
+        response.encoding = "utf-8"
+        return response.text
