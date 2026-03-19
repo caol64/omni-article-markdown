@@ -14,8 +14,6 @@ extend-exclude = [
     "__pycache__",
     "*.pyc",
     "*.yaml",
-    "node_modules",
-    "webview",
     "bin",
     "build",
     "dist",

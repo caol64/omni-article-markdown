@@ -29,8 +29,8 @@ dependencies = [
     "pip",
 ]
 
-[project.optional-dependencies]
-dev = ["pytest"]
+[dependency-groups]
+dev = ["pytest", "mypy", "ruff", "playwright==1.57.0"]
 
 [project.scripts]
 mdcli = "omni_article_markdown.cli:cli"
@@ -42,16 +42,8 @@ Homepage = "https://github.com/caol64/omni-article-markdown"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.hatch.build]
-exclude = [
-    "/data",
-    "/plugins",
-    "/dist",
-]
-
 [tool.hatch.build.targets.sdist]
-include = [
-    "/src/omni_article_markdown",
-    "/README.md",
-    "/pyproject.toml",
-]
+include = ["/src"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["/src/omni_article_markdown"]
