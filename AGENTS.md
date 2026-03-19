@@ -37,7 +37,7 @@ When working on this project, the agent **MUST** adhere to the following rules:
 
 ## 开发流程
 
-- 先阅读`README`了解项目功能，项目使用`requests`库对`url`进行访问，把抓取到的`html`使用`beautifulsoup4`进行转换
+- 先阅读`README`了解项目功能
 - 阅读`src/omni_article_markdown/extractors`目录下已有的功能，找到开发规律
 - 对于新接入的网站，在`src/omni_article_markdown/extractors`下新建一个独立文件并继承`Extractor`类，引擎会自动加载
 - 使用工具抓取网站`html`，由于内容一般较大，建议保存成临时文件，工具使用方法：
@@ -56,6 +56,8 @@ When working on this project, the agent **MUST** adhere to the following rules:
   - 求关注、推广链接等
   - 菜单、目录、`TOC`等与正文无关内容
 - 如果你确定使用`playwright`模拟浏览器浏览即可获取到正文，无需新增新的`extractor`，只需在`src/utils.py`中的`BROWSER_TARGET_HOSTS`添加网站域名即可
+- 最后使用如下方法验证：
+  - `uv run mdcli <url>`
 
 ## 开发规范
 
@@ -75,7 +77,11 @@ When working on this project, the agent **MUST** adhere to the following rules:
 
 ## 开发日志
 
-`AGENT_NOTES.md`是你的开发日志，你会把你开发中遇到的问题记录在案。注意，不要事无巨细的全部记录下来，把你认为重要，可以为你之后开发提升效率或者带来帮助的内容记录下来。此外，对一些明显踩过坑的方案，也要记录下来，避免再次踩坑。
+`AGENT_NOTES.md`是你的开发日志，是你对本次开发过程的总结。
+
+- 重要：不要事无巨细的把工作内容全部记录下来。开发某个网站的`extractor`是**一次性工作**，只把你认为其它网站也可能遇到的**通用型问题**记录下来
+  - 例如：某个`extractor`的某个函数实现很有通用性，很多网站可以参考这个实现，你可以单独记录到开发日志中
+- 把踩过坑的地方记录下来，避免再次踩坑
 
 开发日志这样编写：
 

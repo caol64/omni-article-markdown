@@ -1,3 +1,11 @@
+## 2026-03-19
+
+- 开发 Snowflake 技术博客 extractor (`snowflake_blog.py`)
+- Snowflake 博客识别方式：
+  - 通过 canonical URL 中包含 `snowflake.com/en/blog` 来识别
+  - 或通过特有的 `snowflake-blog-text` class 来识别
+- Snowflake 博客的内容在 `div.snowflake-blog-text` 中
+
 ## 2026-03-18
 
 - 开发飞书文档 extractor (`feishu.py`)

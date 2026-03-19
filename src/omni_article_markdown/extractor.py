@@ -37,8 +37,8 @@ class Article:
 
 class Extractor(ABC):
     def __init__(self):
-        self.tags_to_clean = TAGS_TO_CLEAN
-        self.attrs_to_clean = ATTRS_TO_CLEAN
+        self.tags_to_clean = list(TAGS_TO_CLEAN)
+        self.attrs_to_clean = list(ATTRS_TO_CLEAN)
 
     def extract(self, soup: BeautifulSoup) -> Article | None:
         if self.can_handle(soup):

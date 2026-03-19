@@ -25,6 +25,7 @@ BROWSER_TARGET_HOSTS = [
     "www.infoq.cn/",
     "pcsx2.net/",
     "baijiahao.baidu.com/",
+    "www.snowflake.com/en/blog/",
 ]
 
 def is_sequentially_increasing(code: str) -> bool:

@@ -69,6 +69,7 @@
 --|--|--
 |苹果开发者文档|[link](https://developer.apple.com/documentation/technologyoverviews/adopting-liquid-glass)|需安装browser插件|
 |百家号|[link](https://baijiahao.baidu.com/s?id=1846135703319246634)|需安装browser插件|
+|Snowflake 技术博客|[link](https://www.snowflake.com/en/blog/project-snowwork-business-users/)|需安装browser插件|
 
 ### 需安装专有插件
 
