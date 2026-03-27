@@ -56,6 +56,7 @@ class FileReader(Reader):
         with open(self.url_or_path, encoding="utf8") as f:
             return f.read()
 
+
 class CurlReader(Reader):
     def __init__(self, url_or_path: str):
         self.url_or_path = url_or_path

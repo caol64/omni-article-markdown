@@ -9,6 +9,7 @@ from omni_article_markdown.extractor import (
 
 # ---- mock utils ----
 
+
 def make_html(content: str, title="Page Title", description="Desc", url="https://example.com") -> str:
     return f"""
     <html>

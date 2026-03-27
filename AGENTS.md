@@ -40,11 +40,15 @@ When working on this project, the agent **MUST** adhere to the following rules:
 - 先阅读`README`了解项目功能
 - 阅读`src/omni_article_markdown/extractors`目录下已有的功能，找到开发规律
 - 对于新接入的网站，在`src/omni_article_markdown/extractors`下新建一个独立文件并继承`Extractor`类，引擎会自动加载
-- 使用工具抓取网站`html`，由于内容一般较大，建议保存成临时文件，工具使用方法：
-  - `uv run python scripts/fetch_url.py <url>`
-  - `uv run python scripts/fetch_url.py <url> --curl`，如果上述命令无法抓取到正文，可以尝试用这个命令再次抓取一次
-- 如果上面的工具无法抓取到正文（比如网站需要开启`javascript`，或者需要`cookie`），你可以尝试用以下工具：
-  - `uv run python scripts/fetch_url_playwright.py <url>`
+- 使用工具抓取网站`html`，由于内容一般较大，建议保存成临时文件，提供如下工具抓取网页：
+  - 普通抓取，使用`requests`库进行简单抓取
+    - `uv run python scripts/fetch_url.py <url>`
+    - `uv run python scripts/fetch_url.py <url> --curl`，伪装成`curl`
+  - 使用无头浏览器进行抓取，适用于需要`javascript`的网站
+    - `uv run python scripts/fetch_url_playwright.py <url>`，适用于大多数静态或加载较快的动态网页
+    - `uv run python scripts/fetch_url_playwright.py <url> -m scroll`，适用于需要时间加载且必须滚动到底部才能加载完整内容的 SPA（单页应用）
+- 如果使用工具无法抓取到正文，可能是`js`后台异步请求了一些接口，你可以用以下工具嗅探一下`js`的后台请求：
+  - `uv run python scripts/log_js_request.py <url>`
 - 如果目标网站遇到以下情况，立刻停止并记录开发日志
   - 无论如何无法抓取到正文
   - 网站有人机交互检查
@@ -56,24 +60,9 @@ When working on this project, the agent **MUST** adhere to the following rules:
   - 求关注、推广链接等
   - 菜单、目录、`TOC`等与正文无关内容
 - 如果你确定使用`playwright`模拟浏览器浏览即可获取到正文，无需新增新的`extractor`，只需在`src/utils.py`中的`BROWSER_TARGET_HOSTS`添加网站域名即可
-- 最后使用如下方法验证：
-  - `uv run mdcli <url>`
-
-## 开发规范
-
-- `src/utils.py`中有很多工具函数开箱可用
-- 不要直接使用下述写法，用`filter_tag`包装一下
-  ```
-  # wrong:
-  wiki_box = soup.find("div", class_="wikiSSRBox")
-  for script in soup.find_all("script"):
-    s = script.string
-
-  # right:
-  wiki_box = filter_tag(soup.find("div", class_="wikiSSRBox"))
-  for script in soup.find_all("script"):
-    script_tag = filter_tag(script)
-  ```
+- 最后：
+  - 使用该命令进行验证`uv run mdcli <url>`
+  - 如果必须使用`playwright`，说明一下原因以及记录到开发日志中
 
 ## 开发日志
 

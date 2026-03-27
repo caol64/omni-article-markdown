@@ -10,6 +10,7 @@ class SspaiExtractor(Extractor):
     """
     少数派
     """
+
     def __init__(self):
         super().__init__()
         self.attrs_to_clean.extend(

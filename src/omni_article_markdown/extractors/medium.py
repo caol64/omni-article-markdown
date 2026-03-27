@@ -13,10 +13,12 @@ class MediumExtractor(Extractor):
 
     def __init__(self):
         super().__init__()
-        self.attrs_to_clean.extend([
-            lambda el: 'data-testid' in el.attrs,
-            lambda el: 'class' in el.attrs and 'speechify-ignore' in el.attrs['class'],
-        ])
+        self.attrs_to_clean.extend(
+            [
+                lambda el: "data-testid" in el.attrs,
+                lambda el: "class" in el.attrs and "speechify-ignore" in el.attrs["class"],
+            ]
+        )
 
     @override
     def can_handle(self, soup: BeautifulSoup) -> bool:

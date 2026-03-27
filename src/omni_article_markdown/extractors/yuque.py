@@ -41,7 +41,10 @@ class YuqueExtractor(Extractor):
                     if doc and doc["book_id"]:
                         book_id = str(doc["book_id"])
                         slug = str(doc["slug"])
-                        response = requests.get(f"https://www.yuque.com/api/docs/{slug}?book_id={book_id}&mode=markdown", headers=REQUEST_HEADERS)
+                        response = requests.get(
+                            f"https://www.yuque.com/api/docs/{slug}?book_id={book_id}&mode=markdown",
+                            headers=REQUEST_HEADERS,
+                        )
                         response.encoding = "utf-8"
                         resp = response.json()
                         # print(resp)

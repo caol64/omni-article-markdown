@@ -30,7 +30,7 @@ class HackernoonExtractor(Extractor):
             image = data.get("mainImage", "")
             body = data.get("parsed", "")
             if image:
-                body = f"<img src=\"{image}\" />\n{body}"
+                body = f'<img src="{image}" />\n{body}'
             return Article(data.get("title", ""), None, data.get("tldr", ""), BeautifulSoup(body, "html5lib"))
 
         return Article("", None, None, "")

@@ -1,4 +1,1 @@
-下面是snowflake技术博客，编写extractor，抓取成markdown
-
-https://www.snowflake.com/en/blog/open-semantic-interchange-ai-standard/
-
+尝试抓取推特长文：https://x.com/Huxpro/status/2036993665965416601

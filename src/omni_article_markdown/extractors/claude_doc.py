@@ -16,7 +16,9 @@ class ClaudeDocExtractor(Extractor):
         self.attrs_to_clean.extend(
             [
                 lambda el: "data-component-part" in el.attrs and "code-block-header" in el.attrs["data-component-part"],
-                lambda el: "data-component-part" in el.attrs and "code-group-tab-bar" in el.attrs["data-component-part"],
+                lambda el: (
+                    "data-component-part" in el.attrs and "code-group-tab-bar" in el.attrs["data-component-part"]
+                ),
             ]
         )
 

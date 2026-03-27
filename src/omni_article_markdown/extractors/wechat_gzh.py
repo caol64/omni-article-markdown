@@ -14,7 +14,7 @@ class WechatGZHExtractor(Extractor):
 
     def __init__(self):
         super().__init__()
-        self.attrs_to_clean.append(lambda el: 'id' in el.attrs and el.attrs['id'] == 'meta_content')
+        self.attrs_to_clean.append(lambda el: "id" in el.attrs and el.attrs["id"] == "meta_content")
 
     @override
     def can_handle(self, soup: BeautifulSoup) -> bool:
