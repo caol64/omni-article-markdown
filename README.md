@@ -25,11 +25,9 @@
 - 部分页面支持katex公式转换（示例：[https://quantum.country/qcvc](https://quantum.country/qcvc)）
 - 部分页面支持github gist（示例：[https://towardsdatascience.com/hands-on-multi-agent-llm-restaurant-simulation-with-python-and-openai](https://towardsdatascience.com/hands-on-multi-agent-llm-restaurant-simulation-with-python-and-openai)）
 - 支持保存成文件或输出至`stdout`
-- 支持突破某些网站的防爬虫策略（需安装插件）
+- 支持突破某些网站的防爬虫策略（通过`playwright`）
 
 以下是一些网站示例，大家可以自己测试下效果。
-
-### 无需安装插件
 
 |站点|链接|备注|
 --|--|--
@@ -62,22 +60,12 @@
 |Hackernoon|[link](https://hackernoon.com/attention-is-currency-ai-is-the-printing-press)||
 |领英博客|[link](https://www.linkedin.com/blog/engineering/infrastructure/scalable-multi-language-service-discovery-at-linkedin)||
 |华尔街见闻|[link](https://wallstreetcn.com/articles/3763051)||
-
-### 需安装 browser 插件
-
-|站点|链接|备注|
---|--|--
-|苹果开发者文档|[link](https://developer.apple.com/documentation/technologyoverviews/adopting-liquid-glass)|需安装browser插件|
-|百家号|[link](https://baijiahao.baidu.com/s?id=1846135703319246634)|需安装browser插件|
-|Snowflake 技术博客|[link](https://www.snowflake.com/en/blog/project-snowwork-business-users/)|需安装browser插件|
-
-### 需安装专有插件
-
-|站点|链接|备注|
---|--|--
-|知乎专栏|[link](https://zhuanlan.zhihu.com/p/1915735485801828475)|需安装zhihu插件|
-|今日头条|[link](https://www.toutiao.com/article/7283050053155947062/)|需安装toutiao插件|
-|Freedium|[link](https://freedium.cfd/https://medium.com/@devlink/ai-killed-my-coding-brain-but-im-rebuilding-it-8de7e1618bca)|需安装freedium插件|
+|苹果开发者文档|[link](https://developer.apple.com/documentation/technologyoverviews/adopting-liquid-glass)||
+|百家号|[link](https://baijiahao.baidu.com/s?id=1846135703319246634)||
+|Snowflake 技术博客|[link](https://www.snowflake.com/en/blog/project-snowwork-business-users/)||
+|知乎专栏|[link](https://zhuanlan.zhihu.com/p/1915735485801828475)||
+|今日头条|[link](https://www.toutiao.com/article/7283050053155947062/)||
+|~~Freedium~~|[link](https://freedium.cfd/https://medium.com/@devlink/ai-killed-my-coding-brain-but-im-rebuilding-it-8de7e1618bca)|已失效|
 
 ## 安装方式
 
@@ -92,37 +80,6 @@ pip install omni-article-markdown
 ```bash
 mdcli --help
 ```
-
-### 方式二：Docker（无需 Python 环境）
-
-如果你不想在本地安装 Python，也可以直接使用 Docker。
-
-**拉取镜像**
-
-```bash
-docker pull caol64/omnimd
-```
-
-**查看帮助**
-
-```bash
-docker run --rm caol64/omnimd --help
-```
-
-**Markdown转换示例**
-
-```bash
-docker run --rm \
-  -v ~/.ommimd:/root/.ommimd \
-  caol64/omnimd \
-  https://zhuanlan.zhihu.com/p/1915735485801828475
-```
-
-> 说明：
->
-> * 使用 `-v` 挂载本地目录以保存网站cookie
-> * 容器启动即执行 `mdcli` 命令
-
 
 ## 基本用法
 
@@ -144,69 +101,6 @@ mdcli https://example.com -s
 mdcli https://example.com -s /home/user/
 ```
 
-## 插件机制
-
-[「墨探」是如何使用插件机制构建可扩展架构的](https://babyno.top/posts/2025/06/a-deep-dive-into-the-extensible-architecture-of-omni-article-markdown/)
-
-**安装插件**
-
-> [!NOTE]
->
-> docker 镜像已安装所有插件。
-
-安装插件和`pip`命令格式相同：
-
-```sh
-mdcli install <PLUGIN_NAME_OR_PACKAGE_NAME> [-U] [-e]
-```
-
-**示例：安装知乎解析插件**
-
-```sh
-mdcli install zhihu
-```
-
-或者，你可以使用 `-e` 参数安装本地可编辑的包。
-
-```sh
-mdcli install -e "./plugins/omnimd-zhihu-reader"
-```
-
-**升级插件**
-
-```sh
-mdcli install zhihu -U
-```
-
-**卸载插件**
-
-如果你想移除一个已安装的插件，可以使用 `mdcli` 提供的 `uninstall` 命令。
-
-```sh
-mdcli uninstall zhihu
-```
-
-或者，使用插件的全称删除
-
-```sh
-mdcli uninstall omnimd-zhihu-reader
-```
-
-**已支持的插件**
-
-目前已发布4个插件，你可以按需安装：
-
-| 命令                             | 说明                                                     |
-|----------------------------------|----------------------------------------------------------|
-| `mdcli install zhihu`              | 知乎专栏 |
-| `mdcli install toutiao`            | 今日头条                         |
-| `mdcli install freedium`           | Freedium                         |
-| `mdcli install browser`           | 需要启用浏览器的JS功能才能访问的页面（如Apple Developer Documentation）                         |
-
-**开发自己的插件**
-
-文档编写中。
-
 ## 架构说明
 
 ![](data/1.jpg)
@@ -220,7 +114,6 @@ mdcli uninstall omnimd-zhihu-reader
 ## 贡献与反馈
 - 发现解析问题？欢迎提交 [Issue](https://github.com/caol64/omni-article-markdown/issues)
 - 改进解析？欢迎贡献 [Pull Request](https://github.com/caol64/omni-article-markdown/pulls)
-- 开发插件？文档正在筹备中
 
 ## 赞助
 

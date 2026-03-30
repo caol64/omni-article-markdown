@@ -271,6 +271,7 @@ dependencies = [
     { name = "click" },
     { name = "click-default-group" },
     { name = "html5lib" },
+    { name = "pip" },
     { name = "requests" },
 ]
 
@@ -288,6 +289,7 @@ requires-dist = [
     { name = "click", specifier = ">=8.2.0" },
     { name = "click-default-group", specifier = ">=1.2.4" },
     { name = "html5lib", specifier = ">=1.1" },
+    { name = "pip" },
     { name = "requests", specifier = ">=2.32.3" },
 ]
 
@@ -315,6 +317,15 @@ source = { registry = "https://mirrors.aliyun.com/pypi/simple/" }
 sdist = { url = "https://mirrors.aliyun.com/pypi/packages/fa/36/e27608899f9b8d4dff0617b2d9ab17ca5608956ca44461ac14ac48b44015/pathspec-1.0.4.tar.gz", hash = "sha256:0210e2ae8a21a9137c0d470578cb0e595af87edaa6ebf12ff176f14a02e0e645" }
 wheels = [
     { url = "https://mirrors.aliyun.com/pypi/packages/ef/3c/2c197d226f9ea224a9ab8d197933f9da0ae0aac5b6e0f884e2b8d9c8e9f7/pathspec-1.0.4-py3-none-any.whl", hash = "sha256:fb6ae2fd4e7c921a165808a552060e722767cfa526f99ca5156ed2ce45a5c723" },
+]
+
+[[package]]
+name = "pip"
+version = "26.0.1"
+source = { registry = "https://mirrors.aliyun.com/pypi/simple/" }
+sdist = { url = "https://mirrors.aliyun.com/pypi/packages/48/83/0d7d4e9efe3344b8e2fe25d93be44f64b65364d3c8d7bc6dc90198d5422e/pip-26.0.1.tar.gz", hash = "sha256:c4037d8a277c89b320abe636d59f91e6d0922d08a05b60e85e53b296613346d8" }
+wheels = [
+    { url = "https://mirrors.aliyun.com/pypi/packages/de/f0/c81e05b613866b76d2d1066490adf1a3dbc4ee9d9c839961c3fc8a6997af/pip-26.0.1-py3-none-any.whl", hash = "sha256:bdb1b08f4274833d62c1aa29e20907365a2ceb950410df15fc9521bad440122b" },
 ]
 
 [[package]]

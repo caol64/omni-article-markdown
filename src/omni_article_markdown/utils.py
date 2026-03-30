@@ -1,4 +1,5 @@
 import re
+from typing import Any
 from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
@@ -124,3 +125,10 @@ def get_tag_text(tag: Tag | None, attr: str) -> str:
 def get_title(soup: BeautifulSoup) -> str:
     title_tag = soup.title
     return title_tag.get_text(strip=True) if title_tag else ""
+
+
+def convert_cookies_to_requests_dict(playwright_cookies: list[dict[str, Any]]) -> dict[str, str]:
+    requests_cookies = {}
+    for cookie in playwright_cookies:
+        requests_cookies[cookie.get("name")] = cookie.get("value")
+    return requests_cookies

@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from .extractor import Article, ExtractorFactory
 from .parser import HtmlMarkdownParser
 from .reader import ReaderFactory
+from .reporter import Reporter
 from .utils import to_snake_case
 
 
@@ -29,8 +30,9 @@ class ParserContext:
 class OmniArticleMarkdown:
     DEFAULT_SAVE_PATH = "./"
 
-    def __init__(self, url_or_path: str):
+    def __init__(self, url_or_path: str, reporter: Reporter | None = None):
         self.url_or_path = url_or_path
+        self.reporter = reporter
 
     def parse(self) -> ParserContext:
         reader_ctx = self._read_html(self.url_or_path)
@@ -49,7 +51,7 @@ class OmniArticleMarkdown:
         return str(file_path.resolve())
 
     def _read_html(self, url_or_path: str) -> ReaderContext:
-        reader = ReaderFactory.create(url_or_path)
+        reader = ReaderFactory.create(url_or_path, reporter=self.reporter)
         raw_html = reader.read()
         if os.getenv("IS_DEBUG") == "1":
             with Path("r.html").open("w", encoding="utf-8") as f:

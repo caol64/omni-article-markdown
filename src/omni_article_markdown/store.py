@@ -37,13 +37,13 @@ class Store:
                 shutil.move(str(item), str(self.path))
             shutil.rmtree(self.old_path, ignore_errors=True)
 
-    def save(self, key: str, obj: Any):
+    def save(self, key: str, obj: list[dict[str, Any]]):
         self.path.mkdir(parents=True, exist_ok=True)
         file_path = self.path / f"{key}.json"
         with open(file_path, "w", encoding="utf8") as f:
             json.dump(obj, f, indent=2, ensure_ascii=False)
 
-    def load(self, key: str) -> Any | None:
+    def load(self, key: str) -> list[dict[str, Any]] | None:
         file_path = self.path / f"{key}.json"
         if not file_path.exists() or not file_path.is_file():
             return None
