@@ -1,9 +1,8 @@
 from typing import override
 
-from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-from ..extractor import ARTICLE_CONTAINERS, Extractor
+from ..extractor import Extractor
 from ..utils import filter_tag, get_attr_text, get_og_site_name
 
 
@@ -13,19 +12,15 @@ class JianshuExtractor(Extractor):
     """
 
     @override
-    def can_handle(self, soup: BeautifulSoup) -> bool:
-        return get_og_site_name(soup) == "简书"
+    def can_handle(self) -> bool:
+        return get_og_site_name(self.soup) == "简书"
 
     @override
-    def article_container(self) -> list[tuple]:
-        return ARTICLE_CONTAINERS
-
-    @override
-    def extract_description(self, soup: BeautifulSoup) -> str:
+    def extract_description(self) -> str:
         return ""
 
     @override
-    def extract_url(self, soup: BeautifulSoup) -> str:
+    def extract_url(self) -> str:
         return "https:"
 
     @override

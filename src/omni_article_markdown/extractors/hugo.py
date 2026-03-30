@@ -1,7 +1,5 @@
 from typing import override
 
-from bs4 import BeautifulSoup
-
 from ..extractor import Extractor
 
 
@@ -11,7 +9,7 @@ class HugoExtractor(Extractor):
     """
 
     @override
-    def can_handle(self, soup: BeautifulSoup) -> bool:
+    def can_handle(self) -> bool:
         return False
 
     @override

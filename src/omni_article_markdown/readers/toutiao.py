@@ -11,11 +11,7 @@ from omni_article_markdown.store import Store
 from omni_article_markdown.utils import REQUEST_HEADERS
 
 
-class ToutiaoPlugin(ReaderPlugin):
-    @override
-    def can_handle(self, url: str) -> bool:
-        return "toutiao.com" in url
-
+class ToutiaoReader(Reader):
     @override
     def read(self, url: str) -> str:
         store = Store()
@@ -86,10 +82,6 @@ class ToutiaoPlugin(ReaderPlugin):
             requests_cookies[cookie.get("name")] = cookie.get("value")
         return requests_cookies
 
-
-@hookimpl
-def get_custom_reader(url: str) -> ReaderPlugin | None:
-    plugin_instance = ToutiaoPlugin()
-    if plugin_instance.can_handle(url):
-        return plugin_instance
-    return None
+    @override
+    def can_handle(self, url: str) -> bool:
+        return "toutiao.com" in url

@@ -4,20 +4,6 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from bs4.element import AttributeValueList, NavigableString, PageElement, Tag
 
-REQUEST_HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36 Edg/146.0.0.0",
-}
-
-BROWSER_TARGET_HOSTS = [
-    "developer.apple.com/documentation/",
-    "www.infoq.cn/",
-    "pcsx2.net/",
-    "baijiahao.baidu.com/",
-    "www.snowflake.com/en/blog/",
-    "x.com/",
-    "twitter.com/",
-]
-
 
 def is_sequentially_increasing(code: str) -> bool:
     try:

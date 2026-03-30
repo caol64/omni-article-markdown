@@ -11,10 +11,8 @@ from omni_article_markdown.store import Store
 from omni_article_markdown.utils import REQUEST_HEADERS
 
 
-class ZhihuPlugin(ReaderPlugin):
-    @override
-    def can_handle(self, url: str) -> bool:
-        return "zhihu.com" in url
+class ZhihuReader(Reader):
+
 
     @override
     def read(self, url: str) -> str:
@@ -84,10 +82,6 @@ class ZhihuPlugin(ReaderPlugin):
             requests_cookies[cookie.get("name")] = cookie.get("value")
         return requests_cookies
 
-
-@hookimpl
-def get_custom_reader(url: str) -> ReaderPlugin | None:
-    plugin_instance = ZhihuPlugin()
-    if plugin_instance.can_handle(url):
-        return plugin_instance
-    return None
+    @override
+    def can_handle(self, url: str) -> bool:
+        return "zhihu.com" in url

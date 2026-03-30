@@ -1,6 +1,6 @@
 [project]
 name = "omni-article-markdown"
-version = "0.1.10"
+version = "0.2.0"
 description = "Easily convert web articles (blogs, news, documents, etc.) into Markdown format."
 authors = [{ name = "Lei", email = "caol64@gmail.com" }]
 readme = "README.md"
@@ -24,9 +24,7 @@ dependencies = [
     "beautifulsoup4>=4.13.4",
     "html5lib>=1.1",
     "click>=8.2.0",
-    "pluggy>=1.6.0",
     "click-default-group>=1.2.4",
-    "pip",
 ]
 
 [dependency-groups]

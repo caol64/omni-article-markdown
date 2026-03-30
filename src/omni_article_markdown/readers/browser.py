@@ -1,20 +1,22 @@
 import sys
-from runpy import run_module
 from typing import override
 
+from ..reader import Reader
 from playwright.sync_api import Browser, Playwright, sync_playwright
 
-from omni_article_markdown.hookspecs import ReaderPlugin, hookimpl
-from omni_article_markdown.utils import BROWSER_TARGET_HOSTS
+
+TARGET_HOSTS = [
+    "developer.apple.com/documentation/",
+    "www.infoq.cn/",
+    "pcsx2.net/",
+    "baijiahao.baidu.com/",
+    "www.snowflake.com/en/blog/",
+]
 
 
-class BrowserPlugin(ReaderPlugin):
+class BrowserReader(Reader):
     @override
-    def can_handle(self, url: str) -> bool:
-        return any(host in url for host in BROWSER_TARGET_HOSTS)
-
-    @override
-    def read(self, url: str) -> str:
+    def read(self) -> str:
         import time
 
         def try_launch_browser(p: Playwright) -> Browser:
@@ -75,10 +77,6 @@ class BrowserPlugin(ReaderPlugin):
             browser.close()
         return html
 
-
-@hookimpl
-def get_custom_reader(url: str) -> ReaderPlugin | None:
-    plugin_instance = BrowserPlugin()
-    if plugin_instance.can_handle(url):
-        return plugin_instance
-    return None
+    @override
+    def can_handle(self) -> bool:
+        return any(self.url_or_path.startswith(host) for host in TARGET_HOSTS)

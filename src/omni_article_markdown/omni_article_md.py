@@ -1,14 +1,12 @@
-import importlib
 import os
-import pkgutil
 from dataclasses import dataclass
 from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-from .extractor import Article, DefaultExtractor, Extractor
+from .extractor import Article, ExtractorFactory
 from .parser import HtmlMarkdownParser
-from .readers import ReaderFactory
+from .reader import ReaderFactory
 from .utils import to_snake_case
 
 
@@ -60,12 +58,8 @@ class OmniArticleMarkdown:
 
     def _extract_article(self, ctx: ReaderContext) -> ExtractorContext:
         soup = BeautifulSoup(ctx.raw_html, "html5lib")
-        for extract in load_extractors():
-            article = extract.extract(soup)
-            if article:
-                break
-        else:
-            article = DefaultExtractor().extract(soup)
+        extract = ExtractorFactory.create(soup)
+        article = extract.extract()
         if not article:
             raise ValueError("Failed to extract article content.")
         return ExtractorContext(article)
@@ -74,15 +68,3 @@ class OmniArticleMarkdown:
         parser = HtmlMarkdownParser(ctx.article)
         result = parser.parse()
         return ParserContext(title=result[0], markdown=result[1])
-
-
-def load_extractors(package_name="extractors") -> list[Extractor]:
-    extractors_package = Path(__file__).parent / package_name
-    extractors = []
-    for _loader, module_name, _is_pkg in pkgutil.iter_modules([extractors_package.resolve()]):
-        module = importlib.import_module(f"omni_article_markdown.{package_name}.{module_name}")
-        for attr in dir(module):
-            cls = getattr(module, attr)
-            if isinstance(cls, type) and issubclass(cls, Extractor) and cls is not Extractor:
-                extractors.append(cls())
-    return extractors

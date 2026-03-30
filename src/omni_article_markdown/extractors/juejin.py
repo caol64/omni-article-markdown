@@ -1,7 +1,5 @@
 from typing import override
 
-from bs4 import BeautifulSoup
-
 from ..extractor import Extractor
 from ..utils import filter_tag, is_matched_canonical
 
@@ -12,14 +10,14 @@ class JuejinExtractor(Extractor):
     """
 
     @override
-    def can_handle(self, soup: BeautifulSoup) -> bool:
-        return is_matched_canonical("https://juejin.cn/", soup)
+    def can_handle(self) -> bool:
+        return is_matched_canonical("https://juejin.cn/", self.soup)
 
     @override
     def article_container(self) -> tuple:
         return ("div", {"id": "article-root"})
 
     @override
-    def extract_title(self, soup: BeautifulSoup) -> str:
-        title_tag = filter_tag(soup.find("h1", {"class": "article-title"}))
-        return title_tag.get_text(strip=True) if title_tag else super().extract_title(soup)
+    def extract_title(self) -> str:
+        title_tag = filter_tag(self.soup.find("h1", {"class": "article-title"}))
+        return title_tag.get_text(strip=True) if title_tag else super().extract_title()

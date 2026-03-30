@@ -1,7 +1,5 @@
 from typing import override
 
-from bs4 import BeautifulSoup
-
 from ..extractor import Extractor
 from ..utils import is_matched_canonical
 
@@ -12,8 +10,8 @@ class CloudflareBlogExtractor(Extractor):
     """
 
     @override
-    def can_handle(self, soup: BeautifulSoup) -> bool:
-        return is_matched_canonical("https://blog.cloudflare.com", soup)
+    def can_handle(self) -> bool:
+        return is_matched_canonical("https://blog.cloudflare.com", self.soup)
 
     @override
     def article_container(self) -> tuple:

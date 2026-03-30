@@ -1,7 +1,5 @@
 from typing import override
 
-from bs4 import BeautifulSoup
-
 from ..extractor import Extractor
 from ..utils import is_matched_canonical
 
@@ -12,8 +10,8 @@ class Netease163Extractor(Extractor):
     """
 
     @override
-    def can_handle(self, soup: BeautifulSoup) -> bool:
-        return is_matched_canonical("https://www.163.com", soup)
+    def can_handle(self) -> bool:
+        return is_matched_canonical("https://www.163.com", self.soup)
 
     @override
     def article_container(self) -> tuple:

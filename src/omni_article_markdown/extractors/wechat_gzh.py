@@ -1,9 +1,8 @@
 from typing import override
 
-from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-from ..extractor import Extractor
+from ..extractor import Extractor, TagPredicate
 from ..utils import filter_tag, get_attr_text, get_og_site_name
 
 
@@ -12,13 +11,15 @@ class WechatGZHExtractor(Extractor):
     微信公众号
     """
 
-    def __init__(self):
-        super().__init__()
-        self.attrs_to_clean.append(lambda el: "id" in el.attrs and el.attrs["id"] == "meta_content")
+    @override
+    def can_handle(self) -> bool:
+        return get_og_site_name(self.soup) == "微信公众平台"
 
     @override
-    def can_handle(self, soup: BeautifulSoup) -> bool:
-        return get_og_site_name(soup) == "微信公众平台"
+    def get_attrs_to_clean(self) -> list[TagPredicate]:
+        return super().get_attrs_to_clean() + [
+            lambda el: "id" in el.attrs and el.attrs["id"] == "meta_content",
+        ]
 
     @override
     def article_container(self) -> tuple:

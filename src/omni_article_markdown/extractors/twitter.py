@@ -1,9 +1,8 @@
 from typing import override
 
-from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-from ..extractor import Extractor
+from ..extractor import Extractor, TagPredicate
 from ..utils import get_og_site_name, get_og_title
 
 
@@ -15,45 +14,42 @@ class TwitterExtractor(Extractor):
     已在 BROWSER_TARGET_HOSTS 中添加了 x.com 和 twitter.com。
     """
 
-    def __init__(self):
-        super().__init__()
-        # 清理不需要的元素
-        self.tags_to_clean.extend(
-            [
-                lambda el: el.name == "button",
-                lambda el: el.name == "svg",
-                lambda el: el.name == "path",
-            ]
-        )
-        self.attrs_to_clean.extend(
-            [
-                lambda el: (
-                    "data-testid" in el.attrs
-                    and el.attrs.get("data-testid")
-                    in [
-                        "likeButton",
-                        "replyButton",
-                        "repostButton",
-                        "shareButton",
-                        "bookmarkButton",
-                        "analyticsButton",
-                        "shareButtonMore",
-                    ]
-                ),
-                lambda el: (
-                    "aria-label" in el.attrs
-                    and any(
-                        x in el.attrs["aria-label"]
-                        for x in ["Reply", "Repost", "Like", "Share", "Bookmark", "Analytics"]
-                    )
-                ),
-            ]
-        )
+    @override
+    def can_handle(self) -> bool:
+        site_name = get_og_site_name(self.soup)
+        return site_name == "X (formerly Twitter)" or "twitter.com" in str(self.soup) or "x.com" in str(self.soup)
 
     @override
-    def can_handle(self, soup: BeautifulSoup) -> bool:
-        site_name = get_og_site_name(soup)
-        return site_name == "X (formerly Twitter)" or "twitter.com" in str(soup) or "x.com" in str(soup)
+    def get_tags_to_clean(self) -> list[TagPredicate]:
+        return super().get_tags_to_clean() + [
+            lambda el: el.name == "button",
+            lambda el: el.name == "svg",
+            lambda el: el.name == "path",
+        ]
+
+    @override
+    def get_attrs_to_clean(self) -> list[TagPredicate]:
+        return super().get_attrs_to_clean() + [
+            lambda el: (
+                "data-testid" in el.attrs
+                and el.attrs.get("data-testid")
+                in [
+                    "likeButton",
+                    "replyButton",
+                    "repostButton",
+                    "shareButton",
+                    "bookmarkButton",
+                    "analyticsButton",
+                    "shareButtonMore",
+                ]
+            ),
+            lambda el: (
+                "aria-label" in el.attrs
+                and any(
+                    x in el.attrs["aria-label"] for x in ["Reply", "Repost", "Like", "Share", "Bookmark", "Analytics"]
+                )
+            ),
+        ]
 
     @override
     def article_container(self) -> tuple:
@@ -61,7 +57,7 @@ class TwitterExtractor(Extractor):
         return ("article", None)
 
     @override
-    def pre_handle_soup(self, soup: BeautifulSoup) -> BeautifulSoup:
+    def pre_handle_soup(self):
         """
         预处理 HTML，提取推文正文内容。
 
@@ -71,13 +67,13 @@ class TwitterExtractor(Extractor):
         - 长文（Thread/Article）：在 public-DraftEditor-content 或 longform-unstyled 类中
         """
         # 查找所有 article 标签
-        articles = soup.find_all("article")
+        articles = self.soup.find_all("article")
 
         if not articles:
-            return soup
+            return
 
         # 创建一个新的容器来存放所有推文内容
-        new_content = soup.new_tag("div")
+        new_content = self.soup.new_tag("div")
         new_content["class"] = "twitter-thread"
 
         for article in articles:
@@ -87,20 +83,18 @@ class TwitterExtractor(Extractor):
             tweet_text = self._extract_tweet_text(article)
             if tweet_text:
                 # 创建一个 p 标签来存放推文文本
-                p_tag = soup.new_tag("p")
+                p_tag = self.soup.new_tag("p")
                 p_tag.string = tweet_text
                 new_content.append(p_tag)
 
         # 如果有提取到内容，将其添加到 body
         if len(new_content) > 0:
-            body = soup.find("body")
+            body = self.soup.find("body")
             if body and isinstance(body, Tag):
                 # 清空 body 内容，只保留我们提取的内容
                 for tag in body.find_all(True):
                     tag.decompose()
                 body.append(new_content)
-
-        return soup
 
     def _extract_tweet_text(self, article: Tag) -> str:
         """
@@ -164,14 +158,14 @@ class TwitterExtractor(Extractor):
         return ""
 
     @override
-    def extract_title(self, soup: BeautifulSoup) -> str:
+    def extract_title(self) -> str:
         # 使用 og:title 或页面标题
-        title = get_og_title(soup)
+        title = get_og_title(self.soup)
         if title:
             return title
 
         # 如果没有 og:title，尝试从推文中提取
-        articles = soup.find_all("article")
+        articles = self.soup.find_all("article")
         if articles:
             first_article = articles[0]
             if isinstance(first_article, Tag):

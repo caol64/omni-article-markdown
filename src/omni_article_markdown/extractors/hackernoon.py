@@ -13,16 +13,16 @@ class HackernoonExtractor(Extractor):
     """
 
     @override
-    def can_handle(self, soup: BeautifulSoup) -> bool:
-        return is_matched_canonical("https://hackernoon.com", soup)
+    def can_handle(self) -> bool:
+        return is_matched_canonical("https://hackernoon.com", self.soup)
 
     @override
     def article_container(self) -> tuple:
         return ("article", None)
 
     @override
-    def extract_article(self, soup: BeautifulSoup) -> Article:
-        tag = filter_tag(soup.find("script", {"id": "__NEXT_DATA__"}))
+    def extract_article(self) -> Article:
+        tag = filter_tag(self.soup.find("script", {"id": "__NEXT_DATA__"}))
         if tag and tag.string:
             data = json.loads(tag.string)
             data = data.get("props", {}).get("pageProps", {}).get("data", {})

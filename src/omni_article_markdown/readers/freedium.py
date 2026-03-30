@@ -9,10 +9,8 @@ from omni_article_markdown.hookspecs import ReaderPlugin, hookimpl
 from omni_article_markdown.utils import REQUEST_HEADERS
 
 
-class FreediumPlugin(ReaderPlugin):
-    @override
-    def can_handle(self, url: str) -> bool:
-        return "freedium.cfd" in url
+class FreediumReader(Reader):
+
 
     @override
     def read(self, url: str) -> str:
@@ -50,9 +48,6 @@ class FreediumPlugin(ReaderPlugin):
         return html
 
 
-@hookimpl
-def get_custom_reader(url: str) -> ReaderPlugin | None:
-    plugin_instance = FreediumPlugin()
-    if plugin_instance.can_handle(url):
-        return plugin_instance
-    return None
+    @override
+    def can_handle(self, url: str) -> bool:
+        return "freedium.cfd" in url
