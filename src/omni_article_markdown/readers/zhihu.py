@@ -41,9 +41,10 @@ class ZhihuReader(Reader):
         with create_stealth_page(self.reporter, self.verify_ssl) as (page, context):
             try:
                 page.goto(url, wait_until="domcontentloaded", timeout=45000)
-                target_cookies =["d_c0"]
+                target_cookies = ["d_c0"]
                 self.report(f"等待知乎生成关键Cookie({', '.join(target_cookies)})...")
                 import json
+
                 target_cookies_js = json.dumps(target_cookies)
                 js_function = f"""
                 () => {{

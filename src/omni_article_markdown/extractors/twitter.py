@@ -29,21 +29,54 @@ class TwitterExtractor(Extractor):
     def pre_handle_soup(self):
         # 查找所有卡片
         cards = self.soup.find_all(attrs={"data-testid": "simpleTweet"})
-        if not cards:
-            return
-        for card in cards:
-            card_tag = filter_tag(card)
-            if not card_tag:
+        if cards:
+            for card in cards:
+                card_tag = filter_tag(card)
+                if not card_tag:
+                    continue
+                links = card_tag.find_all("a", href=True)
+                for link in links:
+                    href = get_tag_text(link, "href")
+                    if href.endswith("/analytics"):
+                        target_url = f"https://x.com{href.replace('/analytics', '')}"
+                        new_a_tag = self.soup.new_tag("a", href=target_url)
+                        new_a_tag.string = "link"
+                        card.replace_with(new_a_tag)
+                        break
+
+        # 修复段落结构：Twitter/X 使用 data-offset-key 和 longform 样式来分段
+        # 查找所有 class 包含 longform 的 div 元素（代表段落）
+        # 用 <p> 标签包裹它们，以便后续正确转换为 markdown
+        paragraphs = self.soup.select("div[class*='longform']")
+        for para in paragraphs:
+            span_tag = para.find("span", attrs={"data-text": "true"})
+            if span_tag:
+                # 获取带换行的原始文本
+                raw_text = span_tag.get_text(separator="\n", strip=False)
+                if "\n" in raw_text:
+                    # 按换行分割成干净段落
+                    lines = [
+                        line.strip() for line in raw_text.split("\n")
+                        if line.strip()
+                    ]
+
+                    # 把每一行都变成 <p> 标签
+                    for text in lines:
+                        new_p = self.soup.new_tag("p")
+                        new_p.string = text
+                        span_tag.insert_before(new_p)
+
+                    # 删除原来的 span
+                    span_tag.decompose()
+                    continue
+
+            # 检查是否已经被 <p> 标签包裹
+            if para.parent and para.parent.name == "p":
                 continue
-            links = card_tag.find_all("a", href=True)
-            for link in links:
-                href = get_tag_text(link, "href")
-                if href.endswith("/analytics"):
-                    target_url = f"https://x.com{href.replace('/analytics', '')}"
-                    new_a_tag = self.soup.new_tag("a", href=target_url)
-                    new_a_tag.string = "link"
-                    card.replace_with(new_a_tag)
-                    break
+            # 创建新的 p 标签
+            p_tag = self.soup.new_tag("p")
+            # 将段落内容移动到 p 标签内
+            para.wrap(p_tag)
 
     @override
     def extract_title(self) -> str:

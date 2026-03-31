@@ -14,7 +14,9 @@ class HackernoonExtractor(Extractor):
 
     @override
     def can_handle(self) -> bool:
-        return is_matched_canonical("https://hackernoon.com", self.soup) or get_og_title(self.soup).endswith(" | HackerNoon")
+        return is_matched_canonical("https://hackernoon.com", self.soup) or get_og_title(self.soup).endswith(
+            " | HackerNoon"
+        )
 
     @override
     def article_container(self) -> tuple:

@@ -12,6 +12,7 @@ REQUEST_HEADERS = {
     "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
 }
 
+
 @cache
 def get_session(verify_ssl: bool = True) -> requests.Session:
     """

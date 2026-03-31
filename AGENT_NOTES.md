@@ -1,3 +1,20 @@
+## 2026-03-31
+
+- 修复 Twitter/X 长文段落结构问题
+- 问题描述：
+  - Twitter/X 的长文（Article）使用 Draft.js 编辑器渲染
+  - 原始 HTML 没有 `<p>` 标签区分段落，而是使用 CSS 样式（`longform-unstyled` 等）在页面上进行分段
+  - 导致抓取到的 markdown 所有内容都不分段，挤在一起
+- 解决方案：
+  - 在 `pre_handle_soup()` 方法中查找所有 class 包含 `longform` 的 div 元素
+  - 用 `<p>` 标签包裹这些段落元素
+  - 这样传到后续的 markdown 转换流程就能正确识别段落
+- 技术细节：
+  - Twitter/X 使用 `data-offset-key` 属性来标识不同的段落块
+  - 每个段落是一个带有 `longform-unstyled` 或 `longform-header-*` 类的 div
+  - 使用 BeautifulSoup 的 `class_` 参数配合 lambda 函数查找：`class_=lambda x: x and "longform" in str(x)`
+  - 注意：不要使用 `any("longform" in c for c in x)`，因为 class 可能已经是字符串而不是列表
+
 ## 2026-03-27
 
 - 开发 Twitter/X 推文提取器 (`twitter.py`)

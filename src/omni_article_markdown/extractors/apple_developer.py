@@ -1,4 +1,3 @@
-
 from typing import override
 
 from ..extractor import Extractor, TagPredicate

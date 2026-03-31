@@ -3,8 +3,7 @@ import sys
 
 import requests
 
-REQUEST_HEADERS = {
-}
+REQUEST_HEADERS = {}
 
 # 普通浏览器 User-Agent
 BROWSER_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36 Edg/146.0.0.0"

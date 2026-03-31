@@ -2,9 +2,8 @@ import json
 import re
 from typing import override
 
-import requests
-
 from ..extractor import Article, Extractor
+from ..http_client import get_session
 from ..utils import filter_tag, get_og_url
 
 
@@ -22,30 +21,30 @@ class YuqueExtractor(Extractor):
         return ("", {})
 
     @override
-    def extract_article(self) -> Article:
-        # script_tag = filter_tag(self.soup.find("script", string=re.compile(r"decodeURIComponent")))
-        # if script_tag:
-        #     raw_js = script_tag.string
-        #     if raw_js:
-        #         match = re.search(r'decodeURIComponent\s*\(\s*"([^"]+)"\s*\)', raw_js)
-        #         if match:
-        #             encoded_str = match.group(1)
+    def extract_article(self) -> Article | None:
+        script_tag = filter_tag(self.soup.find("script", text=re.compile(r"decodeURIComponent")))
+        if not script_tag or not script_tag.string:
+            return None
+        raw_js = script_tag.string.strip()
+        match = re.search(r'decodeURIComponent\s*\(\s*"([^"]+)"\s*\)', raw_js)
+        if not match:
+            return None
+        encoded_str = match.group(1)
 
-        #             from urllib.parse import unquote
+        from urllib.parse import unquote
 
-        #             decoded_str = unquote(encoded_str)
-        #             decoded_json = json.loads(decoded_str)
-        #             # print(decoded_json)
-        #             doc = decoded_json["doc"]
-        #             if doc and doc["book_id"]:
-        #                 book_id = str(doc["book_id"])
-        #                 slug = str(doc["slug"])
-        #                 response = requests.get(
-        #                     f"https://www.yuque.com/api/docs/{slug}?book_id={book_id}&mode=markdown",
-        #                     headers=REQUEST_HEADERS,
-        #                 )
-        #                 response.encoding = "utf-8"
-        #                 resp = response.json()
-        #                 # print(resp)
-        #                 return Article(str(resp["data"]["title"]), None, None, str(resp["data"]["sourcecode"]))
-        return Article("", None, None, "")
+        decoded_str = unquote(encoded_str)
+        decoded_json = json.loads(decoded_str)
+        # print(decoded_json)
+        doc = decoded_json.get("doc")
+        if doc and doc.get("book_id") and doc.get("slug"):
+            book_id = str(doc["book_id"])
+            slug = str(doc["slug"])
+            response = get_session().get(
+                f"https://www.yuque.com/api/docs/{slug}?book_id={book_id}&mode=markdown",
+            )
+            response.encoding = "utf-8"
+            resp = response.json()
+            # print(resp)
+            return Article(str(resp["data"]["title"]), None, None, str(resp["data"]["sourcecode"]))
+        return None

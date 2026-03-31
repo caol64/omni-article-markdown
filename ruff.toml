@@ -17,6 +17,7 @@ extend-exclude = [
     "bin",
     "build",
     "dist",
+    "scripts",
 ]
 
 [format]

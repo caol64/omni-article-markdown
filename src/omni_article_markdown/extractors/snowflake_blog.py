@@ -1,7 +1,7 @@
 from typing import override
 
-from ..extractor import Extractor
-from ..utils import get_canonical_url
+from ..extractor import Extractor, TagPredicate
+from ..utils import is_matched_canonical
 
 
 class SnowflakeBlogExtractor(Extractor):
@@ -11,13 +11,14 @@ class SnowflakeBlogExtractor(Extractor):
 
     @override
     def can_handle(self) -> bool:
-        # 通过 canonical URL 和特有的 class 来识别
-        canonical = get_canonical_url(self.soup)
-        if canonical and "snowflake.com/en/blog" in canonical:
-            return True
-        # 也可以通过特有的 class 来识别
-        return self.soup.find("div", class_="snowflake-blog-text") is not None
+        return is_matched_canonical("https://www.snowflake.com/en/blog/", self.soup)
+
+    @override
+    def get_attrs_to_clean(self) -> list[TagPredicate]:
+        return super().get_attrs_to_clean() + [
+            lambda el: "class" in el.attrs and "snowflake-header-container" in el.attrs["class"],
+        ]
 
     @override
     def article_container(self) -> tuple:
-        return ("div", {"class": "snowflake-blog-text"})
+        return ("div", {"class": "snowflake-responsive-container-inner-padding-medium"})
