@@ -1,7 +1,5 @@
 from typing import override
 
-import requests
-
 from ..reader import Reader
 
 TARGET_HOSTS = [
@@ -13,7 +11,7 @@ class CurlReader(Reader):
     @override
     def read(self) -> str:
         headers = {"User-Agent": "curl/8.7.1"}
-        response = requests.get(self.url_or_path, headers=headers)
+        response = self.session.get(self.url_or_path, headers=headers)
         response.encoding = "utf-8"
         return response.text
 

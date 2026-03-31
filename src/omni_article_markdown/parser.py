@@ -2,10 +2,10 @@ import re
 from collections.abc import Callable
 from urllib.parse import urljoin
 
-import requests
 from bs4.element import NavigableString, Tag
 
 from .extractor import Article
+from .http_client import get_session
 from .utils import (
     collapse_spaces,
     detect_language,
@@ -265,7 +265,7 @@ class HtmlMarkdownParser:
         if match:
             gist_id = match.group(1)
             url = f"https://api.github.com/gists/{gist_id}"
-            response = requests.get(url)
+            response = get_session().get(url)
             response.encoding = "utf-8"
             if response.status_code == 200:
                 data = response.json()

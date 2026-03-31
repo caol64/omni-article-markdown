@@ -1,11 +1,6 @@
 from bs4.element import Tag
 
-from omni_article_markdown.extractor import (
-    Article,
-    DefaultExtractor,
-    extract_article_from_soup,
-    remove_duplicate_titles,
-)
+from omni_article_markdown.extractor import Article, DefaultExtractor
 
 # ---- mock utils ----
 
@@ -28,18 +23,19 @@ def make_html(content: str, title="Page Title", description="Desc", url="https:/
 def test_extract_article_from_soup_basic(make_soup):
     html = "<html><body><article><p>Hello</p></article></body></html>"
     soup = make_soup(html)
-    tag = extract_article_from_soup(soup, ("article", None))
+    extractor = DefaultExtractor(soup)
+    tag = extractor.extract_article_from_soup(("article", None))
     assert tag is not None
     assert tag.name == "article"
     assert "Hello" in tag.text
 
 
 def test_default_extractor_basic_behavior(make_soup):
-    extractor = DefaultExtractor()
     html = make_html("<article><p>Hello World</p></article>")
     soup = make_soup(html)
+    extractor = DefaultExtractor(soup)
 
-    assert extractor.can_handle(soup) is True
+    assert extractor.can_handle() is True
     assert isinstance(extractor.article_container(), list | tuple)
 
 
@@ -53,8 +49,8 @@ def test_cleaning_tags_and_attrs(make_soup):
             <!-- comment -->
         </article>
     """)
-    extractor = DefaultExtractor()
-    article = extractor.extract(make_soup(html))
+    extractor = DefaultExtractor(make_soup(html))
+    article = extractor.extract()
     assert article is not None
     assert isinstance(article.body, Tag)
     text = article.body.get_text()
@@ -68,18 +64,19 @@ def test_cleaning_tags_and_attrs(make_soup):
 def test_extract_metadata(make_soup):
     html = make_html("<article><p>Body</p></article>", title="Hello", description="A test desc", url="https://abc.com")
     soup = make_soup(html)
-    extractor = DefaultExtractor()
+    extractor = DefaultExtractor(soup)
 
-    assert extractor.extract_title(soup) == "Hello"
-    assert extractor.extract_description(soup) == "A test desc"
-    assert extractor.extract_url(soup) == "https://abc.com"
+    assert extractor.extract_title() == "Hello"
+    assert extractor.extract_description() == "A test desc"
+    assert extractor.extract_url() == "https://abc.com"
 
 
 def test_remove_duplicate_titles(make_soup):
     html = "<article><h1>Same Title</h1><p>Body text</p></article>"
     soup = make_soup(html)
+    extractor = DefaultExtractor(soup)
     article = Article(title="Same Title", url=None, description=None, body=soup.article)
-    remove_duplicate_titles(article)
+    extractor.remove_duplicate_titles(article)
 
     # 标题应保持一致
     assert article.title == "Same Title"
@@ -90,8 +87,9 @@ def test_remove_duplicate_titles(make_soup):
 def test_remove_duplicate_titles_different(make_soup):
     html = "<article><h1>Other Title</h1><p>Body text</p></article>"
     soup = make_soup(html)
+    extractor = DefaultExtractor(soup)
     article = Article(title="Main Page", url=None, description=None, body=soup.article)
-    remove_duplicate_titles(article)
+    extractor.remove_duplicate_titles(article)
 
     # 原标题不变，H1 保留
     assert article.title == "Main Page"
@@ -99,8 +97,8 @@ def test_remove_duplicate_titles_different(make_soup):
 
 
 class CustomExtractor(DefaultExtractor):
-    def can_handle(self, soup):
-        title = soup.title.text.strip() if soup.title else ""
+    def can_handle(self):
+        title = self.soup.title.text.strip() if self.soup.title else ""
         return "Special" in title
 
     def article_container(self):
@@ -109,11 +107,11 @@ class CustomExtractor(DefaultExtractor):
 
 def test_custom_extractor_can_handle(make_soup):
     html = make_html("<p>Hello</p>", title="Special Page")
-    extractor = CustomExtractor()
     soup = make_soup(html)
-    assert extractor.can_handle(soup) is True
+    extractor = CustomExtractor(soup)
+    assert extractor.can_handle() is True
 
-    article = extractor.extract(soup)
+    article = extractor.extract()
     assert article is not None
     assert isinstance(article.body, Tag)
     assert "Hello" in article.body.text

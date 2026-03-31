@@ -1,6 +1,11 @@
 import subprocess
 import sys
+from collections.abc import Generator
+from contextlib import contextmanager
+from importlib import resources
+from typing import Any
 
+from .http_client import REQUEST_HEADERS, USER_AGENT
 from .reporter import Reporter
 
 
@@ -90,3 +95,49 @@ def try_launch_browser(p, reporter: Reporter | None = None):
 
         # 其他系统级错误直接抛出
         raise
+
+
+@contextmanager
+def create_stealth_page(reporter: Reporter | None = None, verify_ssl: bool = True) -> Generator[tuple[Any, Any]]:
+    """
+    提供一个开箱即用的、自带 Stealth 防爬插件的 Playwright Page 和 Context。
+    使用 @contextmanager 确保在 yield 结束后，浏览器资源会被妥善关闭。
+    """
+    # 1. 确保环境安装
+    playwright_context_manager = ensure_playwright_installed(reporter)
+
+    # 2. 启动 Playwright
+    with playwright_context_manager() as p:
+        browser = try_launch_browser(p, reporter=reporter)
+
+        # 3. 创建带有统一配置的 Context
+        context = browser.new_context(
+            user_agent=USER_AGENT,
+            java_script_enabled=True,
+            extra_http_headers=REQUEST_HEADERS,
+            ignore_https_errors=not verify_ssl,  # 统一处理 SSL 验证
+        )
+
+        # 4. 注入 Stealth 插件
+        try:
+            with resources.path("omni_article_markdown.libs", "stealth.min.js") as js_path:
+                context.add_init_script(path=str(js_path))
+        except Exception as e:
+            if reporter:
+                reporter(f"无法加载 stealth 插件，将使用标准模式: {e}")
+
+        page = context.new_page()
+
+        try:
+            # 将 page 和 context 作为元组 yield 出去，供业务代码在 with 块中使用
+            # 返回 context 是因为有些业务（如知乎）需要调用 context.cookies()
+            yield page, context
+
+        finally:
+            # 无论业务代码是否抛出异常，这里都会在 with 块结束时完美释放资源
+            for obj in (page, context, browser):
+                try:
+                    if obj:
+                        obj.close()
+                except Exception:
+                    pass

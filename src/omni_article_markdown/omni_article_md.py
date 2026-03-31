@@ -30,28 +30,36 @@ class ParserContext:
 class OmniArticleMarkdown:
     DEFAULT_SAVE_PATH = "./"
 
-    def __init__(self, url_or_path: str, reporter: Reporter | None = None):
+    def __init__(self, url_or_path: str, reporter: Reporter | None = None, verify_ssl: bool = True):
         self.url_or_path = url_or_path
         self.reporter = reporter
+        self.verify_ssl = verify_ssl
+        self.parser_ctx: ParserContext | None = None
 
-    def parse(self) -> ParserContext:
+    def parse(self):
         reader_ctx = self._read_html(self.url_or_path)
         extractor_ctx = self._extract_article(reader_ctx)
-        parser_ctx = self._parse_html(extractor_ctx)
-        return parser_ctx
+        self.parser_ctx = self._parse_html(extractor_ctx)
 
-    def save(self, ctx: ParserContext, save_path: str = "") -> str:
+    def result(self):
+        if not self.parser_ctx:
+            raise ValueError("No parsed content available. Please call parse() first.")
+        return self.parser_ctx.markdown
+
+    def save(self, save_path: str = "") -> str:
+        if not self.parser_ctx:
+            raise ValueError("No parsed content to save. Please call parse() first.")
         save_path = save_path or self.DEFAULT_SAVE_PATH
         file_path = Path(save_path)
         if file_path.is_dir():
-            filename = f"{to_snake_case(ctx.title)}.md"
+            filename = f"{to_snake_case(self.parser_ctx.title)}.md"
             file_path = file_path / filename
         with file_path.open("w", encoding="utf-8") as f:
-            f.write(ctx.markdown)
+            f.write(self.parser_ctx.markdown)
         return str(file_path.resolve())
 
     def _read_html(self, url_or_path: str) -> ReaderContext:
-        reader = ReaderFactory.create(url_or_path, reporter=self.reporter)
+        reader = ReaderFactory.create(url_or_path, reporter=self.reporter, verify_ssl=self.verify_ssl)
         raw_html = reader.read()
         if os.getenv("IS_DEBUG") == "1":
             with Path("r.html").open("w", encoding="utf-8") as f:

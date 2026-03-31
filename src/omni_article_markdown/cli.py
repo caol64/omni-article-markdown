@@ -1,3 +1,5 @@
+import sys
+
 import click
 from click_default_group import DefaultGroup
 
@@ -8,16 +10,23 @@ def stderr_reporter(message: str):
     click.echo(click.style(message, fg="yellow"), err=True)
 
 
+def stderr(message: str):
+    click.echo(click.style(message, fg="red"), err=True)
+
+
 @click.group(cls=DefaultGroup, default="parse", default_if_no_args=True)
 def cli():
     """
-    A CLI tool to parse articles and save them as Markdown.
+    A CLI tool to parse web articles and export clean Markdown.
     """
     ...
 
 
 @cli.command(name="parse")
 @click.argument("url_or_path")
+@click.option(
+    "--no-verify-ssl", is_flag=True, default=False, help="Disable SSL certificate verification (not recommended)."
+)
 @click.option(
     "-s",
     "--save",
@@ -27,22 +36,22 @@ def cli():
     flag_value="./",
     default=None,
 )
-def parse_article(url_or_path: str, save: str | None):
+def parse_article(url_or_path: str, save: str | None, no_verify_ssl: bool):
     """
     Parses an article from a URL or local path and outputs/saves it as Markdown.
     """
+    verify_ssl = not no_verify_ssl
     try:
-        handler = OmniArticleMarkdown(url_or_path, reporter=stderr_reporter)
-        parser_ctx = handler.parse()
+        handler = OmniArticleMarkdown(url_or_path, reporter=stderr_reporter, verify_ssl=verify_ssl)
+        handler.parse()
+        if save is None:
+            click.echo(handler.result())
+        else:
+            save_path = handler.save(save)
+            stderr_reporter(f"Article saved to: {save_path}")
     except Exception as e:
-        click.echo(click.style(f"Error: {str(e)}", fg="red"), err=True)
-        return
-
-    if save is None:
-        click.echo(parser_ctx.markdown)
-    else:
-        save_path = handler.save(parser_ctx, save)
-        click.echo(f"Article saved to: {save_path}")
+        stderr(f"Error: {str(e)}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

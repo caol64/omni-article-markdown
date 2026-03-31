@@ -5,7 +5,6 @@ from typing import override
 import requests
 
 from ..extractor import Article, Extractor
-from ..reader import REQUEST_HEADERS
 from ..utils import filter_tag, get_og_url
 
 

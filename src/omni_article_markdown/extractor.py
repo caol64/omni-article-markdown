@@ -51,6 +51,8 @@ class Extractor(ABC):
                 return article
             article_tag = self.extract_article_from_soup(container)
             if article_tag:
+                title = self.extract_title()
+                description = self.extract_description()
                 for el in article_tag.find_all():
                     tag = filter_tag(el)
                     if tag:
@@ -62,8 +64,6 @@ class Extractor(ABC):
                 for comment in article_tag.find_all(string=lambda text: isinstance(text, Comment)):
                     comment.extract()
                 self.extract_img(article_tag)
-                title = self.extract_title()
-                description = self.extract_description()
                 url = self.extract_url()
                 article = Article(title=title, url=url, description=description, body=article_tag)
                 self.remove_duplicate_titles(article)

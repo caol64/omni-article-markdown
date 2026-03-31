@@ -3,7 +3,7 @@ from typing import override
 from bs4.element import Tag
 
 from ..extractor import Extractor, TagPredicate
-from ..utils import get_og_site_name, get_og_title, get_tag_text
+from ..utils import filter_tag, get_og_site_name, get_og_title, get_tag_text
 
 
 class TwitterExtractor(Extractor):
@@ -28,26 +28,14 @@ class TwitterExtractor(Extractor):
     @override
     def get_attrs_to_clean(self) -> list[TagPredicate]:
         return super().get_attrs_to_clean() + [
-            lambda el: (
-                "data-testid" in el.attrs
-                and el.attrs.get("data-testid")
-                in [
-                    "simpleTweet",
-                ]
-            ),
-            lambda el: (
-                "aria-live" in el.attrs
-                and el.attrs.get("aria-live")
-                in [
-                    "polite",
-                ]
-            ),
+            lambda el: "data-testid" in el.attrs and "simpleTweet" in el.attrs["data-testid"],
+            lambda el: "aria-live" in el.attrs and "polite" in el.attrs["aria-live"],
+            lambda el: "role" in el.attrs and "group" in el.attrs["role"],
         ]
 
     @override
     def article_container(self) -> tuple:
-        # Twitter 使用 article 标签或 data-testid="tweet" 来标识推文
-        return ("article", None)
+        return ("article", {"data-testid": "tweet"})
 
     # @override
     # def pre_handle_soup(self):
@@ -152,6 +140,9 @@ class TwitterExtractor(Extractor):
 
     @override
     def extract_title(self) -> str:
-        title_tag = self.soup.find("div", attrs={"data-testid": "twitter-article-title"})
-        title = title_tag.get_text(strip=True) if title_tag else ""
-        return title if title else get_og_title(self.soup)
+        title_tag = filter_tag(self.soup.find("div", attrs={"data-testid": "twitter-article-title"}))
+        if title_tag:
+            title = title_tag.get_text(strip=True)
+            title_tag.decompose()  # 从 DOM 中移除标题，避免重复
+            return title
+        return super().extract_title()
