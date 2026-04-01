@@ -132,3 +132,17 @@ def convert_cookies_to_requests_dict(playwright_cookies: list[dict[str, Any]]) -
     for cookie in playwright_cookies:
         requests_cookies[cookie.get("name")] = cookie.get("value")
     return requests_cookies
+
+
+# \u200b-\u200f: 零宽空格、各向异性连接符
+# \u202a-\u202e: 方向控制符 (LRO, RLO 等)
+# \ufeff: Byte Order Mark (BOM)
+# \u2060-\u206f: 各种不可见连接符
+_INVISIBLE_RE = re.compile(r"[\u200b-\u200f\u202a-\u202e\ufeff\u2060-\u206f]")
+
+
+def clean_text(text: str) -> str:
+    if not text:
+        return ""
+    cleaned = _INVISIBLE_RE.sub("", text)
+    return cleaned

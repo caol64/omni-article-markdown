@@ -4,6 +4,7 @@ import click
 from click_default_group import DefaultGroup
 
 from .omni_article_md import OmniArticleMarkdown
+from .reader import ReaderFactory
 
 
 def stderr_reporter(message: str):
@@ -49,6 +50,25 @@ def parse_article(url_or_path: str, save: str | None, no_verify_ssl: bool):
         else:
             save_path = handler.save(save)
             stderr_reporter(f"Article saved to: {save_path}")
+    except Exception as e:
+        stderr(f"Error: {str(e)}")
+        sys.exit(1)
+
+
+@cli.command(name="read")
+@click.argument("url_or_path")
+@click.option(
+    "--no-verify-ssl", is_flag=True, default=False, help="Disable SSL certificate verification (not recommended)."
+)
+def read(url_or_path: str, no_verify_ssl: bool):
+    """
+    Reads an article from a URL or local path.
+    """
+    verify_ssl = not no_verify_ssl
+    try:
+        reader = ReaderFactory.create(url_or_path, reporter=stderr_reporter, verify_ssl=verify_ssl)
+        raw_html = reader.read()
+        click.echo(raw_html)
     except Exception as e:
         stderr(f"Error: {str(e)}")
         sys.exit(1)

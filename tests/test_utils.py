@@ -2,6 +2,7 @@ import pytest
 from bs4.element import AttributeValueList, NavigableString
 
 from omni_article_markdown.utils import (
+    clean_text,
     collapse_spaces,
     detect_language,
     extract_domain,
@@ -177,3 +178,8 @@ def test_get_title(soup):
 def test_get_title_no_title(make_soup):
     soup = make_soup("<html><head></head></html>")
     assert get_title(soup) == ""
+
+
+def test_clean_text():
+    data = b'\xe7\x95\x8c\xe2\x80\x8b'
+    assert clean_text(data.decode('utf-8')).encode('utf-8') == b"\xe7\x95\x8c"

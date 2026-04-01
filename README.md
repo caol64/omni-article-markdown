@@ -66,6 +66,7 @@
 |知乎专栏|[link](https://zhuanlan.zhihu.com/p/1915735485801828475)||
 |今日头条|[link](https://www.toutiao.com/article/7283050053155947062/)||
 |X Articles|[link](https://x.com/Huxpro/status/2036993665965416601)||
+|飞书云文档|[link](https://waytoagi.feishu.cn/docx/DTYCd1Q6Eohmwsx6s8hcxKqYnLc)||
 |~~Freedium~~|[link](https://freedium.cfd/https://medium.com/@devlink/ai-killed-my-coding-brain-but-im-rebuilding-it-8de7e1618bca)|已失效|
 
 ## 安装方式
