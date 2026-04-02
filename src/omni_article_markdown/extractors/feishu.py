@@ -1,3 +1,4 @@
+import re
 from typing import override
 
 from ..extractor import Extractor, TagPredicate
@@ -63,4 +64,24 @@ class FeishuExtractor(Extractor):
                 if not tag:
                     continue
                 tag.name = new_tag
-                tag.attrs = {}
+
+        for code in self.soup.select(".code-block-zone-container"):
+            new_spans = []
+            for line_in_code in code.select(".ace-line"):
+                span_in_line = line_in_code.select("[data-string='true']")
+                if not span_in_line:
+                    continue
+                full_code_text = "".join([_collapse_spaces(e.get_text()) for e in span_in_line])
+                new_span = self.soup.new_tag("span")
+                new_span.string = full_code_text + "\n"
+                new_spans.append(new_span)
+
+            code.clear()
+            for new_span in new_spans:
+                code.append(new_span)
+
+
+def _collapse_spaces(text: str) -> str:
+    if "\n" in text:
+        return re.sub(r"\s+", " ", text)
+    return text

@@ -1,3 +1,4 @@
+import time
 from typing import override
 
 from ..launch_playwright import create_stealth_page
@@ -42,6 +43,36 @@ class FeishuReader(Reader):
                 max_retries = 5
                 last_block_id = 0
                 while consecutive_no_new_blocks < max_retries:
+                    is_loading_js = """
+                    () => {
+                        // 特征 1：通用的加载中骨架屏或 Spinner 动画
+                        const spinners = document.querySelectorAll('.docx-block-loading');
+                        if (spinners.length > 0) return true;
+
+                        // 特征 2：未完全展开的代码块 (通常飞书的代码块在没高亮完之前结构很简单)
+                        // 比如可能缺少特定的语法高亮 class
+                        const codeBlocks = document.querySelectorAll('[data-block-type="code"]');
+                        for (let code of codeBlocks) {
+                            // 如果代码块容器存在，但里面连基本的文本行结构都没生成
+                            if (code.querySelectorAll('.ace-line').length === 0) return true;
+                        }
+
+                        // 特征 3：未完全渲染的表格 (比如有 table 壳子，但没有 tr/td)
+                        const tables = document.querySelectorAll('[data-block-type="table"]');
+                        for (let table of tables) {
+                            if (table.querySelectorAll('tr, td, .docx-table-cell').length === 0) return true;
+                        }
+
+                        return false; // 全部就绪，可以安全提取
+                    }
+                    """
+                    wait_start = time.time()
+                    while page.evaluate(is_loading_js):
+                        if time.time() - wait_start > 10:
+                            self.report("等待复杂组件加载超时，强行继续抓取...")
+                            break
+                        self.report("等待复杂组件加载中...")
+                        page.wait_for_timeout(500)
                     # --- 第一步：收集当前视口内的所有可见 Block ---
                     current_blocks = page.evaluate("""() => {
                         // 获取页面上所有的 block 元素
@@ -78,9 +109,17 @@ class FeishuReader(Reader):
                     if current_blocks:
                         for b in current_blocks:
                             b_id = b["id"]
-                            if b_id and b_id not in collected_blocks:
-                                collected_blocks[b_id] = b["html"]
-                                new_blocks_found = True
+                            is_complex_block = 'data-block-type="code"' in b["html"] or 'data-block-type="table"' in b["html"]
+                            if b_id and (b_id not in collected_blocks or is_complex_block):
+                                if is_complex_block and b_id in collected_blocks:
+                                    old_len = len(collected_blocks[b_id])
+                                    new_len = len(b["html"])
+                                    if new_len > old_len:
+                                        collected_blocks[b_id] = b["html"]
+                                        new_blocks_found = True
+                                else:
+                                    collected_blocks[b_id] = b["html"]
+                                    new_blocks_found = True
 
                     # --- 第二步：判定是否发现了新内容 ---
                     if new_blocks_found:

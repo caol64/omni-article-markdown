@@ -37,7 +37,7 @@ def to_snake_case(input_string: str) -> str:
     return snake_case_string
 
 
-def collapse_spaces(text) -> str:
+def collapse_spaces(text: str) -> str:
     """
     将多个连续空格（包括换行和 Tab）折叠成一个空格。
     """
