@@ -1,7 +1,7 @@
 [project]
 name = "omni-article-markdown"
 version = "0.2.0"
-description = "Easily convert web articles (blogs, news, documents, etc.) into Markdown format."
+description = "Turn any web article into clean Markdown via CLI."
 authors = [{ name = "Lei", email = "caol64@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.13"
@@ -41,8 +41,14 @@ Homepage = "https://github.com/caol64/omni-article-markdown"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.hatch.build.targets.sdist]
-include = ["/src"]
+[tool.hatch.build]
+packages = [
+    "src/omni_article_markdown",
+]
 
-[tool.hatch.build.targets.wheel]
-packages = ["/src/omni_article_markdown"]
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src/omni_article_markdown",
+    "/README.md",
+    "/pyproject.toml",
+]
