@@ -1,10 +1,10 @@
 from typing import override
 
 from ..extractor import Extractor, TagPredicate
-from ..utils import filter_tag, get_title
+from ..utils import filter_tag, get_attr_text, get_title
 
 
-class FeishuDocExtractor(Extractor):
+class FeishuExtractor(Extractor):
     """
     飞书云文档
     """
@@ -16,7 +16,7 @@ class FeishuDocExtractor(Extractor):
     @override
     def get_attrs_to_clean(self) -> list[TagPredicate]:
         return super().get_attrs_to_clean() + [
-            lambda el: "class" in el.attrs and "author-section-full" in el.attrs["class"],
+            lambda el: "data-type" in el.attrs and "print-forbidden-placeholder" in el.attrs["data-type"],
         ]
 
     @override
@@ -30,6 +30,10 @@ class FeishuDocExtractor(Extractor):
 
     @override
     def pre_handle_soup(self):
+        """
+        https://open.feishu.cn/document/docs/docs/data-structure/block
+        """
+
         tag_map = {
             "heading1": "h1",
             "heading2": "h2",
@@ -41,10 +45,22 @@ class FeishuDocExtractor(Extractor):
             "quote_container": "blockquote",
             "code": "pre",
         }
-        for block_type, block_tag in tag_map.items():
-            for el in self.soup.find_all("div", attrs={"data-block-type": block_type}):
+        attr_map = {
+            ".inline-code": "code",
+            ".code-block-zone-container": "code",
+        }
+        for el in self.soup.select("div[data-block-type]"):
+            tag = filter_tag(el)
+            if not tag:
+                continue
+            block_type = get_attr_text(el.get("data-block-type"))
+            tag.name = tag_map.get(block_type if block_type else "", "p")
+            tag.attrs = {}
+
+        for attr_selector, new_tag in attr_map.items():
+            for el in self.soup.select(attr_selector):
                 tag = filter_tag(el)
                 if not tag:
                     continue
-                tag.name = block_tag
+                tag.name = new_tag
                 tag.attrs = {}

@@ -1,3 +1,17 @@
+## 2026-04-01
+
+我通过在 `src/omni_article_markdown/readers/feishu_doc.py` 中实现增量块收集策略，成功解决了飞书文档的懒加载问题，该策略通过滚动文档并捕获所有唯一的内容块，正确处理了虚拟列表。
+
+- 问题：飞书文档使用虚拟列表，仅渲染可见内容，导致使用标准的 `page.content()` 无法完整捕获数据。
+- 解决方案：更新了 `FeishuDocReader`，使其能够：
+  - 直接定位 `[data-block-id]` 元素；
+  - 在元素滚动进入视图时，增量收集并存储每个块的 HTML；
+  - 使用基于 JavaScript 的滚动方式，避免 ElementHandle 脱离错误；
+  - 将所有捕获的块合并为单一的 HTML 结构供提取器使用。
+- 验证：成功捕获目标文档中的全部 528 个内容块，使输出的 Markdown 长度从约 30 行显著增加至 761 行。
+
+上述修改仅限于 `src/omni_article_markdown/readers/feishu_doc.py` 文件，提取器无需修改，因其已能正确处理合并后的 HTML 结构。
+
 ## 2026-03-31
 
 - 修复 Twitter/X 长文段落结构问题

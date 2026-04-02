@@ -33,14 +33,25 @@ When working on this project, the agent **MUST** adhere to the following rules:
 - `tests/`: Contains all unit and integration tests (using `pytest`).
 - `pyproject.toml`: The main configuration and dependency file.
 - `AGENTS.md`: This file, providing context and instructions.
-- `plugins/`: Contains all plugin project.
+- `scripts/`: Contains all tools you can use for completing the job.
+
+## 概念
+
+- `reader`: 负责读取目标网页，获得`html`代码
+- `extrator`: 负责从`beautifulsoup4`提取正文、标题、摘要等有用内容，排除无用`html`标签
+- `parser`: `html`->`markdown`核心转换引擎
+- `OmniArticleMarkdown`: 将`readers`、`extrators`和`parser`串联起来的工具
+
+```mermaid
+flowchart LR
+    reader --> extrator --> parser
+```
 
 ## 开发流程
 
-- 先阅读`README`了解项目功能
-- 阅读`src/omni_article_markdown/extractors`目录下已有的功能，找到开发规律
-- 对于新接入的网站，在`src/omni_article_markdown/extractors`下新建一个独立文件并继承`Extractor`类，引擎会自动加载
-- 使用工具抓取网站`html`，由于内容一般较大，建议保存成临时文件，提供如下工具抓取网页：
+- 阅读`README`了解项目功能
+- 对于新接入的网站，分别在`readers`和`extractors`目录下新建一个类继承各自的父类，引擎会自动加载
+- 第一步，你需要正确编写`reader`以抓取到目标网页的`html`代码，你可以使用如下工具：
   - 普通抓取，使用`requests`库进行简单抓取
     - `uv run python scripts/fetch_url.py <url>`
     - `uv run python scripts/fetch_url.py <url> --curl`，伪装成`curl`
@@ -49,28 +60,24 @@ When working on this project, the agent **MUST** adhere to the following rules:
     - `uv run python scripts/fetch_url_playwright.py <url> -m scroll`，适用于需要时间加载且必须滚动到底部才能加载完整内容的 SPA（单页应用）
 - 如果使用工具无法抓取到正文，可能是`js`后台异步请求了一些接口，你可以用以下工具嗅探一下`js`的后台请求：
   - `uv run python scripts/log_js_request.py <url>`
+- 原则上优先使用`requests`，再使用`playwright`
 - 如果目标网站遇到以下情况，立刻停止并记录开发日志
   - 无论如何无法抓取到正文
   - 网站有人机交互检查
   - 网站无法访问（连接中断、404、500等）
   - 需要登录才能访问
-- 对正文做最后的检查，过滤掉以下内容：
+- 第二步，你需要正确编写`extractor`对`soup`对象做清理，过滤掉以下内容，使得文章尽可能干净：
   - 广告
   - 作者介绍、用户头像等
   - 求关注、推广链接等
   - 菜单、目录、`TOC`等与正文无关内容
-- 如果你确定使用`playwright`模拟浏览器浏览即可获取到正文，无需新增新的`extractor`，只需在`src/utils.py`中的`BROWSER_TARGET_HOSTS`添加网站域名即可
 - 最后：
-  - 使用该命令进行验证`uv run mdcli <url>`
-  - 如果必须使用`playwright`，说明一下原因以及记录到开发日志中
+  - 使用该命令对转换后的`markdown`做最后的验证：`uv run mdcli <url>`
+  - 使用该命令可以对你编写的`reader`对抓取到的`html`进行验证：`uv run mdcli read <url>`
 
 ## 开发日志
 
 `AGENT_NOTES.md`是你的开发日志，是你对本次开发过程的总结。
-
-- 重要：不要事无巨细的把工作内容全部记录下来。开发某个网站的`extractor`是**一次性工作**，只把你认为其它网站也可能遇到的**通用型问题**记录下来
-  - 例如：某个`extractor`的某个函数实现很有通用性，很多网站可以参考这个实现，你可以单独记录到开发日志中
-- 把踩过坑的地方记录下来，避免再次踩坑
 
 开发日志这样编写：
 
@@ -81,5 +88,3 @@ When working on this project, the agent **MUST** adhere to the following rules:
 - 内容2
 ...
 ```
-
-在每次开始工作前将`AGENT_NOTES.md`的内容加载到你的系统指令中。
