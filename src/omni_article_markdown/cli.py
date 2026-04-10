@@ -60,9 +60,7 @@ def parse_article(url_or_path: str, save: str | None, no_verify_ssl: bool):
 @click.option(
     "--no-verify-ssl", is_flag=True, default=False, help="Disable SSL certificate verification (not recommended)."
 )
-@click.option(
-    "-p", "--prettify", is_flag=True, default=False, help="Prettify the HTML output."
-)
+@click.option("-p", "--prettify", is_flag=True, default=False, help="Prettify the HTML output.")
 def read(url_or_path: str, no_verify_ssl: bool, prettify: bool):
     """
     Reads and formats an article from a URL or local path.
@@ -73,6 +71,7 @@ def read(url_or_path: str, no_verify_ssl: bool, prettify: bool):
         raw_html = reader.read()
         if prettify:
             from bs4 import BeautifulSoup
+
             soup = BeautifulSoup(raw_html, "html5lib")
             click.echo(soup.prettify())
         else:

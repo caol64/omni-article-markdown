@@ -181,5 +181,5 @@ def test_get_title_no_title(make_soup):
 
 
 def test_clean_text():
-    data = b'\xe7\x95\x8c\xe2\x80\x8b'
-    assert clean_text(data.decode('utf-8')).encode('utf-8') == b"\xe7\x95\x8c"
+    data = b"\xe7\x95\x8c\xe2\x80\x8b"
+    assert clean_text(data.decode("utf-8")).encode("utf-8") == b"\xe7\x95\x8c"

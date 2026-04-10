@@ -109,7 +109,9 @@ class FeishuReader(Reader):
                     if current_blocks:
                         for b in current_blocks:
                             b_id = b["id"]
-                            is_complex_block = 'data-block-type="code"' in b["html"] or 'data-block-type="table"' in b["html"]
+                            is_complex_block = (
+                                'data-block-type="code"' in b["html"] or 'data-block-type="table"' in b["html"]
+                            )
                             if b_id and (b_id not in collected_blocks or is_complex_block):
                                 if is_complex_block and b_id in collected_blocks:
                                     old_len = len(collected_blocks[b_id])

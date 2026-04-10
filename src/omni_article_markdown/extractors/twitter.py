@@ -55,10 +55,7 @@ class TwitterExtractor(Extractor):
                 raw_text = span_tag.get_text(separator="\n", strip=False)
                 if "\n" in raw_text:
                     # 按换行分割成干净段落
-                    lines = [
-                        line.strip() for line in raw_text.split("\n")
-                        if line.strip()
-                    ]
+                    lines = [line.strip() for line in raw_text.split("\n") if line.strip()]
 
                     # 把每一行都变成 <p> 标签
                     for text in lines:
