@@ -15,6 +15,7 @@ description: "AI-ready skill to fetch complete HTML source code using various te
 2.  **验证**：对比抓取结果。如果 Level 1 只有空壳，而 Level 2 有正文，则确认该站必须使用浏览器渲染。
 3.  **嗅探**：如果所有方法都抓不到正文，运行 `uv run python scripts/log_js_request.py <url>` 寻找潜在的 API 接口。
 4.  **编码**：在 `src/omni_article_markdown/readers` 下创建 Python 类。
+5.  **最终验证**：`uv run mdcli read <url>` 验证抓取结果。
 
 ## 2. 核心类模板
 
