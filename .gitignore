@@ -13,3 +13,4 @@ wheels/
 .env
 
 plugins/**/uv.lock
+.github/copilot-instructions.md

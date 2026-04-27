@@ -1,36 +1,39 @@
 # AGENTS.md
 
-## Project Context
-This project uses the `uv` package manager and `pyproject.toml` for dependency management and configuration. The target Python version is 3.13. All commands must be run within the `uv` managed environment.
+## Commands
 
-## Agent Instructions
-When working on this project, the agent **MUST** adhere to the following rules:
+- Install/update dependencies: `uv sync`
+- Run the CLI locally:
+  - Convert to Markdown: `uv run mdcli https://example.com/article`
+  - Read raw HTML: `uv run mdcli read https://example.com/article`
+- Format: `uv run ruff format .`
+- Lint: `uv run ruff check .`
+- Type-check: `uv run mypy`
+- Run all tests: `uv run pytest`
+- Run one test file: `uv run pytest tests/test_parser.py`
+- Run one test case: `uv run pytest tests/test_parser.py::test_codeblock`
+- Build distribution artifacts: `uv build`
 
-- **ALWAYS** use `uv run <command>` instead of invoking `python`, `pytest`, or other tools directly.
-- **NEVER** use `pip` or `pip3` for installing or managing packages.
-- **ALWAYS** run `uv sync` to install/update dependencies after changes to `pyproject.toml`.
-- **ALWAYS** run quality checks (`format`, `lint`, `typecheck`, `test`) before proposing any changes.
-- **MAINTAIN** existing code formatting and style, primarily enforced by `ruff` and `mypy`.
+## Architecture
 
-## Useful Commands (for the AI Agent)
+- `src/omni_article_markdown/cli.py` exposes the `mdcli` entry point. The Click group defaults to `parse`, so `mdcli <url>` runs the full article-to-Markdown pipeline, while `mdcli read <url>` stops after HTML acquisition.
+- `OmniArticleMarkdown` in `omni_article_md.py` is the orchestrator. Its flow is fixed: `ReaderFactory` fetches HTML, `ExtractorFactory` turns that HTML into an `Article`, and `HtmlMarkdownParser` converts the cleaned article body into the final Markdown output.
+- Reader and extractor discovery is plugin-based. `load_plugins()` imports every subclass under `src/omni_article_markdown/readers/` and `src/omni_article_markdown/extractors/`, so adding a new module in those packages is usually enough; there is no central registry to update.
+- Reader selection is `URL -> first matching custom reader -> HtmlReader fallback`, and local files go through `FileReader`. Extractor selection is the same pattern: first matching custom extractor, otherwise `DefaultExtractor`.
+- The parser does more than simple tag mapping. `HtmlMarkdownParser` walks the BeautifulSoup tree, resolves relative image URLs against `Article.url`, converts inline/block math, normalizes markdown formatting through `POST_HANDLERS`, and can fetch GitHub Gist contents during parsing.
 
-- **Install dependencies**: `uv sync`
-- **Run a script**: `uv run python script.py`
-- **Run tests**: `uv run pytest`
-- **Run linting**: `uv run ruff check .`
-- **Format code**: `uv run ruff format .`
-- **Run type checking**: `uv run mypy`
-- **Add a new package**: `uv add <package-name>`
-- **Remove a package**: `uv remove <package-name>`
-- **Create a virtual environment** (if needed): `uv venv`
+## Key Conventions
 
-## Project Structure
-- `src/`: Contains all application-level code.
-- `agents/`: Contains AI agent operational logs, learnings, errors, and task records for self-improvement and context management.
-- `tests/`: Contains all unit and integration tests (using `pytest`).
-- `pyproject.toml`: The main configuration and dependency file.
-- `AGENTS.md`: This file, providing context and instructions.
-- `scripts/`: Contains all tools you can use for completing the job.
+- Always use `uv` commands in this repository. The project targets Python 3.13 and the existing agent guidance assumes `uv run ...` for scripts, tests, and tooling.
+- Treat `skills/reader-developer/SKILL.md` and `skills/extractor-developer/SKILL.md` as task-specific playbooks when working on those areas. They document the expected investigation flow for acquiring HTML and for refining site-specific extraction.
+- Keep `can_handle()` implementations narrow because factory selection stops at the first match. Readers typically match on URL prefixes; extractors often match on OG/canonical metadata helpers from `utils.py` such as `get_og_*()`, `get_canonical_url()`, and `is_matched_canonical()`.
+- Reuse the existing browser stack instead of bootstrapping Playwright manually. `BrowserReader`, `ScrollableBrowserReader`, and `create_stealth_page()` centralize headers, stealth setup, and SSL handling for dynamic sites.
+- Prefer the lightest reader that works. The codebase uses plain `requests` via `get_session()` by default and only escalates to Playwright for sites that need rendering, scrolling, cookies, or anti-bot workarounds.
+- New extractors usually get the best results by overriding `article_container()` and cleanup predicates before reaching for a fully custom `extract_article()`. Use `pre_handle_soup()` for DOM normalization such as lazy-image fixes or converting non-semantic wrappers into real headings/paragraphs.
+- `DefaultExtractor` removes duplicate top-level titles by deleting a matching first `<h1>` from the article body. If title extraction changes, check both the final Markdown heading and the saved filename because `OmniArticleMarkdown.save()` derives filenames from `to_snake_case(title)`.
+- The main tests are small unit tests built from inline HTML snippets and the `make_soup` fixture in `tests/conftest.py`, not end-to-end browser tests. Match that style for parser/extractor changes unless the behavior truly depends on live page rendering.
+- If you make code changes as part of an agent task, append a log entry to `agents/logs.md` using the `LOG-YYYYMMDD-XXX` format described in `AGENTS.md`.
+
 
 ## 概念
 
