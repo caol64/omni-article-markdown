@@ -1,6 +1,6 @@
 [project]
 name = "omni-article-markdown"
-version = "0.2.0"
+version = "0.2.1"
 description = "Turn any web article into clean Markdown via CLI."
 authors = [{ name = "Lei", email = "caol64@gmail.com" }]
 readme = "README.md"
@@ -41,7 +41,7 @@ Homepage = "https://github.com/caol64/omni-article-markdown"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.hatch.build]
+[tool.hatch.build.targets.wheel]
 packages = [
     "src/omni_article_markdown",
 ]
