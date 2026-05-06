@@ -33,7 +33,7 @@ POST_HANDLERS: list[Callable[[str], str]] = [
     lambda el: re.sub(r"\\\[(.+?)\\\]", r"$$\1$$", el),
 ]
 
-INLINE_ELEMENTS = ["span", "code", "li", "a", "strong", "em", "b", "i"]
+INLINE_ELEMENTS = ["span", "code", "li", "a", "strong", "em", "b", "i", "sup"]
 
 BLOCK_ELEMENTS = [
     "p",
@@ -89,10 +89,14 @@ class HtmlMarkdownParser:
             case "h1" | "h2" | "h3" | "h4" | "h5" | "h6":
                 heading = self._process_children(element, level, is_pre=is_pre)
                 parts.append(f"{'#' * int(element.name[1])} {heading}")
+            case "sup":
+                sup = element.get_text(strip=True)
+                if sup:
+                    parts.append(f"<sup>{sup}</sup>")
             case "a":
-                link = self._process_children(element, level, is_pre=is_pre).replace(LB_SYMBOL, "")
-                if link:
-                    parts.append(f"[{link}]({element.get('href')})")
+                link_text = self._process_children(element, level, is_pre=is_pre).replace(LB_SYMBOL, "")
+                if link_text:
+                    parts.append(self._process_link(element, link_text))
             case "strong" | "b":
                 s = self._process_children(element, level, is_pre=is_pre).replace(LB_SYMBOL, "")
                 if s:
@@ -261,6 +265,14 @@ class HtmlMarkdownParser:
                 src = urljoin(self.article.url, src)
             return f"![{alt}]({src})"
         return ""
+
+    def _process_link(self, element: Tag, link_text: str) -> str:
+        link = get_attr_text(element.get("href"))
+        if link:
+            if self.article.url and not link.startswith("http"):
+                link = urljoin(self.article.url, link)
+            return f"[{link_text}]({link})"
+        return link_text
 
     def _process_svg(self, element: Tag) -> str:
         svg_content = str(element)
