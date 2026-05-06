@@ -1,3 +1,4 @@
+import base64
 import re
 from collections.abc import Callable
 from urllib.parse import urljoin
@@ -52,6 +53,7 @@ BLOCK_ELEMENTS = [
     "figcaption",
     "table",
     "section",
+    "svg",
 ]
 
 TRUSTED_ELEMENTS = INLINE_ELEMENTS + BLOCK_ELEMENTS
@@ -142,6 +144,8 @@ class HtmlMarkdownParser:
                         parts.append(f"$$ {tex.text} $$")
             case "script":  # 处理github gist
                 parts.append(self._process_gist(element))
+            case "svg":  # 处理svg图片
+                parts.append(self._process_svg(element))
             case _:
                 parts.append(self._process_children(element, level, is_pre=is_pre))
         result = "".join(parts)
@@ -256,6 +260,12 @@ class HtmlMarkdownParser:
             if not src.startswith("http") and self.article.url:
                 src = urljoin(self.article.url, src)
             return f"![{alt}]({src})"
+        return ""
+
+    def _process_svg(self, element: Tag) -> str:
+        svg_content = str(element)
+        if svg_content:
+            return f"![](data:image/svg+xml;base64,{base64.b64encode(svg_content.encode()).decode()})"
         return ""
 
     def _process_gist(self, element: Tag) -> str:
