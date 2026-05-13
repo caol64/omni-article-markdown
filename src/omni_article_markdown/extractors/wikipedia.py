@@ -11,7 +11,8 @@ class WikipediaExtractor(Extractor):
 
     @override
     def can_handle(self) -> bool:
-        return get_canonical_url(self.soup).index("wikipedia.org/wiki/") != -1
+        canonical_url = get_canonical_url(self.soup)
+        return bool(canonical_url and "wikipedia.org/wiki/" in canonical_url)
 
     @override
     def article_container(self) -> tuple:

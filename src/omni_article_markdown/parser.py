@@ -149,7 +149,8 @@ class HtmlMarkdownParser:
             case "script":  # 处理github gist
                 parts.append(self._process_gist(element))
             case "svg":  # 处理svg图片
-                parts.append(self._process_svg(element))
+                if element.get("data-id") == "omnimd":
+                    parts.append(self._process_svg(element))
             case _:
                 parts.append(self._process_children(element, level, is_pre=is_pre))
         result = "".join(parts)

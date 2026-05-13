@@ -35,3 +35,10 @@ class WechatGZHExtractor(Extractor):
                 if src:
                     img_tag.attrs["src"] = src
         return element
+
+    @override
+    def pre_handle_soup(self):
+        for tag in self.soup.find_all("svg"):
+            span_tag = filter_tag(tag)
+            if span_tag:
+                span_tag["data-id"] = "omnimd"

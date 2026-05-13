@@ -1,10 +1,36 @@
+import inspect
 import sys
+from importlib import metadata
 
 import click
 from click_default_group import DefaultGroup
 
 from .omni_article_md import OmniArticleMarkdown
 from .reader import ReaderFactory
+
+help_msg = inspect.cleandoc("""
+Parse web articles into clean Markdown.
+
+Examples:
+
+\b
+Parse an article and print Markdown:
+  mdcli <url>
+Parse and save to a specific directory:
+  mdcli <url> -s /path/to/save
+
+
+Notes:
+
+--no-verify-ssl disables certificate validation.
+""")
+
+
+def get_version():
+    try:
+        return metadata.version("omni-article-markdown")
+    except metadata.PackageNotFoundError:
+        return "0.0.0-dev"
 
 
 def stderr_reporter(message: str):
@@ -15,12 +41,16 @@ def stderr(message: str):
     click.echo(click.style(message, fg="red"), err=True)
 
 
-@click.group(cls=DefaultGroup, default="parse", default_if_no_args=True)
-def cli():
-    """
-    A CLI tool to parse web articles and export clean Markdown.
-    """
-    ...
+@click.group(
+    cls=DefaultGroup,
+    default="parse",
+    default_if_no_args=False,
+    no_args_is_help=True,
+    context_settings={"help_option_names": ["-h", "--help"]},
+    help=help_msg,
+)
+@click.version_option(version=get_version())
+def cli(): ...
 
 
 @cli.command(name="parse")

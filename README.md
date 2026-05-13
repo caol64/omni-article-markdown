@@ -34,7 +34,7 @@
 |Medium|[link](https://medium.com/perry-street-software-engineering/architectural-linting-for-swift-made-easy-75d7f9f569cd)||
 |csdn|[link](https://blog.csdn.net/weixin_41705306/article/details/148787220)||
 |掘金|[link](https://juejin.cn/post/7405845617282449462)||
-|公众号|[link](https://mp.weixin.qq.com/s/imHIKy7dqMmpm032eIhIJg)||
+|公众号|[link](https://mp.weixin.qq.com/s/FV-JUjiJel5K6wGJao17_A)||
 |网易|[link](https://www.163.com/dy/article/K2SPPGSK0514R9KE.html)||
 |简书|[link](https://www.jianshu.com/p/20bd2e9b1f03)||
 |Towards Data Science|[link](https://towardsdatascience.com/hands-on-multi-agent-llm-restaurant-simulation-with-python-and-openai/)||
@@ -72,18 +72,26 @@
 |Wikipedia|[link](https://en.wikipedia.org/wiki/Self-balancing_binary_search_tree)||
 |~~Freedium~~|[link](https://freedium.cfd/https://medium.com/@devlink/ai-killed-my-coding-brain-but-im-rebuilding-it-8de7e1618bca)|已失效|
 
-## 安装方式
-
-### 方式一：pip（推荐）
+## 安装与升级
 
 ```sh
+# pipx
+pipx install omni-article-markdown
+pipx upgrade omni-article-markdown
+
+# pip
 pip install omni-article-markdown
+pip install -U omni-article-markdown
+
+# uv
+uv tool install omni-article-markdown
+uv tool install omni-article-markdown --upgrade
 ```
 
 安装完成后即可使用：
 
 ```bash
-mdcli --help
+mdcli -h
 ```
 
 ## 基本用法

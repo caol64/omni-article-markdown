@@ -21,4 +21,7 @@ class InfoQExtractor(Extractor):
 
     @override
     def article_container(self) -> tuple:
+        containers = self.soup.find_all("div", class_="article__data")
+        if len(containers) > 1:
+            return ("div", {"class": "article__content"})
         return ("div", {"class": "article__data"})

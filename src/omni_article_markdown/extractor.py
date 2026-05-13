@@ -29,6 +29,7 @@ ATTRS_TO_CLEAN: list[TagPredicate] = [
     ),
     lambda el: "hidden" in el.attrs,
     lambda el: "class" in el.attrs and "katex-html" in el.attrs["class"],  # katex
+    lambda el: "aria-hidden" in el.attrs and "true" in el.attrs["aria-hidden"],
 ]
 
 ARTICLE_CONTAINERS = [("article", None), ("main", None), ("body", None)]
