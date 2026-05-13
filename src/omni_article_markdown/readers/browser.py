@@ -12,6 +12,7 @@ class BrowserReader(Reader):
         "https://baijiahao.baidu.com/": "body",
         "https://www.toutiao.com/article": 'div[class="article-content"]',
         "https://medium.com": "article",
+        "https://www.huxiu.com/article": 'div[class="article__content"]',
     }
 
     def __init__(self, *args, **kwargs):
