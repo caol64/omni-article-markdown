@@ -40,6 +40,17 @@ def test_is_sequentially_increasing_non_numeric():
     assert is_sequentially_increasing(code) is False
 
 
+def test_is_sequentially_increasing_two_numbers():
+    code = "1\n2"
+    assert is_sequentially_increasing(code) is True
+
+
+def test_is_sequentially_increasing_single_number():
+    # A lone number is content, not a line-number gutter: a sequence
+    # needs at least two numbers to establish an increase.
+    assert is_sequentially_increasing("42") is False
+
+
 # --------------------------
 # move_spaces
 # --------------------------

@@ -64,6 +64,15 @@ def test_codeblock(make_soup):
     assert "print('Hello')" in md
 
 
+def test_codeblock_single_number_is_kept(make_soup):
+    html = "<pre><code>42</code></pre>"
+    article = Article("Code", "", "", make_soup(html))
+    parser = HtmlMarkdownParser(article)
+    _, md = parser.parse()
+    assert "```" in md
+    assert "42" in md
+
+
 def test_inline_code(make_soup):
     html = "<p>Run <code>ls -al</code> command.</p>"
     article = Article("Cmd", "", "", make_soup(html))
