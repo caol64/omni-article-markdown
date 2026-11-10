@@ -10,6 +10,9 @@ def is_sequentially_increasing(code: str) -> bool:
     try:
         # 解码并按换行符拆分
         numbers = [int(line.strip()) for line in code.split("\n") if line.strip()]
+        # 单个数字无法构成递增序列,只有两个及以上数字才能判定为行号列
+        if len(numbers) < 2:
+            return False
         # 检查是否递增
         return all(numbers[i] + 1 == numbers[i + 1] for i in range(len(numbers) - 1))
     except ValueError:
