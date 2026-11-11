@@ -30,5 +30,7 @@ class TowardsDataScienceExtractor(Extractor):
         ]
 
     @override
-    def article_container(self) -> tuple:
-        return ("main", None)
+    def article_container(self) -> tuple | list[tuple]:
+        # 正文只在 article.max-w-article 内；main 还额外包含文末 “Related Articles” 推荐位
+        # 非文章页（分类页/首页）没有该节点，退回 main 以保持原有行为
+        return [("article", {"class": "max-w-article"}), ("main", None)]
