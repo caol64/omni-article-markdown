@@ -71,6 +71,7 @@
 |Dropbox.Tech|[link](https://dropbox.tech/infrastructure/reducing-our-monorepo-size-to-improve-developer-velocity)||
 |Wikipedia|[link](https://en.wikipedia.org/wiki/Self-balancing_binary_search_tree)||
 |虎嗅网|[link](https://www.huxiu.com/article/4857835.html)||
+|Simon Willison’s Weblog|[link](https://simonwillison.net/2026/Nov/9/mysterious-beeps/)||
 |~~Freedium~~|[link](https://freedium.cfd/https://medium.com/@devlink/ai-killed-my-coding-brain-but-im-rebuilding-it-8de7e1618bca)|已失效|
 
 ## 安装与升级
