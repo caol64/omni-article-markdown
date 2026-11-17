@@ -4,6 +4,7 @@ from bs4.element import AttributeValueList, NavigableString
 from omni_article_markdown.utils import (
     clean_text,
     collapse_spaces,
+    count_tokens,
     detect_language,
     extract_domain,
     filter_tag,
@@ -19,7 +20,46 @@ from omni_article_markdown.utils import (
     is_sequentially_increasing,
     move_spaces,
     to_snake_case,
+    utf8_size,
 )
+
+
+# --------------------------
+# count_tokens / utf8_size
+# --------------------------
+def test_utf8_size():
+    assert utf8_size("abc") == 3
+    assert utf8_size("中") == 3
+
+
+def test_count_tokens_empty_and_list():
+    assert count_tokens("") == 0
+    assert count_tokens(["ab cd", "ef gh"]) == count_tokens("ab cd\nef gh")
+
+
+def test_count_tokens_english_not_overestimated():
+    # 130 个纯英文字符，真实 BPE 约 40 token；旧 ÷2.5 公式给 52（+30%），新公式应落在 ±15% 内
+    text = (
+        "The quick brown fox jumps over the lazy dog while we discussed "
+        "caching strategies for large distributed DNS systems in production."
+    )
+    est = count_tokens(text)
+    assert 34 <= est <= 46, est
+
+
+def test_count_tokens_cjk_comparable_to_old_estimate():
+    # 中英混排：分段估算不应比旧的 bytes/2.5 明显偏低（防低估截断超预算）
+    text = "11月16日，话题“DeepSeek使用额度已达上限”登上热搜，引发关注。综合科创板日报消息，因算力资源供给紧张。"
+    old = int(utf8_size(text) / 2.5)
+    new = count_tokens(text)
+    assert new >= old * 0.9, (new, old)
+
+
+def test_count_tokens_mixed_is_sum_of_parts():
+    latin = "hello world this is english"
+    cjk = "这是一段中文内容用于测试"
+    total = count_tokens(latin + cjk)
+    assert abs(total - (count_tokens(latin) + count_tokens(cjk))) <= 1
 
 
 # --------------------------

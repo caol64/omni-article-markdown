@@ -7,6 +7,7 @@ from click_default_group import DefaultGroup
 
 from .omni_article_md import OmniArticleMarkdown
 from .reader import ReaderFactory
+from .truncate import truncate_markdown
 
 help_msg = inspect.cleandoc("""
 Parse web articles into clean Markdown.
@@ -41,6 +42,26 @@ def stderr(message: str):
     click.echo(click.style(message, fg="red"), err=True)
 
 
+def _optional_value_option(*decls, **attrs):
+    """
+    构造“可裸用”的取值选项装饰器：不带值时使用 flag_value，带值时使用值。
+
+    click<=8.2 会从 flag_value 自动推导内部标志 _flag_needs_value；
+    click>=8.3 改为仅当 default 未显式给出时才推导，导致 is_flag=False +
+    flag_value + default=None 的组合在裸用时报 "requires an argument"。
+    这里显式置位以保持跨版本一致的行为。
+    """
+
+    def decorator(f):
+        opt = click.Option(decls, is_flag=False, default=None, **attrs)
+        opt._flag_needs_value = True
+        f.__click_params__ = getattr(f, "__click_params__", [])
+        f.__click_params__.append(opt)
+        return f
+
+    return decorator
+
+
 @click.group(
     cls=DefaultGroup,
     default="parse",
@@ -58,16 +79,22 @@ def cli(): ...
 @click.option(
     "--no-verify-ssl", is_flag=True, default=False, help="Disable SSL certificate verification (not recommended)."
 )
-@click.option(
+@_optional_value_option(
     "-s",
     "--save",
     help="Save result. Use -s alone to save to './', or -s /path to save elsewhere.",
     type=click.Path(dir_okay=True, writable=True),
-    is_flag=False,
     flag_value="./",
-    default=None,
 )
-def parse_article(url_or_path: str, save: str | None, no_verify_ssl: bool):
+@_optional_value_option(
+    "--truncate",
+    "truncate_tokens",
+    type=int,
+    help="Truncate output Markdown to N tokens (heuristic estimate: ~4 bytes/token for "
+    "Latin text, ~2.2 for CJK). Use --truncate alone for the default of 800.",
+    flag_value=800,
+)
+def parse_article(url_or_path: str, save: str | None, no_verify_ssl: bool, truncate_tokens: int | None):
     """
     Parses an article from a URL or local path and outputs/saves it as Markdown.
     """
@@ -75,10 +102,13 @@ def parse_article(url_or_path: str, save: str | None, no_verify_ssl: bool):
     try:
         handler = OmniArticleMarkdown(url_or_path, reporter=stderr_reporter, verify_ssl=verify_ssl)
         handler.parse()
+        markdown = handler.result()
+        if truncate_tokens is not None:
+            markdown = truncate_markdown(markdown, truncate_tokens)
         if save is None:
-            click.echo(handler.result())
+            click.echo(markdown)
         else:
-            save_path = handler.save(save)
+            save_path = handler.save(save, markdown=markdown)
             stderr_reporter(f"Article saved to: {save_path}")
     except Exception as e:
         stderr(f"Error: {str(e)}")

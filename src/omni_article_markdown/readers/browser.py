@@ -13,6 +13,7 @@ class BrowserReader(Reader):
         "https://www.toutiao.com/article": 'div[class="article-content"]',
         "https://medium.com": "article",
         "https://www.huxiu.com/article": 'div[class="article__content"]',
+        "https://my.oschina.net/": 'div[class~="editor"]',
     }
 
     def __init__(self, *args, **kwargs):

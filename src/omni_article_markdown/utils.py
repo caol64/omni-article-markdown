@@ -47,6 +47,33 @@ def collapse_spaces(text: str) -> str:
     return re.sub(r"\s+", " ", text)
 
 
+def utf8_size(text: str) -> int:
+    return len(text.encode("utf-8"))
+
+
+# CJK 统一区间：日文假名、CJK 基本/扩展 A、兼容表意文字、全角标点与空格
+_CJK_RE = re.compile(r"[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff01-\uff5e\u3000-\u303f]")
+
+# cl100k 类 BPE 的经验系数：拉丁文本约 3.5 字节/token（含空格与标点摊薄），CJK 约 2.2 字节/token
+_LATIN_BYTES_PER_TOKEN = 3.5
+_CJK_BYTES_PER_TOKEN = 2.2
+
+
+def count_tokens(text: str | list[str]) -> int:
+    """
+    按内容类型分段的近似 token 计数：
+    CJK 字符与其余文本分别折算，避免纯英文被整体 ÷2.5 高估约 30%。
+    """
+    if isinstance(text, list):
+        text = "\n".join(text)
+    if not text:
+        return 0
+    cjk_bytes = sum(len(ch.encode("utf-8")) for ch in text if _CJK_RE.match(ch))
+    latin_bytes = utf8_size(text) - cjk_bytes
+    # 非空文本至少计 1 token，避免短片段被 int() 抹零导致调用方死循环
+    return max(1, int(latin_bytes / _LATIN_BYTES_PER_TOKEN + cjk_bytes / _CJK_BYTES_PER_TOKEN))
+
+
 def extract_domain(url: str) -> str | None:
     """
     从URL中提取域名（包含协议）。

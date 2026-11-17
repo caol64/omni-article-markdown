@@ -45,7 +45,7 @@ class OmniArticleMarkdown:
             raise ValueError("No parsed content available. Please call parse() first.")
         return self.parser_ctx.markdown
 
-    def save(self, save_path: str = "") -> str:
+    def save(self, save_path: str = "", markdown: str | None = None) -> str:
         if not self.parser_ctx:
             raise ValueError("No parsed content to save. Please call parse() first.")
         save_path = save_path or self.DEFAULT_SAVE_PATH
@@ -54,7 +54,7 @@ class OmniArticleMarkdown:
             filename = f"{to_snake_case(self.parser_ctx.title)}.md"
             file_path = file_path / filename
         with file_path.open("w", encoding="utf-8") as f:
-            f.write(self.parser_ctx.markdown)
+            f.write(markdown if markdown is not None else self.parser_ctx.markdown)
         return str(file_path.resolve())
 
     def _read_html(self, url_or_path: str) -> ReaderContext:
