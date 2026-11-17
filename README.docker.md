@@ -2,7 +2,7 @@
 
 **Convert web articles (blogs, news, docs) to clean Markdown — powered by Docker.**
 
-> This image bundles **omni-article-markdown** (`mdcli`) and all official plugins.
+> This image bundles **omni-article-markdown** (`mdcli`) with its Chromium headless shell.
 > No local Python environment required.
 
 ## Quick Start
@@ -36,48 +36,50 @@ docker run --rm \
   https://example.com/article -s /output
 ```
 
-## Persist Cookies / Sessions (Recommended)
+## Truncate Output for AI Agents
 
-Some sites (Zhihu, Toutiao, etc.) require cookies or login state.
+Long articles can blow up an LLM context. `--truncate` limits the output to N tokens
+(a heuristic estimate; plain `--truncate` defaults to 800). Truncation happens at
+paragraph boundaries and appends a `…[truncated]` marker:
 
-Mount a local directory to persist data:
+```bash
+docker run --rm caol64/omnimd https://example.com/article --truncate
+docker run --rm caol64/omnimd https://example.com/article --truncate 1500
+```
+
+## Persist Cookies / Sessions (Optional)
+
+Some sites (Zhihu, etc.) rely on cached cookies. The readers obtain them automatically
+via the bundled browser when no cache exists, so mounting a volume is only needed to
+**reuse** sessions across container runs:
 
 ```bash
 docker run --rm \
-  -v ~/.ommimd:/root/.ommimd \
+  -v ~/.config/ommimd:/root/.config/ommimd \
   caol64/omnimd \
   https://zhuanlan.zhihu.com/p/1915735485801828475
 ```
 
 **What this does:**
 
-| Location        | Purpose                       |
-| --------------- | ----------------------------- |
-| `/root/.ommimd` | Stores cookies, browser state |
-| `~/.ommimd`     | Persistent storage on host    |
+| Location                  | Purpose                                        |
+| ------------------------- | ---------------------------------------------- |
+| `/root/.config/ommimd`    | Stores cookies / session data inside container |
+| `~/.config/ommimd`        | Persistent storage on host                     |
 
-## Plugin Support
+## Built-in Site Adapters
 
-All official plugins are **pre-installed** in this image.
+All site-specific readers and extractors ship inside the package — there is nothing to
+install separately. Dynamic-rendering sites (Zhihu, Toutiao, Huxiu, InfoQ CN, OSCHINA
+blogs, Medium, …) are handled automatically with the bundled headless Chromium.
 
-Supported sites include:
-
--   Medium
--   Zhihu (requires cookie)
--   WeChat Official Accounts
--   Toutiao
--   Freedium
--   Apple Developer Docs
--   Cloudflare Blog
--   InfoQ, CSDN, Juejin, Yuque, etc.
-
-No extra setup required.
+For the full list of tested sites, see [docs/sites.md](docs/sites.md).
 
 ## Image Details
 
--   Base image: `python:3.x-alpine`
+-   Base image: `python:3.13-bookworm` (Debian)
+-   Browser: Playwright `chromium-headless-shell` (installed at build time)
 -   Entrypoint: `mdcli`
--   Plugins: all official plugins included
 -   Architecture: `linux/amd64`, `linux/arm64`
 
 ## Example: Pipe to File
@@ -101,7 +103,7 @@ MIT License
 For frequent usage, consider creating an alias:
 
 ```bash
-alias mdcli='docker run --rm -v ~/.ommimd:/root/.ommimd caol64/omnimd'
+alias mdcli='docker run --rm -v ~/.config/ommimd:/root/.config/ommimd caol64/omnimd'
 ```
 
 Then use it like a native CLI:

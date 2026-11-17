@@ -53,6 +53,12 @@ uv tool install omni-article-markdown --upgrade
 mdcli -h
 ```
 
+不想装 Python 环境，也可以用 Docker 镜像（详见 [README.docker.md](README.docker.md)）：
+
+```bash
+docker run --rm caol64/omnimd https://example.com/article
+```
+
 ## 基本用法
 
 **仅转换**

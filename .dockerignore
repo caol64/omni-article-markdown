@@ -1,0 +1,30 @@
+# 版本控制与本地环境
+.git
+.gitignore
+.venv
+.env
+__pycache__/
+*.py[oc]
+
+# 构建产物
+build/
+dist/
+wheels/
+*.egg-info
+
+# 与镜像无关的仓库内容
+data/
+docs/
+skills/
+tests/
+scripts/
+.agents/
+.claude/
+.github/
+agents/
+
+# 杂项
+.DS_Store
+.DS_STORE
+README.docker.md
+uv.lock
