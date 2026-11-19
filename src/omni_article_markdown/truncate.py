@@ -9,6 +9,7 @@ def truncate_markdown(text: str, max_tokens: int = DEFAULT_TOKEN_LIMIT) -> str:
     将 Markdown 文本截断到约 max_tokens 个 token（count_tokens 分段近似）。
 
     - 以空行分隔的块为最小单位收尾，避免劈坏表格、图片语法；
+    - 已保留内容不足预算一半时（如文档开头是超长的徽章/链接块），硬切当前块补足；
     - 截断点若落在未闭合的代码围栏内，回退到该围栏起始块之前；
     - 发生截断时追加 “…[truncated]” 标记。
     """
@@ -24,6 +25,13 @@ def truncate_markdown(text: str, max_tokens: int = DEFAULT_TOKEN_LIMIT) -> str:
     for block in blocks:
         cost = count_tokens(block) + (2 if kept else 0)  # 块间 "\n\n" 的字节折算
         if used + cost > budget:
+            # 已保留内容不足一半预算时，硬切本块补足，避免只剩标题/徽章这类短块
+            remaining = budget - used - (2 if kept else 0)
+            if used < budget / 2 and remaining > 0:
+                piece = _hard_cut(block, remaining)
+                if piece.strip():
+                    kept.append(piece)
+                    used += count_tokens(piece)
             break
         kept.append(block)
         used += cost

@@ -87,6 +87,14 @@ mdcli https://example.com --truncate
 mdcli https://example.com --truncate 1500
 ```
 
+**纯 Markdown 源原样输出**
+
+源本身就是 Markdown（如 GitHub raw 链接）时，跳过 HTML 解析与转换，逐字节原样输出：
+
+```sh
+mdcli https://raw.githubusercontent.com/caol64/omni-article-markdown/refs/heads/main/README.md
+```
+
 ## 架构说明
 
 ![](data/1.jpg)

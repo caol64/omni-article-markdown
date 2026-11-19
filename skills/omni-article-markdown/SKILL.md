@@ -50,6 +50,9 @@ mdcli read https://example.com/article
 # 本地 HTML 文件也可以直接转换
 mdcli /path/to/page.html
 
+# 纯 Markdown 源（如 GitHub raw / gist raw）会被识别并原样输出，不做 HTML 解析和格式转换
+mdcli https://raw.githubusercontent.com/user/repo/main/README.md
+
 # agent 场景推荐：限制输出规模，防止长文撑爆上下文
 # token 数为分段启发式估算（拉丁 ≈4 字节/token，CJK ≈2.2），误差约 ±10%；--truncate 不带数值时默认 800 tokens
 mdcli <url> --truncate

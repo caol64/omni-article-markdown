@@ -2,17 +2,14 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
 from .extractor import Article, ExtractorFactory
+from .markdown_detector import extract_markdown_title, looks_like_markdown
 from .parser import HtmlMarkdownParser
 from .reader import ReaderFactory
 from .reporter import Reporter
 from .utils import to_snake_case
-
-
-@dataclass
-class ReaderContext:
-    raw_html: str
 
 
 @dataclass
@@ -36,9 +33,19 @@ class OmniArticleMarkdown:
         self.parser_ctx: ParserContext | None = None
 
     def parse(self):
-        reader_ctx = self._read_html(self.url_or_path)
-        extractor_ctx = self._extract_article(reader_ctx)
+        raw = self._read(self.url_or_path)
+        # 纯 Markdown 源（如 raw.githubusercontent.com）不经 HTML 解析，原样透传
+        if looks_like_markdown(raw):
+            if self.reporter:
+                self.reporter("检测到 Markdown 源，已原样输出（跳过转换）")
+            self.parser_ctx = self._passthrough_markdown(raw)
+            return
+        extractor_ctx = self._extract_article(raw)
         self.parser_ctx = self._parse_html(extractor_ctx)
+
+    def _passthrough_markdown(self, raw: str) -> ParserContext:
+        # 原文逐字节保留，仅去掉尾部空白并保证单个结尾换行
+        return ParserContext(title=extract_markdown_title(raw), markdown=raw.rstrip() + "\n")
 
     def result(self):
         if not self.parser_ctx:
@@ -57,20 +64,28 @@ class OmniArticleMarkdown:
             f.write(markdown if markdown is not None else self.parser_ctx.markdown)
         return str(file_path.resolve())
 
-    def _read_html(self, url_or_path: str) -> ReaderContext:
+    def _read(self, url_or_path: str) -> str:
         reader = ReaderFactory.create(url_or_path, reporter=self.reporter, verify_ssl=self.verify_ssl)
-        raw_html = reader.read()
-        return ReaderContext(raw_html)
+        return reader.read()
 
-    def _extract_article(self, ctx: ReaderContext) -> ExtractorContext:
-        soup = BeautifulSoup(ctx.raw_html, "html5lib")
+    def _extract_article(self, ctx: str) -> ExtractorContext:
+        soup = BeautifulSoup(ctx, "html5lib")
         extract = ExtractorFactory.create(soup)
         article = extract.extract()
-        if not article:
+        if not article or not self._has_body_content(article.body):
             raise ValueError("Failed to extract article content.")
         return ExtractorContext(article)
+
+    @staticmethod
+    def _has_body_content(body: Tag | str) -> bool:
+        if isinstance(body, str):
+            return bool(body.strip())
+        return bool(body.get_text(strip=True))
 
     def _parse_html(self, ctx: ExtractorContext) -> ParserContext:
         parser = HtmlMarkdownParser(ctx.article)
         result = parser.parse()
+        # 非文章页面（如纯文本 404）常无标题：此时内容不可用
+        if not result[0].strip():
+            raise ValueError("Failed to extract article content (no title found).")
         return ParserContext(title=result[0], markdown=result[1])
