@@ -47,4 +47,5 @@
 |新浪财经|[link](https://finance.sina.com.cn/wm/2026-11-16/doc-iniyxynv2270218.shtml)||
 |Simon Willison’s Weblog|[link](https://simonwillison.net/2026/Nov/9/mysterious-beeps/)||
 |火山引擎文档|[link](https://docs.volcengine.com/docs/vector-database-vikingdb/billing-instructions)||
+|GitHub Blog|[link](https://github.blog/engineering/architecture-optimization/improving-site-performance-by-shipping-more-css/)||
 |~~Freedium~~|[link](https://freedium.cfd/https://medium.com/@devlink/ai-killed-my-coding-brain-but-im-rebuilding-it-8de7e1618bca)|已失效|
