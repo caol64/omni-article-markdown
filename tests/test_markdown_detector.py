@@ -58,7 +58,8 @@ def test_extract_markdown_title_h1():
 
 
 def test_extract_markdown_title_fallback_to_first_line():
-    assert extract_markdown_title("[![img](x)](y)\n\n正文") == "[![img](x)](y)"
+    # 徽章形式 [![img](x)](y)：提取链接文本（即图片 alt），而非原始标记
+    assert extract_markdown_title("[![img](x)](y)\n\n正文") == "![img](x)"
 
 
 def test_extract_markdown_title_plain_text_returns_empty():

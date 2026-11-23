@@ -21,7 +21,6 @@ scripts/
 .agents/
 .claude/
 .github/
-agents/
 
 # 杂项
 .DS_Store

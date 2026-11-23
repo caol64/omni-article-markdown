@@ -61,7 +61,7 @@ class CustomDynamicReader(Reader):
 
 ## 3. 开发禁令（停止触发器）
 
-如果遇到以下情况，**必须立即终止**并在 `agents/logs.md` 记录原因，不要尝试暴力破解：
+如果遇到以下情况，**必须立即终止**，并把该站点不可抓取的原因追加到 `.agents/docs/dev_logs.md`（“站点抓取档案”用途），不要尝试暴力破解：
 
 * **人机校验**：出现 Cloudflare 5s 盾、图形验证码。
 * **权限限制**：出现 `Login to continue` 或 `403 Forbidden`。

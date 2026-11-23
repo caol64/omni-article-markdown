@@ -23,7 +23,8 @@ _TAG_RE = re.compile(r"</?[a-zA-Z][a-zA-Z0-9-]*(?:\s+[^>\r\n]*)?/?>")
 
 _ATX_HEADING_RE = re.compile(r"^ {0,3}(#{1,6})[ \t]+(.+?)(?:[ \t]+#+)?\s*$")
 _FALLBACK_MARKED_RE = re.compile(r"^(?:>[ \t]*|[-*+][ \t]+|\d+\.[ \t]+)(.+)$")
-_LINK_OR_IMG_RE = re.compile(r"!?\[([^\]]*)\]\([^)\s]+\)")
+# 嵌套感知：链接文本允许包含内联图片，如 [![badge](img)](link)
+_LINK_OR_IMG_RE = re.compile(r"!?\[((?:[^\[\]]|\[[^\]]*\])*)\]\([^)\s]+\)")
 
 
 def _clean_inline_markdown(text: str) -> str:
