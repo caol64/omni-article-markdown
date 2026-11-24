@@ -51,4 +51,6 @@
 |遇之文档|[link](https://yuzhi.tech/docs/wenyan/features)||
 |SpringerLink|[link](https://link.springer.com/article/10.1007/s10462-026-11651-1)||
 |NVIDIA 技术博客|[link](https://developer.nvidia.com/blog/co-designing-ai-model-attention-for-fast-interactive-long-context-inference)||
+|vLLM 文档|[link](https://docs.vllm.ai/en/v0.32.0/features/speculative_decoding/)||
+|SkillHub|[link](https://skillhub.cn/skills/indiv-caol64/wenyan)||
 |~~Freedium~~|[link](https://freedium.cfd/https://medium.com/@devlink/ai-killed-my-coding-brain-but-im-rebuilding-it-8de7e1618bca)|已失效|

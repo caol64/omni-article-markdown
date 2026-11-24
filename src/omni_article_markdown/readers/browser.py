@@ -14,6 +14,8 @@ class BrowserReader(Reader):
         "https://medium.com": "article",
         "https://www.huxiu.com/article": 'div[class="article__content"]',
         "https://my.oschina.net/": 'div[class~="editor"]',
+        # SkillHub 详情页：正文（概述 Tab 里的 Markdown）由前端拉取后才出现
+        "https://skillhub.cn/skills/": "div.markdown-body",
     }
 
     def __init__(self, *args, **kwargs):
