@@ -51,8 +51,23 @@ BLOCK_ELEMENTS = [
     "picture",
     "hr",
     "figcaption",
+    "figure",
+    "video",
+    "audio",
     "table",
     "section",
+    "article",
+    "nav",
+    "aside",
+    "main",
+    "header",
+    "footer",
+    "details",
+    "summary",
+    "dl",
+    "dt",
+    "dd",
+    "address",
     "svg",
 ]
 
@@ -134,6 +149,10 @@ class HtmlMarkdownParser:
                         parts.append(self._process_image(img_element, src_el))
                 elif img_element:
                     parts.append(self._process_image(img_element, None))
+            case "video" | "audio":
+                media = self._process_media(element)
+                if media:
+                    parts.append(media)
             case "figcaption":
                 figcaption = self._process_children(element, level, is_pre=is_pre).replace(LB_SYMBOL, "\n").strip()
                 figcaptions = figcaption.replace("\n\n", "\n").split("\n")
@@ -266,6 +285,20 @@ class HtmlMarkdownParser:
                 src = urljoin(self.article.url, src)
             return f"![{alt}]({src})"
         return ""
+
+    def _process_media(self, element: Tag) -> str:
+        """video / audio：输出为指向媒体源的链接，避免内容丢失。"""
+        src = get_attr_text(element.attrs.get("src"))
+        if not src:
+            source = filter_tag(element.find("source"))
+            if source:
+                src = get_attr_text(source.attrs.get("src"))
+        if not src:
+            return ""
+        if not src.startswith("http") and self.article.url:
+            src = urljoin(self.article.url, src)
+        label = self._process_children(element).strip() or element.name
+        return f"[{label}]({src})"
 
     def _process_link(self, element: Tag, link_text: str) -> str:
         link = get_attr_text(element.get("href"))

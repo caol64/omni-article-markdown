@@ -213,6 +213,38 @@
 
 ---
 
+## [LOG-20261124-001] 图片与后续元素粘成一行：块级元素的 LB 被"折叠"吃掉了
+
+- **现象**：`mdcli https://yuzhi.tech/docs/wenyan/features` 输出中
+  `![功能演示](4.gif)[上一篇界面说明](…)` 粘在同一行，本应是独立段落。
+- **根因**：`HtmlMarkdownParser` 用 `LB_SYMBOL` 标记块边界，最后 `POST_HANDLERS` 第一步
+  `re.sub(f"(?:{LB})+", LB, ...)` 会把**相邻的多个 LB 折叠成一个**。
+  - `<p><img></p>` 中 `img` 在 `BLOCK_ELEMENTS` 内，自身加了 LB；`p` 因"纯块子节点"不再加，
+    但 `p` 尾部还有一个 LB → 两个 LB 相邻 → 折叠成一个 → 净效果是**丢了一个段落分隔**。
+  - 之后若紧跟的容器不在 `BLOCK_ELEMENTS`（如 `nav`/`aside`/`figure`），它不加 LB，
+    内容就直接黏在图片后。
+- **正确做法**：`BLOCK_ELEMENTS` 必须覆盖所有语义块级标签。已补充
+  `nav / aside / main / header / footer / figure / article / details / summary / dl / dt / dd / address`。
+  判断标准：HTML 语义上会独占一行的元素，都要进这个列表。
+- **验证方式**：`uv run python` 里构造 `<div><p><img/></p><nav>x</nav></div>`，
+  期望输出 `![A](…)\n\nx`；再跑多站点回归确认字节数不变。
+- **相关文件**：`src/omni_article_markdown/parser.py`（`BLOCK_ELEMENTS`、`POST_HANDLERS`）
+
+---
+
+## [LOG-20261124-002] `<video>` / `<audio>` 内容会被静默丢弃
+
+- **现象**：yuzhi 文档"打开 markdown 文件"一节的演示视频完全没有出现在输出里。
+- **根因**：`TRUSTED_ELEMENTS = INLINE_ELEMENTS + BLOCK_ELEMENTS`，两者都不含 `video`/`audio`，
+  而 `_process_element` 的 `case _` 分支只处理子节点文本，`<source>` 的 `src` 无处输出。
+- **正确做法**：新增 `video`/`audio` 分支，取 `src`（或首个 `<source>` 的 `src`）输出为
+  `[video](绝对URL)` 链接，并把这两个标签加入 `BLOCK_ELEMENTS`。
+  踩坑点：`src` 是相对路径时必须用 `urljoin(self.article.url, src)` 补全。
+- **验证方式**：构造 `<p><video><source src="/v/a.mp4"/></video></p>`，期望 `[video](https://x/v/a.mp4)`。
+- **相关文件**：`src/omni_article_markdown/parser.py`（`_process_media`）
+
+---
+
 ## 历史任务归档（原 `agents/logs.md`）
 
 > 早期任务流水，仅供追溯。可复用的价值已提炼进上方教训条目。
