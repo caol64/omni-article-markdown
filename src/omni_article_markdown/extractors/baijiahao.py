@@ -4,7 +4,7 @@ from ..extractor import Extractor
 from ..utils import filter_tag
 
 
-class Netease163Extractor(Extractor):
+class BaijiahaoExtractor(Extractor):
     """
     百家号
     """

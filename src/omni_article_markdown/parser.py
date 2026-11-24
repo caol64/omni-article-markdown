@@ -28,10 +28,62 @@ POST_HANDLERS: list[Callable[[str], str]] = [
     # 纠正不规范格式 `[code](url)` 替换为 [`code`](url)
     lambda el: re.sub(r"`\s*\[([^\]]+)\]\(([^)]+)\)\s*`", r"[`\1`](\2)", el),
     # 将 \( ... \) 替换为 $ ... $
-    lambda el: re.sub(r"\\\((.+?)\\\)", r"$\1$", el),
+    # 数学模式里不能出现 Markdown 的空格分隔反斜杠命令问题，也不能保留 HTML 转义，
+    # 详见 _normalize_tex
+    lambda el: re.sub(r"\\\((.+?)\\\)", lambda m: f"${normalize_tex(m.group(1))}$", el),
     # 将 \[ ... \] 替换为 $$ ... $$
-    lambda el: re.sub(r"\\\[(.+?)\\\]", r"$$\1$$", el),
+    lambda el: re.sub(r"\\\[(.+?)\\\]", lambda m: f"$${normalize_tex(m.group(1))}$$", el),
+    # 源站已写好的 $$ ... $$ 行间公式同样需要规整（转义还原、多余空格）
+    lambda el: re.sub(r"\$\$(.+?)\$\$", lambda m: f"$${normalize_tex(m.group(1))}$$", el, flags=re.S),
 ]
+
+# LaTeX 里本身带空格的命令：空格是命令参数分隔符，不能删
+_TEX_SPACED_COMMANDS = (
+    "text",
+    "textbf",
+    "textrm",
+    "textit",
+    "texttt",
+    "textsf",
+    "mathrm",
+    "mathbf",
+    "mathit",
+    "mathsf",
+    "mathtt",
+    "mathfrak",
+    "mathcal",
+    "operatorname",
+    "begin",
+    "end",
+    "hspace",
+    "vspace",
+    "label",
+    "tag",
+)
+
+
+def normalize_tex(tex: str) -> str:
+    r"""
+    规整行内/行间公式，使其在 Obsidian 等 CommonMark 数学插件下正确渲染。
+
+    1. 还原 HTML 转义：`&lt;` / `&gt;` / `&amp;` 在公式里必须还原成 < > &，
+       否则 KaTeX/MathJax 会直接显示 `&lt;` 字面量。
+    2. 去掉反斜杠命令后多余的空格：``\sim `` 在数学模式下会渲染成一个
+       额外间隔，``$\sim $125`` 与 ``$\sim$125`` 视觉不一致；
+       但 ``\text {...}``、``\begin {...}`` 这类命令的空格是语法必需，需保留。
+    """
+    tex = tex.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
+
+    def _strip_space(match: re.Match) -> str:
+        # group(0) 带反斜杠，如 "\\sim "；group(1) 只有命令名。
+        # 正则已用 (?!\S) 保证空白位于公式/行尾，故此处删空格是安全的；
+        # 唯独 \text {...} 这类命令的空格是语法分隔符，必须原样保留。
+        if match.group(1) in _TEX_SPACED_COMMANDS:
+            return match.group(0)
+        return match.group(0).rstrip(" ")
+
+    return re.sub(r"\\([A-Za-z]+) +(?!\S)", _strip_space, tex)
+
 
 INLINE_ELEMENTS = ["span", "code", "li", "a", "strong", "em", "b", "i", "sup"]
 

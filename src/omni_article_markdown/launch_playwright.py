@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from importlib import resources
 from typing import Any
 
-from .http_client import REQUEST_HEADERS, USER_AGENT
+from .http_client import BROWSER_HEADERS, USER_AGENT
 from .reporter import Reporter
 
 
@@ -114,7 +114,7 @@ def create_stealth_page(reporter: Reporter | None = None, verify_ssl: bool = Tru
         context = browser.new_context(
             user_agent=USER_AGENT,
             java_script_enabled=True,
-            extra_http_headers=REQUEST_HEADERS,
+            extra_http_headers=BROWSER_HEADERS,
             ignore_https_errors=not verify_ssl,  # 统一处理 SSL 验证
         )
 

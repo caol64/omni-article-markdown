@@ -1,5 +1,5 @@
 from omni_article_markdown.extractor import Article
-from omni_article_markdown.parser import HtmlMarkdownParser
+from omni_article_markdown.parser import HtmlMarkdownParser, normalize_tex
 
 
 def test_basic_paragraph(make_soup):
@@ -127,3 +127,39 @@ def test_post_handler_math(make_soup):
     _, md = parser.parse()
     assert "$x+y$" in md
     assert "$$E=mc^2$$" in md
+
+
+# --------------------------
+# 公式规整（normalize_tex）
+# --------------------------
+def test_normalize_tex_restores_html_entities():
+    assert normalize_tex("B &lt; B^*") == "B < B^*"
+    assert normalize_tex("B &gt; 27") == "B > 27"
+    assert normalize_tex("a &amp; b") == "a & b"
+
+
+def test_normalize_tex_strips_trailing_space_but_keeps_argument_space():
+    # 命令后紧跟公式结束符时的多余空格应删除
+    assert normalize_tex(r"\sim ") == r"\sim"
+    assert normalize_tex(r"18\times ") == r"18\times"
+    # \text {...} 的空格是语法分隔符，必须保留
+    assert normalize_tex(r"b_\text {kv}") == r"b_\text {kv}"
+    assert normalize_tex(r"\begin{aligned} x") == r"\begin{aligned} x"
+    # 命令后有内容时，空格是语义分隔符，必须保留
+    assert normalize_tex(r"\sim 2BNd_\text {model}^2") == r"\sim 2BNd_\text {model}^2"
+
+
+def test_inline_math_trailing_space_and_less_than(make_soup):
+    html = '<p>V100 (<span class="mathjax-tex">\\(\\sim \\)</span>125 TFLOP/s) and \\(B &lt; B^*\\)</p>'
+    article = Article("Math", "", "", make_soup(html))
+    _, md = HtmlMarkdownParser(article).parse()
+    assert r"V100 ($\sim$125 TFLOP/s)" in md
+    assert r"$B < B^*$" in md
+
+
+def test_display_math_entities_restored(make_soup):
+    html = "<p>$$\\begin{aligned} \\text {if } B &lt; B^* \\end{aligned}$$</p>"
+    article = Article("Math", "", "", make_soup(html))
+    _, md = HtmlMarkdownParser(article).parse()
+    assert "&lt;" not in md
+    assert "B < B^*" in md

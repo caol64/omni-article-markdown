@@ -245,6 +245,89 @@
 
 ---
 
+## [LOG-20261124-003] 学术论文站：正文容器旁边还有参考文献/附录，"收窄"会误删正文
+
+- **现象**：SpringerLink 文章先用 `div.main-content`（章节所在）当容器，输出很干净，
+  但 **References / Appendices / Data availability / Funding / Author information / Notes 全部消失**。
+- **根因**：这些章节是 `div.main-content` 的**兄弟节点**，同属 `div.c-article-body`。
+  只看"哪个容器文本最多"就会漏掉它们——学术论文的正文并不都在同一个连续区块里。
+- **正确做法**：
+  1. 容器取**外层** `div.c-article-body`（包住全部学术结构）；
+  2. 用清理谓词**精确**剔除模板噪音：`c-article-recommendations`（Similar content）、
+     `app-explore-related-subjects`（Explore related subjects）、`#researcher-profile-container`（Profiles）；
+  3. **不要**清理「About this article」块——里面的 `Cite this article`、`Keywords`、收稿/见刊日期、
+     DOI 都是论文的正式元数据。我一开始加了 `c-article-info-details` 谓词，误删了这些。
+- **验证方式**：把改动前后的标题列表做 diff，**应当只少掉噪音标题**（本次 69 → 63，恰好少 6 个噪音）。
+  这个"标题集合对比"比看字节数可靠得多。
+- **相关文件**：`src/omni_article_markdown/extractors/springer_link.py`
+
+---
+
+## [LOG-20261124-004] og:title 带站名后缀是普遍现象，`extract_title()` 要优先取 h1
+
+- **现象**：NVIDIA 技术博客标题输出成
+  `Co-Designing AI Model Attention… | NVIDIA Technical Blog`。
+- **根因**：`og:title` 普遍被站点拼上品牌后缀（` | NVIDIA Technical Blog`、
+  ` - The GitHub Blog`、`--向量数据库VikingDB-火山引擎`、` | 文颜`…）。
+- **正确做法**：新写 extractor 时**默认重写 `extract_title()` 取页面 `<h1>`**，
+  再 `return super().extract_title()` 兜底。本站 h1 通常就是纯标题。
+  例外：h1 可能是栏目名而非文章名（见 yuzhi 的 `themes` 页），此时取正文容器内的 h1。
+- **验证方式**：看输出首行 + `-s` 保存后的文件名（文件名由 `to_snake_case(title)` 生成）。
+- **相关文件**：`src/omni_article_markdown/extractors/nvidia*.py`、`utils.py`（`get_og_title`）
+
+---
+
+## [LOG-20261124-005] 自定义 `Accept-Language` 会触发站点反爬，Playwright 上下文别乱加 header
+
+- **现象**：百家号抓取稳定失败：`Page.wait_for_selector: Timeout 30000ms exceeded`，
+  且日志里是 `62 × locator resolved to hidden <body>`——元素存在但不可见。
+- **误判方向**：一开始以为是"等待策略不对"（`body` 要等子节点），或"页面渲染慢"。
+  实际 `document.body.getBoundingClientRect().height === 0`，且 **`page.title()` 变成了「百度安全验证」**。
+- **根因**：`create_stealth_page()` 给浏览器上下文设了 `extra_http_headers=REQUEST_HEADERS`，
+  其中包含 `Accept-Language: zh-CN,zh;q=0.9,en;q=0.8`。**显式覆盖 Accept-Language**
+  被站点的反爬风控判定为异常请求，直接返回安全验证页（正文 0 个 `span.bjh-p`）。
+  二分实验证明：只加 `Accept` 正常，只加 `Accept-Language` 必挂，换成 `en-US` 也一样挂。
+- **正确做法**：
+  1. 浏览器上下文用独立的 `BROWSER_HEADERS`（只含 UA + Accept），**不要塞 Accept-Language**；
+     浏览器自带的值本就与真实用户一致；
+  2. `requests` 侧的 `REQUEST_HEADERS` 仍可保留 Accept-Language（服务端抓取需要），
+     两套 header 不要混用。
+- **排查手法（值得复用）**：遇到 `locator resolved to hidden` 时，先 `page.title()` 与
+  `body.getBoundingClientRect().height`——标题异常（如变成验证页）说明是**请求被拦**，
+  而不是等待时机问题。再对 context 参数做二分（逐一加 `user_agent` / `extra_http_headers` / stealth）。
+- **相关文件**：`src/omni_article_markdown/http_client.py`（`BROWSER_HEADERS`）、
+  `src/omni_article_markdown/launch_playwright.py`
+
+---
+
+## [LOG-20261124-006] 数学公式：HTML 实体会残留在 $...$ 里，`\cmd ` 尾部空格会让 Obsidian 渲染异常
+
+- **现象**：SpringerLink 输出里
+  - `\(B &lt; B^*\)` → `$B < B^*$` 失败，实际输出 `$B &lt; B^*$`；
+  - `\(\sim \)125` → 输出 `$\sim $125`，Obsidian 里渲染成一个诡异的额外间隔。
+- **根因**：
+  1. `_process_children()` 对所有文本节点做 `.replace("<", "&lt;")`，而 MathJax 的 `\(...\)`
+     内容正是文本节点，于是 `<` 被转义后再也没还原；
+  2. 源站 LaTeX 里命令后真的带空格（`\sim `），直接转成 `$\sim $` 在 MathJax 下没问题，
+     但 Obsidian 等 CommonMark 数学插件对 `$\sim $` 的处理不一致。
+- **正确做法**：新增 `normalize_tex()`，在把 `\(...\)` / `\[...\]` / 已有的 `$$...$$`
+  转成 Markdown 数学语法时统一处理：
+  - 还原 `&lt;` `&gt;` `&amp;`；
+  - 删除命令后**位于公式末尾**的多余空格；
+  - **必须保留**两类空格：`\text {...}` `\begin {...}` 等命令的参数分隔空格，
+    以及命令后仍有内容时的语义空格（`\sim 2B` ≠ `\sim2B`）。
+  实现上用 `(?!\S)` 负向先行断言限定"空格在结尾"，并维护 `_TEX_SPACED_COMMANDS` 白名单。
+- **踩坑提醒**：
+  - 源站可能直接写成 `$$...$$`（Springer 的行间公式就是），不走 `\[...\]` 分支，
+    所以还要加一条针对 `$$...$$` 的 handler；
+  - `el.attrs.get("alt")` 返回的是 **str**，不是 list，`" ".join(alt)` 会逐字符拆开。
+    判断图片 alt 一律用 `get_attr_text()`。
+- **验证方式**：`uv run pytest tests/test_parser.py -k normalize_tex`；
+  真实页面检查 `$\sim$125`、`$B < B^*$`、`$C < \sum _e w_e$` 三处。
+- **相关文件**：`src/omni_article_markdown/parser.py`（`normalize_tex`、`POST_HANDLERS`）
+
+---
+
 ## 历史任务归档（原 `agents/logs.md`）
 
 > 早期任务流水，仅供追溯。可复用的价值已提炼进上方教训条目。

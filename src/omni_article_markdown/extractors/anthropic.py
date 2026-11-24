@@ -4,9 +4,9 @@ from ..extractor import Extractor
 from ..utils import get_title
 
 
-class ClaudeDocExtractor(Extractor):
+class AnthropicExtractor(Extractor):
     """
-    Anthropic
+    Anthropic (www.anthropic.com)
     """
 
     @override

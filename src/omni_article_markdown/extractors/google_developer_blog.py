@@ -4,7 +4,7 @@ from ..extractor import Extractor, TagPredicate
 from ..utils import get_og_title
 
 
-class GoogleBlogExtractor(Extractor):
+class GoogleDeveloperBlogExtractor(Extractor):
     """
     developers.googleblog.com
     """

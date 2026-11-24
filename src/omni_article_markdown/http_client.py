@@ -12,6 +12,15 @@ REQUEST_HEADERS = {
     "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
 }
 
+# 浏览器上下文（Playwright）专用的请求头。
+# 注意：**不能**带 Accept-Language——显式覆盖它会让部分站点（如百家号）的
+# 反爬判定为异常请求，直接返回「百度安全验证」页而非正文。
+# 浏览器自带的 Accept-Language 已与真实用户一致，无需覆盖。
+BROWSER_HEADERS = {
+    "User-Agent": USER_AGENT,
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+}
+
 
 @cache
 def get_session(verify_ssl: bool = True) -> requests.Session:

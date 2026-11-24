@@ -6,7 +6,7 @@ from ..utils import get_og_title
 
 class ClaudeDocExtractor(Extractor):
     """
-    docs.claude.com
+    Claude 文档 (docs.claude.com)
     """
 
     @override
