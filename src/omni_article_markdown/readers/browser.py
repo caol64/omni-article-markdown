@@ -16,6 +16,8 @@ class BrowserReader(Reader):
         "https://my.oschina.net/": 'div[class~="editor"]',
         # SkillHub 详情页：正文（概述 Tab 里的 Markdown）由前端拉取后才出现
         "https://skillhub.cn/skills/": "div.markdown-body",
+        # Apiiro 博客：首屏是 Cloudflare 人机验证中间页，通过后正文才出现
+        "https://apiiro.com/blog/": "article.text-gray-700",
     }
 
     def __init__(self, *args, **kwargs):

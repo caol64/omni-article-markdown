@@ -53,4 +53,6 @@
 |NVIDIA 技术博客|[link](https://developer.nvidia.com/blog/co-designing-ai-model-attention-for-fast-interactive-long-context-inference)||
 |vLLM 文档|[link](https://docs.vllm.ai/en/v0.32.0/features/speculative_decoding/)||
 |SkillHub|[link](https://skillhub.cn/skills/indiv-caol64/wenyan)||
+|Uber 博客|[link](https://www.uber.com/us/en/blog/translations-at-scale/)||
+|Apiiro 博客|[link](https://apiiro.com/blog/coding-agents-leaking-secrets-github-dont-ask-again)||
 |~~Freedium~~|[link](https://freedium.cfd/https://medium.com/@devlink/ai-killed-my-coding-brain-but-im-rebuilding-it-8de7e1618bca)|已失效|
